@@ -1,0 +1,58 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <%= link_to "← Calendário Base", admin_calendario_base_index_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
+      <h1 class="text-2xl font-semibold text-stone-800"><%= @calendario_base.dia_nome %> às <%= l(@calendario_base.horario, format: :time) %></h1>
+      <p class="text-stone-500 mt-1">Detalhes da entrada do calendário</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Editar", edit_admin_calendario_base_path(@calendario_base),
+          class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
+      <%= button_to "Excluir", admin_calendario_base_path(@calendario_base), method: :delete, data: { turbo_confirm: "Tem certeza que deseja excluir esta entrada?" },
+          class: "px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-colors" %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Dia da semana</dt>
+        <dd class="mt-1 text-stone-800"><%= @calendario_base.dia_nome %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Tipo</dt>
+        <dd class="mt-1 text-stone-800"><%= I18n.t("activerecord.attributes.calendario_base.tipo.#{@calendario_base.tipo}") %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Horário</dt>
+        <dd class="mt-1 text-stone-800"><%= l(@calendario_base.horario, format: :time) %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Sacerdote</dt>
+        <dd class="mt-1 text-stone-800"><%= @calendario_base.sacerdote&.nome || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Quantidade de ministros</dt>
+        <dd class="mt-1 text-stone-800"><%= @calendario_base.quantidade_ministros %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Valor espórtula (override)</dt>
+        <dd class="mt-1 text-stone-800"><%= @calendario_base.valor_esportula_override ? number_to_currency(@calendario_base.valor_esportula_override) : "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Status</dt>
+        <dd class="mt-1">
+          <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full <%= @calendario_base.ativo? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-600' %>">
+            <%= @calendario_base.ativo? ? "Ativo" : "Inativo" %>
+          </span>
+        </dd>
+      </div>
+      <% if @calendario_base.observacoes.present? %>
+        <div class="sm:col-span-2">
+          <dt class="text-sm font-medium text-stone-500">Observações</dt>
+          <dd class="mt-1 text-stone-800"><%= simple_format(@calendario_base.observacoes) %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+</div>

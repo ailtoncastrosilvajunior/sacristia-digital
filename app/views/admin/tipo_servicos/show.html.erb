@@ -1,0 +1,43 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <%= link_to "← Tipos de Serviço", admin_tipo_servicos_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
+      <h1 class="text-2xl font-semibold text-stone-800"><%= @tipo_servico.nome %></h1>
+      <p class="text-stone-500 mt-1">Detalhes do tipo de serviço</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Editar", edit_admin_tipo_servico_path(@tipo_servico),
+          class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
+      <%= button_to "Excluir", admin_tipo_servico_path(@tipo_servico), method: :delete, data: { turbo_confirm: "Tem certeza que deseja excluir este tipo de serviço?" },
+          class: "px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-colors" %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Nome</dt>
+        <dd class="mt-1 text-stone-800"><%= @tipo_servico.nome %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Tipo de escala</dt>
+        <dd class="mt-1 text-stone-800"><%= @tipo_servico.ordinario? ? "Ordinário" : "Extra" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Cor da etiqueta</dt>
+        <dd class="mt-1 flex items-center gap-2">
+          <span class="w-6 h-6 rounded border border-stone-200" style="background-color: <%= @tipo_servico.cor_etiqueta %>"></span>
+          <%= @tipo_servico.cor_etiqueta %>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Status</dt>
+        <dd class="mt-1">
+          <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full <%= @tipo_servico.ativo? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-600' %>">
+            <%= @tipo_servico.ativo? ? "Ativo" : "Inativo" %>
+          </span>
+        </dd>
+      </div>
+    </dl>
+  </div>
+</div>

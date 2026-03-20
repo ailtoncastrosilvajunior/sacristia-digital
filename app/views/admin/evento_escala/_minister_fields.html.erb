@@ -1,0 +1,18 @@
+<%# Utilizado em new, edit e form_modal %>
+<div>
+  <%= f.label :ministro_ids, "Ministros escalados", class: "block text-sm font-medium text-stone-700 mb-1" %>
+  <p class="text-stone-500 text-xs mb-2">Selecione os ministros que vão servir neste evento</p>
+  <div class="border border-stone-200 rounded-lg p-3 max-h-48 overflow-y-auto bg-stone-50/50">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <%= f.collection_check_boxes :ministro_ids, Ministro.ativos.ordenados_por_nome, :id, :nome do |b| %>
+        <label class="flex items-center gap-2 cursor-pointer hover:bg-stone-100/80 rounded px-2 py-1.5 -mx-2 -my-1.5">
+          <%= b.check_box class: "rounded border-stone-300 text-slate-600 focus:ring-slate-500" %>
+          <span class="text-sm text-stone-700"><%= b.text %></span>
+        </label>
+      <% end %>
+    </div>
+  </div>
+  <% if Ministro.ativos.ordenados_por_nome.empty? %>
+    <p class="text-amber-600 text-xs mt-1">Nenhum ministro ativo cadastrado.</p>
+  <% end %>
+</div>

@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+test:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage") %>
+
+local:
+  service: Disk
+  root: <%= Rails.root.join("storage") %>
+
+# production:
+#   service: S3
+#   access_key_id: <%= ENV["AWS_ACCESS_KEY_ID"] %>
+#   region: <%= ENV["AWS_REGION"] %>
+#   bucket: <%= ENV["AWS_BUCKET"] %>

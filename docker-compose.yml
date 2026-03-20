@@ -1,0 +1,18 @@
+# Sacristia Digital - Docker Compose
+# PostgreSQL está no servidor na nuvem (Digital Ocean)
+# Configure DATABASE_HOST, DATABASE_USERNAME, DATABASE_PASSWORD no .env
+
+services:
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails tailwindcss:build && bundle exec rails server -b 0.0.0.0"
+    volumes:
+      - .:/app
+    ports:
+      - "3033:3000"
+    env_file:
+      - .env
+    environment:
+      RAILS_ENV: development
+      BUNDLE_PATH: /usr/local/bundle
+

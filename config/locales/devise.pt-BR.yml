@@ -1,0 +1,40 @@
+pt-BR:
+  devise:
+    confirmations:
+      confirmed: Sua conta foi confirmada com sucesso.
+      send_instructions: Você receberá um e-mail com instruções para confirmar sua conta em alguns minutos.
+    failure:
+      already_authenticated: Você já está autenticado.
+      inactive: Sua conta ainda não foi ativada.
+      invalid: E-mail ou senha inválidos.
+      last_attempt: Você tem mais uma tentativa antes de sua conta ser bloqueada.
+      locked: Sua conta está bloqueada.
+      timeout: Sua sessão expirou. Por favor, faça login novamente.
+      unauthenticated: Você precisa fazer login ou se cadastrar para continuar.
+      unconfirmed: Você precisa confirmar sua conta para continuar.
+    mailer:
+      confirmation_instructions:
+        subject: Instruções de confirmação
+      reset_password_instructions:
+        subject: Instruções para redefinir senha
+      unlock_instructions:
+        subject: Instruções para desbloquear conta
+    passwords:
+      no_token: Você não pode acessar esta página sem vir de um link de redefinição de senha.
+      send_instructions: Você receberá um e-mail com instruções para redefinir sua senha em alguns minutos.
+      updated: Sua senha foi alterada com sucesso.
+    registrations:
+      destroyed: Até logo! Sua conta foi cancelada com sucesso.
+      signed_up: Bem-vindo! Você se cadastrou com sucesso.
+      signed_up_but_inactive: Você se cadastrou com sucesso. No entanto, não foi possível fazer login porque sua conta ainda não foi ativada.
+      signed_up_but_locked: Você se cadastrou com sucesso. No entanto, não foi possível fazer login porque sua conta está bloqueada.
+      signed_up_but_unconfirmed: Uma mensagem com um link de confirmação foi enviada para seu e-mail. Abra o link para ativar sua conta.
+      update_needs_confirmation: Você atualizou sua conta com sucesso, mas precisamos verificar seu novo endereço de e-mail. Por favor, verifique seu e-mail e clique no link de confirmação para finalizar a confirmação do seu novo endereço de e-mail.
+      updated: Sua conta foi atualizada com sucesso.
+      updated_but_not_saved: Desculpe, não foi possível atualizar sua conta.
+    sessions:
+      signed_in: Login realizado com sucesso.
+      signed_out: Logout realizado com sucesso.
+    unlocks:
+      send_instructions: Você receberá um e-mail com instruções para desbloquear sua conta em alguns minutos.
+      unlocked: Sua conta foi desbloqueada com sucesso.

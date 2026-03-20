@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Garante que todas as views e layouts sejam escaneadas (Tailwind v4) */
+@source "../../views/**/*.erb";
+@source "../../components/**/*.erb";
+@source "../../components/**/*.html";
+@source "../../helpers/**/*.rb";

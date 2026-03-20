@@ -1,0 +1,161 @@
+<div class="space-y-6" data-controller="modal">
+  <% filtros = params.permit(:tipo_servico_id, :sacerdote_id, :ministro_id).to_unsafe_h.compact_blank %>
+  <div id="evento-modal-backdrop" data-modal-target="backdrop" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/50 p-4" data-action="click->modal#closeBackground">
+    <div data-action="click->modal#stopPropagation" class="w-full max-w-2xl">
+      <turbo-frame id="evento_modal" data-modal-target="frame" data-action="turbo:frame-load->modal#show turbo:frame-render->modal#show"></turbo-frame>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <div>
+      <%= link_to "← Competências", admin_competencia_mensal_index_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
+      <h1 class="text-2xl font-semibold text-stone-800"><%= @competencia.label %></h1>
+      <p class="text-stone-500 mt-1">Competência mensal</p>
+    </div>
+    <div class="flex gap-2">
+      <%= button_to "Gerar escala", gerar_escala_admin_competencia_mensal_path(@competencia), method: :post,
+            data: @competencia.escala_gerada? ? { turbo_confirm: "Isso substituirá a escala atual. Continuar?" } : {},
+            class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
+      <%= link_to "Editar", edit_admin_competencia_mensal_path(@competencia),
+          class: "px-4 py-2 border border-stone-300 text-stone-700 hover:bg-stone-50 font-medium rounded-lg transition-colors" %>
+      <%= button_to "Excluir", admin_competencia_mensal_path(@competencia), method: :delete, data: { turbo_confirm: "Tem certeza? Isso excluirá todos os eventos." },
+          class: "px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-colors" %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Mês/Ano</dt>
+        <dd class="mt-1 text-stone-800"><%= @competencia.label %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Escala gerada</dt>
+        <dd class="mt-1">
+          <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full <%= @competencia.escala_gerada? ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+            <%= @competencia.escala_gerada? ? "Sim" : "Não" %>
+          </span>
+        </dd>
+      </div>
+    </dl>
+
+    <div class="mt-6 pt-6 border-t border-stone-200">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-medium text-stone-700">Calendário da escala</h3>
+        <%= link_to "Novo evento", new_admin_evento_escala_path(competencia_mensal_id: @competencia.id, **filtros), data: { turbo_frame: "evento_modal" }, class: "px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors" %>
+      </div>
+
+    <% if @competencia.evento_escalas.any? %>
+
+        <%= form_with url: admin_competencia_mensal_path(@competencia), method: :get, local: true, class: "flex flex-wrap items-end gap-4 mb-4 p-3 bg-stone-50 rounded-lg border border-stone-200" do |f| %>
+          <div>
+            <label for="filtro_tipo_servico" class="block text-xs font-medium text-stone-600 mb-1">Tipo de serviço</label>
+            <%= select_tag :tipo_servico_id, options_from_collection_for_select(TipoServico.ativos, :id, :nome, params[:tipo_servico_id]), { include_blank: "Todos", id: "filtro_tipo_servico", class: "block w-40 rounded-lg border-stone-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500" } %>
+          </div>
+          <div>
+            <label for="filtro_sacerdote" class="block text-xs font-medium text-stone-600 mb-1">Sacerdote</label>
+            <%= select_tag :sacerdote_id, options_from_collection_for_select(Sacerdote.ativos.ordenados_por_nome, :id, :nome, params[:sacerdote_id]), { include_blank: "Todos", id: "filtro_sacerdote", class: "block w-48 rounded-lg border-stone-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500" } %>
+          </div>
+          <div>
+            <label for="filtro_ministro" class="block text-xs font-medium text-stone-600 mb-1">Ministro</label>
+            <%= select_tag :ministro_id, options_from_collection_for_select(Ministro.ativos.ordenados_por_nome, :id, :nome, params[:ministro_id]), { include_blank: "Todos", id: "filtro_ministro", class: "block w-48 rounded-lg border-stone-300 text-sm shadow-sm focus:border-slate-500 focus:ring-slate-500" } %>
+          </div>
+          <div class="flex gap-2">
+            <%= submit_tag "Filtrar", class: "px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer" %>
+            <%= link_to "Limpar", admin_competencia_mensal_path(@competencia), class: "px-3 py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-medium rounded-lg transition-colors" %>
+          </div>
+        <% end %>
+
+        <p class="text-stone-500 text-sm mb-4"><%= @eventos.count %> eventos</p>
+        <div class="flex flex-wrap gap-3 mb-4">
+          <% @eventos.map(&:tipo_servico).uniq(&:id).sort_by(&:nome).each do |ts| %>
+            <span class="inline-flex items-center gap-1.5 text-xs">
+              <span class="w-3 h-3 rounded border" style="background-color: <%= ts.cor_etiqueta %>33; border-color: <%= ts.cor_etiqueta %>;"></span>
+              <%= ts.nome %>
+            </span>
+          <% end %>
+        </div>
+
+        <div class="mb-8 overflow-x-auto">
+          <div class="text-center text-lg font-semibold text-stone-700 mb-3"><%= @competencia.label %></div>
+          <% inicio = @competencia.periodo %>
+          <% fim = @competencia.periodo_fim %>
+          <% eventos_por_dia = @eventos.group_by(&:data) %>
+          <% domingo_primeira_semana = inicio - inicio.wday %>
+          <div class="min-w-[700px] rounded-lg border border-stone-200 overflow-hidden">
+            <div class="grid grid-cols-7 bg-stone-100 border-b border-stone-200">
+              <% %w[Dom Seg Ter Qua Qui Sex Sáb].each do |dia| %>
+                <div class="px-2 py-2 text-center text-xs font-semibold text-stone-600"><%= dia %></div>
+              <% end %>
+            </div>
+            <div class="grid grid-cols-7 bg-white">
+              <% 42.times do |i| %>
+                <% data = domingo_primeira_semana + i %>
+                <% no_mes = (inicio..fim).cover?(data) %>
+                <div class="min-h-[100px] p-2 border-b border-r border-stone-100 <%= data == Date.current ? 'bg-sky-50/50 ring-1 ring-sky-300' : '' %> <%= no_mes ? '' : 'bg-stone-50/50' %>">
+                  <div class="text-xs font-medium mb-1 <%= no_mes ? 'text-stone-700' : 'text-stone-400' %>"><%= data.day %></div>
+                  <% if no_mes %>
+                    <% (eventos_por_dia[data] || []).sort_by(&:horario).each do |ev| %>
+                      <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+                      <%= link_to edit_admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, class: "block text-xs py-1 px-2 rounded mb-0.5 truncate border transition-colors hover:opacity-90", style: "background-color: #{cor}26; border-color: #{cor}; color: #1f2937;" do %>
+                        <%= l(ev.horario, format: :time) %> <%= ev.tipo_servico.nome %>
+                      <% end %>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="text-sm font-medium text-stone-700 mb-3">Lista de eventos</h4>
+        <div class="overflow-x-auto rounded-lg border border-stone-200">
+          <table class="min-w-full divide-y divide-stone-200">
+            <thead class="bg-stone-50">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase">Data</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase">Horário</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase">Serviço</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase">Sacerdote</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase">Ministros</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
+                <th class="px-4 py-2 text-right text-xs font-medium text-stone-500 uppercase">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-stone-200">
+              <% @eventos.por_data.each do |ev| %>
+                <tr class="hover:bg-stone-50">
+                  <td class="px-4 py-2 text-sm text-stone-800"><%= l(ev.data) %></td>
+                  <td class="px-4 py-2 text-sm text-stone-600"><%= l(ev.horario, format: :time) %></td>
+                  <td class="px-4 py-2 text-sm">
+                    <% ts = ev.tipo_servico %>
+                    <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded border" style="background-color: <%= ts.cor_etiqueta %>26; border-color: <%= ts.cor_etiqueta %>; color: #1f2937;"><%= ts.nome %></span>
+                  </td>
+                  <td class="px-4 py-2 text-sm text-stone-600"><%= ev.sacerdote&.nome || "—" %></td>
+                  <td class="px-4 py-2 text-sm text-stone-600"><%= ev.ministros.any? ? ev.ministros.map(&:nome).join(", ") : "—" %></td>
+                  <td class="px-4 py-2">
+                    <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full border
+                      <%= case ev.status
+                          when 'confirmado' then 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                          when 'concluido' then 'bg-sky-100 text-sky-800 border-sky-300'
+                          when 'cancelado' then 'bg-red-100 text-red-800 border-red-300'
+                          else 'bg-amber-100 text-amber-800 border-amber-300'
+                          end %>">
+                      <%= I18n.t("activerecord.attributes.evento_escala.status_values.#{ev.status}", default: ev.status.humanize) %>
+                    </span>
+                  </td>
+                  <td class="px-4 py-2 text-right">
+                    <%= link_to "Editar", edit_admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, class: "text-sm text-slate-600 hover:text-slate-800 font-medium" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% else %>
+      <p class="text-stone-500 text-sm py-4">Nenhum evento na escala. Clique em "Novo evento" para adicionar ou "Gerar escala" para criar a partir do calendário base.</p>
+    <% end %>
+    </div>
+  </div>
+</div>

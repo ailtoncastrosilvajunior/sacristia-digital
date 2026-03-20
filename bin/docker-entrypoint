@@ -1,0 +1,33 @@
+#!/bin/bash
+# Sacristia Digital - Docker Entrypoint
+# Executa migrações e inicia a aplicação
+
+set -e
+
+echo "==> Sacristia Digital - Iniciando..."
+
+# Aguardar banco de dados
+if [ -n "$DATABASE_HOST" ]; then
+  echo "==> Aguardando PostgreSQL em $DATABASE_HOST..."
+  while ! pg_isready -h "$DATABASE_HOST" -U "$DATABASE_USERNAME" 2>/dev/null; do
+    sleep 2
+  done
+  echo "==> PostgreSQL disponível!"
+fi
+
+# Executar migrações
+echo "==> Executando migrações..."
+bundle exec rails db:migrate 2>/dev/null || bundle exec rails db:create db:migrate
+
+# Build Tailwind CSS (necessário com volume mount em desenvolvimento)
+echo "==> Compilando Tailwind CSS..."
+bundle exec rails tailwindcss:build 2>/dev/null || true
+
+# Executar seeds em desenvolvimento (opcional)
+if [ "$RAILS_ENV" = "development" ] && [ "${RUN_SEEDS:-false}" = "true" ]; then
+  echo "==> Executando seeds..."
+  bundle exec rails db:seed
+fi
+
+echo "==> Iniciando servidor Rails..."
+exec bundle exec rails server -b 0.0.0.0

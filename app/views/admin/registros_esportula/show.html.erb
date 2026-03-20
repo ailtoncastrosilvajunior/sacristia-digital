@@ -1,0 +1,54 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <%= link_to "← Espórtulas", admin_registros_esportula_index_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
+      <h1 class="text-2xl font-semibold text-stone-800">Registro de espórtula</h1>
+      <p class="text-stone-500 mt-1"><%= l(@registro.data) %> - <%= @registro.sacerdote.nome %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Editar", edit_admin_registros_esportula_path(@registro),
+          class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
+      <%= button_to "Excluir", admin_registros_esportula_path(@registro), method: :delete, data: { turbo_confirm: "Tem certeza que deseja excluir este registro?" },
+          class: "px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 font-medium rounded-lg transition-colors" %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Data</dt>
+        <dd class="mt-1 text-stone-800"><%= l(@registro.data) %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Sacerdote</dt>
+        <dd class="mt-1 text-stone-800"><%= @registro.sacerdote.nome %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Valor</dt>
+        <dd class="mt-1 text-stone-800"><%= number_to_currency(@registro.valor) %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Status</dt>
+        <dd class="mt-1">
+          <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full <%= @registro.status == 'pago' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+            <%= @registro.status.capitalize %>
+          </span>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Forma de pagamento</dt>
+        <dd class="mt-1 text-stone-800"><%= @registro.forma_pagamento || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Competência</dt>
+        <dd class="mt-1 text-stone-800"><%= @registro.competencia_ano && @registro.competencia_mes ? "#{@registro.competencia_mes}/#{@registro.competencia_ano}" : "—" %></dd>
+      </div>
+      <% if @registro.evento_escala.present? %>
+        <div class="sm:col-span-2">
+          <dt class="text-sm font-medium text-stone-500">Evento vinculado</dt>
+          <dd class="mt-1 text-stone-800"><%= @registro.evento_escala.tipo_servico.nome %> - <%= l(@registro.evento_escala.data) %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+</div>

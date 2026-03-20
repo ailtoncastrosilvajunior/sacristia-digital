@@ -1,0 +1,70 @@
+<div class="space-y-6">
+  <div>
+    <%= link_to "← Calendário Base", admin_calendario_base_index_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
+    <h1 class="text-2xl font-semibold text-stone-800">Nova entrada no calendário</h1>
+    <p class="text-stone-500 mt-1">Cadastre um horário fixo de missa ou celebração</p>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-6 max-w-2xl">
+    <%= form_with model: @calendario_base, url: admin_calendario_base_index_path, scope: :calendario_base, local: true, html: { class: "space-y-5" } do |f| %>
+      <% if @calendario_base.errors.any? %>
+        <div class="rounded-lg bg-red-50 p-4 text-red-800 text-sm">
+          <p class="font-medium mb-2"><%= pluralize(@calendario_base.errors.count, "erro") %> impediram o cadastro:</p>
+          <ul class="list-disc list-inside">
+            <% @calendario_base.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :dia_da_semana, "Dia da semana", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.select :dia_da_semana, (0..6).map { |i| [I18n.l(Date.new(2024, 1, 7) + i, format: "%A"), i] }, { include_blank: "Selecione" },
+            class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500" %>
+      </div>
+
+      <div>
+        <%= f.label :tipo, "Tipo", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.select :tipo, CalendarioBase.tipos.map { |k, v| [I18n.t("activerecord.attributes.calendario_base.tipo.#{k}"), v] },
+            {}, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500" %>
+      </div>
+
+      <div>
+        <%= f.label :horario, class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.time_field :horario, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", value: "08:00" %>
+      </div>
+
+      <div>
+        <%= f.label :quantidade_ministros, "Quantidade de ministros", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.number_field :quantidade_ministros, min: 0, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500" %>
+      </div>
+
+      <div>
+        <%= f.label :sacerdote_id, "Sacerdote", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.collection_select :sacerdote_id, Sacerdote.ativos.ordenados_por_nome, :id, :nome, { include_blank: "Nenhum" },
+            class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500" %>
+      </div>
+
+      <div>
+        <%= f.label :valor_esportula_override, "Valor espórtula (override, opcional)", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.number_field :valor_esportula_override, step: 0.01, min: 0, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", placeholder: "Deixe em branco para usar o padrão" %>
+      </div>
+
+      <div>
+        <%= f.label :observacoes, class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.text_area :observacoes, rows: 3, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500" %>
+      </div>
+
+      <div class="flex items-center">
+        <%= f.check_box :ativo, class: "rounded border-stone-300 text-slate-600 focus:ring-slate-500" %>
+        <%= f.label :ativo, "Ativo", class: "ml-2 text-sm text-stone-700" %>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <%= f.submit "Cadastrar", class: "px-4 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors cursor-pointer" %>
+        <%= link_to "Cancelar", admin_calendario_base_index_path, class: "px-4 py-2.5 border border-stone-300 text-stone-700 hover:bg-stone-50 font-medium rounded-lg transition-colors" %>
+      </div>
+    <% end %>
+  </div>
+</div>

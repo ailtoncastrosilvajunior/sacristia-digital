@@ -1,0 +1,61 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <%= link_to "← #{@evento.competencia_mensal.label}", admin_competencia_mensal_path(@evento.competencia_mensal), class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
+      <h1 class="text-2xl font-semibold text-stone-800"><%= @evento.tipo_servico.nome %></h1>
+      <p class="text-stone-500 mt-1"><%= l(@evento.data) %> às <%= l(@evento.horario, format: :time) %></p>
+    </div>
+    <%= link_to "Editar", edit_admin_evento_escala_path(@evento), class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-6">
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Tipo de serviço</dt>
+        <dd class="mt-1 text-stone-800"><%= @evento.tipo_servico.nome %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Data</dt>
+        <dd class="mt-1 text-stone-800"><%= l(@evento.data) %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Horário</dt>
+        <dd class="mt-1 text-stone-800"><%= l(@evento.horario, format: :time) %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Sacerdote</dt>
+        <dd class="mt-1 text-stone-800"><%= @evento.sacerdote&.nome || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Quantidade de ministros</dt>
+        <dd class="mt-1 text-stone-800"><%= @evento.quantidade_ministros %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-stone-500">Status</dt>
+        <dd class="mt-1">
+          <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+            <%= case @evento.status
+                when 'confirmado' then 'bg-emerald-100 text-emerald-800'
+                when 'concluido' then 'bg-sky-100 text-sky-800'
+                when 'cancelado' then 'bg-red-100 text-red-800'
+                else 'bg-amber-100 text-amber-800'
+                end %>">
+            <%= I18n.t("activerecord.attributes.evento_escala.status_values.#{@evento.status}", default: @evento.status.humanize) %>
+          </span>
+        </dd>
+      </div>
+      <% if @evento.local.present? %>
+        <div>
+          <dt class="text-sm font-medium text-stone-500">Local</dt>
+          <dd class="mt-1 text-stone-800"><%= @evento.local %></dd>
+        </div>
+      <% end %>
+      <% if @evento.valor_esportula.present? && @evento.valor_esportula > 0 %>
+        <div>
+          <dt class="text-sm font-medium text-stone-500">Valor espórtula</dt>
+          <dd class="mt-1 text-stone-800"><%= number_to_currency(@evento.valor_esportula, unit: "R$ ", separator: ",", delimiter: ".") %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+</div>

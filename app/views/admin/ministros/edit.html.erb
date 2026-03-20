@@ -1,0 +1,57 @@
+<div class="space-y-6">
+  <div>
+    <%= link_to "← Ministros", admin_ministros_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
+    <h1 class="text-2xl font-semibold text-stone-800">Editar ministro</h1>
+    <p class="text-stone-500 mt-1"><%= @ministro.nome %></p>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-6 max-w-2xl">
+    <%= form_with model: [:admin, @ministro], local: true, html: { class: "space-y-5" } do |f| %>
+      <% if @ministro.errors.any? %>
+        <div class="rounded-lg bg-red-50 p-4 text-red-800 text-sm">
+          <p class="font-medium mb-2"><%= pluralize(@ministro.errors.count, "erro") %> impediram a atualização:</p>
+          <ul class="list-disc list-inside">
+            <% @ministro.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :nome, class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.text_field :nome, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", placeholder: "Nome completo", autofocus: true %>
+      </div>
+
+      <div>
+        <%= f.label :email, class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.email_field :email, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", placeholder: "email@exemplo.com" %>
+      </div>
+
+      <div>
+        <%= f.label :telefone, class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.telephone_field :telefone, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", placeholder: "(00) 00000-0000" %>
+      </div>
+
+      <div>
+        <%= f.label :sexo, class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.select :sexo, Ministro::SEXOS, { include_blank: "Selecione" }, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500" %>
+      </div>
+
+      <div>
+        <%= f.label :observacoes, class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.text_area :observacoes, rows: 3, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", placeholder: "Observações" %>
+      </div>
+
+      <div class="flex items-center">
+        <%= f.check_box :ativo, class: "rounded border-stone-300 text-slate-600 focus:ring-slate-500" %>
+        <%= f.label :ativo, "Ativo", class: "ml-2 text-sm text-stone-700" %>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <%= f.submit "Salvar", class: "px-4 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors cursor-pointer" %>
+        <%= link_to "Cancelar", admin_ministro_path(@ministro), class: "px-4 py-2.5 border border-stone-300 text-stone-700 hover:bg-stone-50 font-medium rounded-lg transition-colors" %>
+      </div>
+    <% end %>
+  </div>
+</div>
