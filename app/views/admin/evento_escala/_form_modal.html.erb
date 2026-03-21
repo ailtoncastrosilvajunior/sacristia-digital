@@ -13,6 +13,8 @@
         <%= hidden_field_tag :tipo_servico_id, params[:tipo_servico_id] if params[:tipo_servico_id].present? %>
         <%= hidden_field_tag :sacerdote_id, params[:sacerdote_id] if params[:sacerdote_id].present? %>
         <%= hidden_field_tag :ministro_id, params[:ministro_id] if params[:ministro_id].present? %>
+        <%= hidden_field_tag :dia_semana, params[:dia_semana] if params[:dia_semana].present? %>
+        <%= hidden_field_tag :vista, params[:vista] if params[:vista].present? %>
         <% if @evento.errors.any? %>
           <div class="rounded-lg bg-red-50 p-4 text-red-800 text-sm">
             <p class="font-medium mb-2"><%= pluralize(@evento.errors.count, "erro") %> impediram a atualização:</p>

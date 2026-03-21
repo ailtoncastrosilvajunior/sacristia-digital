@@ -6,6 +6,9 @@ module Admin
     before_action :set_competencia, only: [:new, :create]
 
     def show
+      if turbo_frame_request?
+        render partial: "show_modal", layout: false
+      end
     end
 
     def new
@@ -71,7 +74,7 @@ module Admin
     end
 
     def filter_params
-      params.permit(:tipo_servico_id, :sacerdote_id, :ministro_id).to_unsafe_h.compact_blank
+      params.permit(:tipo_servico_id, :sacerdote_id, :ministro_id, :dia_semana, :vista).to_unsafe_h.compact_blank
     end
   end
 end

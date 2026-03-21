@@ -20,6 +20,10 @@ module Admin
       @eventos = @eventos.where(tipo_servico_id: params[:tipo_servico_id]) if params[:tipo_servico_id].present?
       @eventos = @eventos.where(sacerdote_id: params[:sacerdote_id]) if params[:sacerdote_id].present?
       @eventos = @eventos.joins(:escala_ministros).where(escala_ministros: { ministro_id: params[:ministro_id] }).distinct if params[:ministro_id].present?
+      @eventos = @eventos.where("EXTRACT(DOW FROM data) = ?", params[:dia_semana]) if params[:dia_semana].present?
+
+      @vista_lista = params[:vista] == "card" ? "card" : "tabela"
+      @aba = params[:aba] == "lista" ? "lista" : "calendario"
     end
 
     def new
@@ -72,7 +76,7 @@ module Admin
     end
 
     def competencia_params
-      params.require(:competencia_mensal).permit(:ano, :mes)
+      params.require(:competencia_mensal).permit(:ano, :mes, :escala_liberada)
     end
   end
 end

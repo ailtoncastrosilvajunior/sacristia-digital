@@ -18,6 +18,14 @@
         </div>
       <% end %>
 
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <%= f.check_box :escala_liberada, class: "h-4 w-4 rounded border-stone-300 text-slate-600 focus:ring-slate-500" %>
+          <%= f.label :escala_liberada, "Escala liberada para acesso de ministros", class: "text-sm font-medium text-stone-700 cursor-pointer" %>
+        </div>
+        <p class="text-sm text-stone-500 -mt-2 ml-7">Quando marcado, ministros (usuários que não são admin ou coordenador) podem visualizar a escala.</p>
+      </div>
+
       <div class="grid grid-cols-2 gap-4">
         <div>
           <%= f.label :mes, "Mês", class: "block text-sm font-medium text-stone-700 mb-1" %>

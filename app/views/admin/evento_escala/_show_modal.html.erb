@@ -1,0 +1,23 @@
+<turbo-frame id="evento_modal">
+  <div class="bg-white rounded-xl border border-stone-200 shadow-lg max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between z-10">
+      <h2 class="text-lg font-semibold text-stone-800">Ver evento</h2>
+      <button type="button" data-action="click->modal#close" class="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors" aria-label="Fechar">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="p-6">
+      <p class="text-stone-500 text-sm mb-4"><%= @evento.tipo_servico.nome %> - <%= l(@evento.data) %> <%= l(@evento.horario, format: :time) %></p>
+
+      <%= render "form_fields_readonly", evento: @evento %>
+
+      <div class="flex gap-3 pt-4">
+        <%= link_to edit_admin_evento_escala_path(@evento, params.permit(:tipo_servico_id, :sacerdote_id, :ministro_id, :dia_semana, :vista).to_unsafe_h.compact_blank), data: { turbo_frame: "evento_modal" }, class: "inline-flex items-center gap-2 px-4 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          Editar
+        <% end %>
+        <button type="button" data-action="click->modal#close" class="px-4 py-2.5 border border-stone-300 text-stone-700 hover:bg-stone-50 font-medium rounded-lg transition-colors">Fechar</button>
+      </div>
+    </div>
+  </div>
+</turbo-frame>
