@@ -16,8 +16,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
   config.action_dispatch.default_headers = { "X-Frame-Options" => "SAMEORIGIN" }
 
-  # Permitir host do DigitalOcean App Platform
-  config.hosts.clear
-  config.hosts << "sacristia-digital-app-2df7e.ondigitalocean.app"
-  config.hosts << proc { |host| host.to_s.include?("ondigitalocean.app") }
+  # Remover verificação de host (DigitalOcean App Platform)
+  # config.hosts não está sendo respeitado no deploy; isso resolve o "Blocked hosts"
+  config.middleware.delete ActionDispatch::HostAuthorization
 end
