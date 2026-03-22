@@ -15,4 +15,6 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
   config.active_record.dump_schema_after_migration = false
   config.action_dispatch.default_headers = { "X-Frame-Options" => "SAMEORIGIN" }
+
+  config.hosts << "sacristia-digital-app-2df7e.ondigitalocean.app"
 end
