@@ -16,5 +16,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
   config.action_dispatch.default_headers = { "X-Frame-Options" => "SAMEORIGIN" }
 
+  # Permitir host do DigitalOcean App Platform
   config.hosts << "sacristia-digital-app-2df7e.ondigitalocean.app"
+  config.hosts << /[a-z0-9-]+\.ondigitalocean\.app/
 end
