@@ -17,6 +17,7 @@ Rails.application.configure do
   config.action_dispatch.default_headers = { "X-Frame-Options" => "SAMEORIGIN" }
 
   # Permitir host do DigitalOcean App Platform
+  config.hosts.clear
   config.hosts << "sacristia-digital-app-2df7e.ondigitalocean.app"
-  config.hosts << /[a-z0-9-]+\.ondigitalocean\.app/
+  config.hosts << proc { |host| host.to_s.include?("ondigitalocean.app") }
 end
