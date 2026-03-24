@@ -1,5 +1,5 @@
 <turbo-frame id="evento_modal">
-  <div class="bg-white rounded-xl border border-stone-200 shadow-lg max-w-2xl max-h-[90vh] overflow-y-auto">
+  <div class="bg-white rounded-xl border border-stone-200 shadow-lg w-full max-h-[90vh] overflow-y-auto">
     <div class="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between z-10">
       <h2 class="text-lg font-semibold text-stone-800">Editar evento</h2>
       <button type="button" data-action="click->modal#close" class="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors" aria-label="Fechar">
@@ -15,6 +15,9 @@
         <%= hidden_field_tag :ministro_id, params[:ministro_id] if params[:ministro_id].present? %>
         <%= hidden_field_tag :dia_semana, params[:dia_semana] if params[:dia_semana].present? %>
         <%= hidden_field_tag :vista, params[:vista] if params[:vista].present? %>
+        <%= hidden_field_tag :aba, params[:aba] if params[:aba].present? %>
+        <%= hidden_field_tag :vista_calendario, params[:vista_calendario] if params[:vista_calendario].present? %>
+        <%= hidden_field_tag :data_ref, params[:data_ref] if params[:data_ref].present? %>
         <% if @evento.errors.any? %>
           <div class="rounded-lg bg-red-50 p-4 text-red-800 text-sm">
             <p class="font-medium mb-2"><%= pluralize(@evento.errors.count, "erro") %> impediram a atualização:</p>

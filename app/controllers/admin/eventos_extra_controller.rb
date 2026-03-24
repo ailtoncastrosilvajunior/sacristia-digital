@@ -12,7 +12,10 @@ module Admin
     end
 
     def new
-      @evento = EventoEscala.new(tipo_escala: "extra", data: Date.current)
+      data = params[:data].presence&.then { |d| Date.parse(d) } || Date.current
+      competencia = params[:competencia_mensal_id].present? ? CompetenciaMensal.find_by(id: params[:competencia_mensal_id]) : nil
+      @evento = EventoEscala.new(tipo_escala: "extra", data: data, competencia_mensal_id: competencia&.id)
+      @evento.equipe_id = Equipe.para_dia(data, competencia: competencia)&.id if @evento.equipe_id.blank?
     end
 
     def create

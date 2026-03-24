@@ -1,0 +1,15 @@
+<turbo-frame id="evento_modal">
+  <div class="bg-white rounded-xl border border-stone-200 shadow-lg w-full max-h-[90vh] overflow-y-auto">
+    <div class="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between z-10">
+      <h2 class="text-lg font-semibold text-stone-800">Escalar evento</h2>
+      <button type="button" data-action="click->modal#close" class="p-1 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors" aria-label="Fechar">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="p-6">
+      <p class="text-stone-500 text-sm mb-4"><%= @evento.tipo_servico.nome %> · <%= l(@evento.data) %> às <%= l(@evento.horario, format: :time) %></p>
+
+      <%= render "admin/evento_escala/escalar_form", evento: @evento, ministros_disponiveis: @ministros_disponiveis, ministros_escalados: @ministros_escalados, sacerdotes: @sacerdotes %>
+    </div>
+  </div>
+</turbo-frame>

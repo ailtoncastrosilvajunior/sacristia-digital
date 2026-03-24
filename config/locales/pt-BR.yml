@@ -42,6 +42,7 @@ pt-BR:
     formats:
       default: "%d/%m/%Y"
       short: "%d/%m"
+      long: "%e de %B de %Y"
       month: "%B"
       month_year: "%B/%Y"
     day_names: [Domingo, Segunda, Terça, Quarta, Quinta, Sexta, Sábado]

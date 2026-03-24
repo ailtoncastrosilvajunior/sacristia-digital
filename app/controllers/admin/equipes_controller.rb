@@ -5,7 +5,7 @@ module Admin
     before_action :set_equipe, only: [:show, :edit, :update, :destroy]
 
     def index
-      @equipes = Equipe.order(:nome)
+      @equipes = Equipe.includes(:ministros).order(:nome)
     end
 
     def show
@@ -47,7 +47,9 @@ module Admin
     end
 
     def equipe_params
-      params.require(:equipe).permit(:nome, :observacoes)
+      p = params.require(:equipe).permit(:nome, :observacoes, :dia_inicio, :dia_fim, ministro_ids: [])
+      p[:ministro_ids] = (p[:ministro_ids] || []).reject(&:blank?).map(&:to_i)
+      p
     end
   end
 end

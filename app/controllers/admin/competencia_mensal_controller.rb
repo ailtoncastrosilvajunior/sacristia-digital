@@ -24,6 +24,13 @@ module Admin
 
       @vista_lista = params[:vista] == "card" ? "card" : "tabela"
       @aba = params[:aba] == "lista" ? "lista" : "calendario"
+
+      if @aba == "calendario"
+        @vista_calendario = %w[semana dia].include?(params[:vista_calendario]) ? params[:vista_calendario] : "mes"
+        ref = params[:data_ref].presence&.then { |d| Date.parse(d) rescue nil }
+        @data_ref = ref || @competencia.periodo
+        @domingo_semana = @data_ref - @data_ref.wday
+      end
     end
 
     def new

@@ -1,0 +1,25 @@
+<% if evento.ministros.empty? %>
+  —
+<% else %>
+  <% coord = evento.ministro_coordenador %>
+  <% ador = evento.ministro_adoracao %>
+  <% evento.ministros.each_with_index do |m, i| %>
+    <%= ", " if i > 0 %>
+    <% is_coord = coord && m.id == coord.id %>
+    <% is_ador = ador && m.id == ador.id %>
+    <% if is_coord || is_ador %>
+      <% cor_classe = is_coord && is_ador ? "bg-amber-50 text-amber-800 border-amber-200" : (is_coord ? "bg-amber-100 text-amber-800 border-amber-200/80" : "bg-rose-100 text-rose-800 border-rose-200/80") %>
+      <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded border <%= cor_classe %>" title="<%= [is_coord ? "Coordenador" : nil, is_ador ? "Adoração" : nil].compact.join(" · ") %>">
+        <%= m.nome %>
+        <% if is_coord %>
+          <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" title="Coordenador"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        <% end %>
+        <% if is_ador %>
+          <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" title="Adoração"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+        <% end %>
+      </span>
+    <% else %>
+      <span class="text-stone-700"><%= m.nome %></span>
+    <% end %>
+  <% end %>
+<% end %>

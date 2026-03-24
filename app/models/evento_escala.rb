@@ -10,6 +10,10 @@ class EventoEscala < ApplicationRecord
 
   has_many :escala_ministros, dependent: :destroy
   has_many :ministros, through: :escala_ministros
+  has_one :escala_ministro_coordenador, -> { where(coordenador: true) }, class_name: "EscalaMinistro"
+  has_one :ministro_coordenador, through: :escala_ministro_coordenador, source: :ministro
+  has_one :escala_ministro_adoracao, -> { where(adoracao: true) }, class_name: "EscalaMinistro"
+  has_one :ministro_adoracao, through: :escala_ministro_adoracao, source: :ministro
   has_many :registro_esportulas, dependent: :destroy
 
   TIPOS_ESCALA = %w[ordinaria extra].freeze
@@ -45,5 +49,17 @@ class EventoEscala < ApplicationRecord
 
   def to_s
     "#{tipo_servico.nome} - #{I18n.l(data)}"
+  end
+
+  def ministros_nomes_com_coordenador
+    return "—" if ministros.empty?
+    coord = ministro_coordenador
+    ador = ministro_adoracao
+    ministros.map do |m|
+      parts = [m.nome]
+      parts << "(coord.)" if coord && m.id == coord.id
+      parts << "(ador.)" if ador && m.id == ador.id
+      parts.join(" ")
+    end.join(", ")
   end
 end

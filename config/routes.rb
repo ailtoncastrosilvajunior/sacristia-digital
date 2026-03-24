@@ -22,7 +22,12 @@ Rails.application.routes.draw do
         post :regenerar_escala
       end
     end
-    resources :evento_escala, path: "eventos-escala", only: [:show, :new, :create, :edit, :update]
+    resources :evento_escala, path: "eventos-escala", only: [:show, :new, :create, :edit, :update, :destroy] do
+      member do
+        get :escalar_ministros
+        patch :update_escalar_ministros
+      end
+    end
     resources :eventos_extra, path: "eventos-extra"
     resources :registros_esportula, path: "esportulas"
     get "relatorios", to: "relatorios#index"

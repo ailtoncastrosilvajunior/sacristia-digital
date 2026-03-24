@@ -10,7 +10,7 @@ class Ministro < ApplicationRecord
   SEXOS = %w[Masculino Feminino].freeze
 
   validates :nome, presence: true
-  validates :email, presence: true, uniqueness: true
+  # validates :email, presence: true, uniqueness: true
   validates :sexo, inclusion: { in: SEXOS }, allow_blank: true
 
   scope :ativos, -> { where(ativo: true) }

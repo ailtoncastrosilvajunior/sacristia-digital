@@ -32,7 +32,7 @@
       </div>
       <div>
         <dt class="text-sm font-medium text-stone-500">Ministros escalados</dt>
-        <dd class="mt-1 text-stone-800"><%= @evento.ministros.any? ? @evento.ministros.map(&:nome).join(", ") : "—" %></dd>
+        <dd class="mt-1 text-stone-800"><%= render "admin/evento_escala/ministros_com_coordenador", evento: @evento %></dd>
       </div>
       <div>
         <dt class="text-sm font-medium text-stone-500">Status</dt>
