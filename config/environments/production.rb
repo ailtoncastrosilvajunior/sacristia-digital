@@ -6,7 +6,11 @@ Rails.application.configure do
   config.enable_reloading = false
   config.eager_load = true
   config.consider_all_requests_local = false
-  config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
+  # DigitalOcean App Platform / container único: servir public/assets após precompile.
+  # Defina RAILS_SERVE_STATIC_FILES=false se um proxy/CDN servir estáticos.
+  config.public_file_server.enabled = ActiveModel::Type::Boolean.new.cast(
+    ENV.fetch("RAILS_SERVE_STATIC_FILES", "true")
+  )
   config.action_controller.perform_caching = true
   config.cache_store = :solid_cache_store
   config.action_mailer.perform_caching = false
