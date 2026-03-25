@@ -1,0 +1,63 @@
+  <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+  <li>
+    <div class="flex flex-col sm:flex-row sm:items-stretch gap-0 rounded-2xl border border-stone-200/90 bg-white shadow-sm overflow-hidden ring-1 ring-transparent transition-all hover:ring-sky-200/70 hover:border-sky-200/50 hover:shadow-md">
+      <div class="sm:w-[7.25rem] shrink-0 flex flex-row sm:flex-col justify-center sm:justify-center gap-3 sm:gap-1 px-4 py-4 bg-gradient-to-br from-sky-50 to-indigo-50/90 sm:border-r border-stone-100 border-b sm:border-b-0">
+        <span class="text-[11px] font-bold uppercase tracking-wide text-sky-700/90"><%= I18n.t("date.abbr_day_names")[ev.data.wday] %></span>
+        <span class="text-lg font-bold tabular-nums text-stone-900 leading-none sm:text-center"><%= l(ev.data, format: :short) %></span>
+        <span class="text-[11px] font-bold uppercase tracking-wide text-sky-700/90">às</span>
+        <span class="text-lg font-semibold text-sky-800 tabular-nums sm:mt-0.5 sm:text-center"><%= l(ev.horario, format: :time) %></span>
+      </div>
+      <div class="flex-1 min-w-0 px-4 py-4 flex flex-col lg:flex-row lg:items-center gap-4">
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg border shadow-sm" style="background-color: <%= cor %>22; border-color: <%= cor %>55; color: #1e293b;"><%= ev.tipo_servico.nome %></span>
+            <% case ev.status
+                when "confirmado" %>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200/80">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0"></span> Confirmado
+            </span>
+            <% when "concluido" %>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-sky-100 text-sky-800 ring-1 ring-sky-200/80">
+              <span class="h-1.5 w-1.5 rounded-full bg-sky-500 shrink-0"></span> Concluído
+            </span>
+            <% when "pendente" %>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-800 ring-1 ring-amber-200/70">
+              <span class="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0"></span> Pendente
+            </span>
+            <% end %>
+          </div>
+          <p class="mt-2 text-sm text-stone-600 truncate">
+            <span class="text-stone-400 font-medium text-[10px] uppercase tracking-wider mr-1">Sacerdote</span>
+            <%= ev.sacerdote&.nome || tag.span("A definir", class: "text-stone-400 italic") %>
+          </p>
+          <% if ev.escala_ministros.any? %>
+          <p class="text-xs text-stone-500 mt-1.5 line-clamp-2 leading-relaxed">
+            <span class="text-stone-400 font-medium uppercase tracking-wider text-[10px] mr-1">Equipe</span>
+            <%= render "admin/evento_escala/ministros_com_coordenador", evento: ev %>
+          </p>
+          <% else %>
+          <p class="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800 bg-amber-50 px-2 py-1 rounded-lg ring-1 ring-amber-200/70 w-fit">
+            <svg class="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            Sem ministros escalados
+          </p>
+          <% end %>
+        </div>
+        <div class="flex shrink-0 flex-row sm:flex-wrap lg:flex-col gap-2 lg:justify-center lg:pr-1">
+          <%= link_to escalar_ministros_admin_evento_escala_path(ev), class: "inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-sky-600 text-white shadow-md shadow-sky-900/15 hover:bg-sky-700 transition-colors" do %>
+          <svg class="w-3.5 h-3.5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Escalar
+          <% end %>
+          <%= link_to admin_competencia_mensal_path(comp, aba: "lista"), class: "inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 hover:border-stone-300 transition-colors" do %>
+          <svg class="w-3.5 h-3.5 shrink-0 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+          Ver mês
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </li>

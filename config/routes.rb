@@ -5,12 +5,13 @@ Rails.application.routes.draw do
     sign_in: "entrar",
     sign_out: "sair",
     sign_up: "cadastrar"
-  }
+  }, controllers: { registrations: "users/registrations" }
 
   root "dashboard#index"
 
   namespace :admin do
     root "dashboard#index"
+    resources :users
     resources :ministros
     resources :sacerdotes
     resources :tipo_servicos, path: "tipo-servicos"
@@ -31,6 +32,10 @@ Rails.application.routes.draw do
     resources :eventos_extra, path: "eventos-extra"
     resources :registros_esportula, path: "esportulas"
     get "relatorios", to: "relatorios#index"
+  end
+
+  namespace :sacerdote do
+    root "dashboard#index"
   end
 
   namespace :coordenador do

@@ -1,5 +1,22 @@
 pt-BR:
+  user:
+    perfis:
+      admin: Administrador
+      coordenador: Coordenador
+      ministro: Ministro
+      sacerdote: Sacerdote
+  errors:
+    messages:
+      confirmation: "não confere com %{attribute}"
   activerecord:
+    errors:
+      messages:
+        confirmation: "não confere com %{attribute}"
+      models:
+        user:
+          attributes:
+            password_confirmation:
+              confirmation: "não confere com a senha"
     models:
       user: Usuário
       ministro: Ministro
@@ -13,6 +30,11 @@ pt-BR:
       plantao_periodo: Período de Plantão
       registro_esportula: Registro de Espórtula
     attributes:
+      user:
+        email: E-mail
+        nome: Nome
+        password: Senha
+        password_confirmation: Confirmação da senha
       ministro:
         nome: Nome
         email: E-mail

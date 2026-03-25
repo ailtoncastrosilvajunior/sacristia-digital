@@ -1,0 +1,80 @@
+<% content_for :title, "#{@user.email} — Usuário" %>
+<div class="max-w-3xl mx-auto">
+  <div class="mb-6">
+    <%= link_to "← Usuários", admin_users_path, class: "text-sm font-medium text-sky-700 hover:text-sky-900" %>
+  </div>
+  <div class="rounded-2xl border border-stone-200 bg-white shadow-sm p-6 sm:p-8">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-stone-900"><%= @user.email %></h1>
+        <p class="text-stone-600 mt-1"><%= @user.nome.presence || "Sem nome" %></p>
+      </div>
+      <div class="flex gap-2">
+        <%= link_to "Editar", edit_admin_user_path(@user), class: "px-4 py-2 rounded-xl border border-stone-200 text-sm font-semibold text-stone-700 hover:bg-stone-50" %>
+        <% unless @user == current_user %>
+          <%= button_to "Excluir", admin_user_path(@user), method: :delete, data: { turbo_confirm: "Excluir este usuário?" }, class: "px-4 py-2 rounded-xl border border-red-200 bg-red-50 text-sm font-semibold text-red-700 hover:bg-red-100" %>
+        <% end %>
+      </div>
+    </div>
+    <section class="relative overflow-hidden rounded-2xl border border-sky-200/70 bg-gradient-to-br from-sky-50/85 via-white to-indigo-50/35 p-5 shadow-sm ring-1 ring-sky-100/60" aria-labelledby="user-perfis-heading">
+      <div class="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-sky-400/12 blur-2xl" aria-hidden="true"></div>
+      <div class="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-600/12 text-sky-700 shadow-inner shadow-sky-900/5">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <h2 id="user-perfis-heading" class="text-xs font-semibold uppercase tracking-wide text-sky-800/75">Perfis</h2>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <% @user.perfis.each do |perfil| %>
+              <span class="inline-flex px-2.5 py-1 text-xs font-bold rounded-lg bg-white/90 text-sky-950 ring-1 ring-sky-200/80 shadow-sm shadow-sky-900/5">
+                <%= t("user.perfis.#{perfil}", default: perfil.humanize) %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-6 grid gap-4 sm:grid-cols-2">
+      <section class="relative overflow-hidden rounded-2xl border p-5 shadow-sm ring-1 <%= @user.ministro ? "border-violet-200/90 bg-gradient-to-br from-violet-50/95 via-white to-violet-50/40 ring-violet-100/80" : "border-dashed border-violet-200/60 bg-violet-50/30 ring-violet-100/40" %>">
+        <div class="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-400/15 blur-2xl" aria-hidden="true"></div>
+        <div class="relative flex gap-4">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-600/15 text-violet-700 shadow-inner shadow-violet-900/5">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-violet-800/80">Ministro vinculado</h3>
+            <% if @user.ministro %>
+              <p class="mt-2 text-base font-semibold text-violet-950 leading-snug"><%= @user.ministro.nome %></p>
+              <% if @user.ministro.email.present? %>
+                <p class="mt-1 text-sm text-violet-800/70 truncate" title="<%= @user.ministro.email %>"><%= @user.ministro.email %></p>
+              <% end %>
+            <% else %>
+              <p class="mt-2 text-sm text-violet-900/50 italic">Nenhum ministro vinculado.</p>
+            <% end %>
+          </div>
+        </div>
+      </section>
+
+      <section class="relative overflow-hidden rounded-2xl border p-5 shadow-sm ring-1 <%= @user.sacerdote ? "border-emerald-200/90 bg-gradient-to-br from-emerald-50/95 via-white to-emerald-50/40 ring-emerald-100/80" : "border-dashed border-emerald-200/60 bg-emerald-50/30 ring-emerald-100/40" %>">
+        <div class="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-400/15 blur-2xl" aria-hidden="true"></div>
+        <div class="relative flex gap-4">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-600/15 text-emerald-700 shadow-inner shadow-emerald-900/5">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-emerald-800/80">Sacerdote vinculado</h3>
+            <% if @user.sacerdote %>
+              <p class="mt-2 text-base font-semibold text-emerald-950 leading-snug"><%= @user.sacerdote.nome %></p>
+              <% if @user.sacerdote.email.present? %>
+                <p class="mt-1 text-sm text-emerald-800/70 truncate" title="<%= @user.sacerdote.email %>"><%= @user.sacerdote.email %></p>
+              <% end %>
+            <% else %>
+              <p class="mt-2 text-sm text-emerald-900/50 italic">Nenhum sacerdote vinculado.</p>
+            <% end %>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

@@ -10,10 +10,17 @@
   <% elsif @competencias.empty? %>
     <div class="relative overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-950 via-indigo-900 to-slate-900 text-white shadow-xl mb-8">
       <div class="absolute inset-0 opacity-[0.06]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-      <div class="relative px-6 py-10 sm:px-10 text-center max-w-lg mx-auto">
-        <p class="text-violet-300/90 text-sm font-medium tracking-wide uppercase">Olá, <%= primeiro_nome %></p>
-        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mt-2">Ainda não há escala com seu nome</h1>
-        <p class="mt-3 text-violet-100/90 text-sm leading-relaxed">Quando a coordenação publicar a escala e você estiver designado, seus dias aparecerão aqui por competência.</p>
+      <div class="relative grid grid-cols-[minmax(7rem,34%)_minmax(0,1fr)] gap-x-3 gap-y-3 px-5 py-5 sm:px-6 sm:gap-x-4 lg:flex lg:items-center lg:gap-6 lg:py-5 lg:px-8">
+        <div class="row-span-1 self-start lg:shrink-0">
+          <%= render "painel_ministro/header_fatima_visual" %>
+        </div>
+        <div class="min-w-0 flex flex-col justify-center text-left lg:flex-1 lg:text-center">
+          <div class="lg:max-w-lg lg:mx-auto">
+            <p class="text-violet-300/90 text-xs sm:text-sm font-medium tracking-wide uppercase">Olá, <%= primeiro_nome %></p>
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mt-1.5">Ainda não há escala com seu nome</h1>
+            <p class="mt-2 text-violet-100/90 text-sm leading-snug lg:leading-relaxed">Quando a coordenação publicar a escala e você estiver designado, seus dias aparecerão aqui por competência.</p>
+          </div>
+        </div>
       </div>
     </div>
   <% elsif @competencia.nil? %>
@@ -28,30 +35,32 @@
 
     <div class="relative overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-950 via-indigo-900 to-slate-900 text-white shadow-xl mb-8">
       <div class="absolute inset-0 opacity-[0.07]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-      <div class="relative px-6 py-8 sm:px-10 sm:py-10">
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
-          <div class="max-w-xl">
-            <p class="text-violet-300/90 text-sm font-medium tracking-wide uppercase">Minha escala</p>
-            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mt-2">Olá, <%= primeiro_nome %></h1>
-            <p class="mt-3 text-violet-100/85 text-sm sm:text-base leading-relaxed">Acompanhe os dias em que você serve, troque de competência e use o mapa para não perder nenhuma celebração.</p>
-            <% if @ministro_record.nome.present? %>
-              <p class="mt-2 text-xs text-violet-300/80">Cadastro: <span class="font-medium text-white"><%= @ministro_record.nome %></span></p>
-            <% end %>
-          </div>
-          <div class="shrink-0 w-full max-w-md">
-            <%= form_with url: ministro_root_path, method: :get, local: true, class: "space-y-2" do %>
-              <label for="ministro_dash_competencia" class="block text-xs font-medium text-violet-300/90 uppercase tracking-wider">Competência</label>
-              <div class="flex flex-col sm:flex-row gap-2">
-                <%= select_tag :competencia_mensal_id,
-                      options_from_collection_for_select(@competencias, :id, :label, comp.id),
-                      { id: "ministro_dash_competencia", class: "flex-1 rounded-xl border-0 bg-white/10 text-white ring-1 ring-white/20 px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-violet-400 focus:outline-none [&>option]:text-slate-900",
-                        onchange: "this.form.requestSubmit()" } %>
-                <noscript>
-                  <%= submit_tag "Atualizar", class: "rounded-xl bg-violet-500 hover:bg-violet-400 px-4 py-3 text-sm font-semibold text-white" %>
-                </noscript>
-              </div>
-            <% end %>
-          </div>
+      <%# Mobile: 2 colunas — retrato à esquerda | texto + competência à direita. lg+: 3 colunas (inalterado). %>
+      <div class="relative grid grid-cols-[minmax(7rem,34%)_minmax(0,1fr)] grid-rows-[auto_auto] gap-x-3 gap-y-3.5 px-5 py-5 sm:px-6 sm:gap-x-4 sm:gap-y-4
+                  lg:grid-cols-[auto_minmax(0,1fr)_10.5rem] lg:grid-rows-1 lg:items-center lg:gap-5 lg:py-5 lg:px-8
+                  xl:grid-cols-[auto_minmax(0,1fr)_11.25rem] xl:gap-7 xl:pr-8">
+        <div class="col-start-1 row-start-1 row-span-2 self-start lg:col-span-1 lg:row-span-1 lg:row-start-1 lg:self-center">
+          <%= render "painel_ministro/header_fatima_visual" %>
+        </div>
+        <div class="col-start-2 row-start-1 min-w-0 text-left">
+          <p class="text-violet-300/90 text-xs sm:text-sm font-medium tracking-wide uppercase">Minha escala</p>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mt-1 lg:mt-1.5">Olá, <%= primeiro_nome %></h1>
+          <p class="mt-2 text-violet-100/85 text-sm leading-snug lg:leading-relaxed">Acompanhe os dias em que você serve, troque de competência e use o mapa para não perder nenhuma celebração.</p>
+          <% if @ministro_record.nome.present? %>
+            <p class="mt-2 text-xs text-violet-300/80">Cadastro: <span class="font-medium text-white"><%= @ministro_record.nome %></span></p>
+          <% end %>
+        </div>
+        <div class="col-start-2 row-start-2 min-w-0 w-full lg:col-start-3 lg:row-start-1 flex flex-col justify-center">
+          <%= form_with url: ministro_root_path, method: :get, local: true, class: "space-y-1.5" do %>
+            <label for="ministro_dash_competencia" class="block text-xs font-medium text-violet-300/90 uppercase tracking-wider">Competência</label>
+            <%= select_tag :competencia_mensal_id,
+                  options_from_collection_for_select(@competencias, :id, :label, comp.id),
+                  { id: "ministro_dash_competencia", class: "w-full rounded-xl border-0 bg-white/10 text-white ring-1 ring-white/20 px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-violet-400 focus:outline-none [&>option]:text-slate-900",
+                    onchange: "this.form.requestSubmit()" } %>
+            <noscript>
+              <%= submit_tag "Atualizar", class: "w-full rounded-xl bg-violet-500 hover:bg-violet-400 px-3 py-2 text-sm font-semibold text-white" %>
+            </noscript>
+          <% end %>
         </div>
       </div>
     </div>

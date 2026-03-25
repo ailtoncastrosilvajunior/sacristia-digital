@@ -1,0 +1,8 @@
+<% content_for :title, "Novo usuário — Admin" %>
+<div class="max-w-3xl mx-auto">
+  <div class="mb-6">
+    <%= link_to "← Usuários", admin_users_path, class: "text-sm font-medium text-sky-700 hover:text-sky-900" %>
+  </div>
+  <h1 class="text-2xl font-bold text-stone-900 mb-6">Novo usuário</h1>
+  <%= render "form", user: @user %>
+</div>

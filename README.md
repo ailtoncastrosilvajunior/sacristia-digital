@@ -58,6 +58,7 @@ O Rails **não sobe** em `RAILS_ENV=production` sem chave de sessão/cookies. De
 | Variável | Obrigatório | Descrição |
 |----------|-------------|-----------|
 | `SECRET_KEY_BASE` | **Sim** | String longa e secreta. Gere na sua máquina: `bin/rails secret` ou `openssl rand -hex 64`. **Não commite** no repositório. |
+| `RAILS_SERVE_STATIC_FILES` | Opcional | Padrão no código é **`true`**: o Puma entrega CSS/JS em `public/assets` (gerados no `docker build` com `assets:precompile`). Use `false` só se um CDN ou nginx na frente servir os estáticos. |
 | `RAILS_ENV` | Recomendado | `production` |
 | `APP_HOST` | Recomendado | Host público sem esquema, ex.: `sacristia-digital-app-xxxx.ondigitalocean.app` (usado no mailer e em hosts permitidos). |
 | `ALLOWED_HOSTS` | Opcional | Domínios extras separados por vírgula, ex.: `meusite.com.br,www.meusite.com.br` |

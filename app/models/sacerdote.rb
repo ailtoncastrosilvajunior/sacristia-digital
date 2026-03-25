@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Sacerdote < ApplicationRecord
+  has_one :user, dependent: :nullify
+
   has_many :calendario_base, dependent: :nullify
   has_many :evento_escalas, dependent: :nullify
   has_many :registro_esportulas, dependent: :destroy

@@ -135,28 +135,33 @@ puts "   ✓ #{Equipe.count} equipes com ministros vinculados"
 puts "\n🔐 Criando usuários..."
 senha = "123456"
 
-admin_user = User.find_or_create_by!(email: "admin@sacristiadigital.local") do |u|
-  u.nome = "Administrador"
-  u.perfil = "admin"
-  u.password = senha
-  u.password_confirmation = senha
-end
+admin_user = User.find_or_initialize_by(email: "admin@sacristiadigital.local")
+admin_user.assign_attributes(
+  nome: "Administrador",
+  perfis: %w[admin],
+  password: senha,
+  password_confirmation: senha
+)
+admin_user.save!
 
-coordenador_user = User.find_or_create_by!(email: "coordenador@sacristiadigital.local") do |u|
-  u.nome = "Coordenador MESC"
-  u.perfil = "coordenador"
-  u.password = senha
-  u.password_confirmation = senha
-end
+coordenador_user = User.find_or_initialize_by(email: "coordenador@sacristiadigital.local")
+coordenador_user.assign_attributes(
+  nome: "Coordenador MESC",
+  perfis: %w[coordenador],
+  password: senha,
+  password_confirmation: senha
+)
+coordenador_user.save!
 
-# Vincular um ministro ao primeiro ministro para login
-ministro_user = User.find_or_create_by!(email: "ministro@sacristiadigital.local") do |u|
-  u.nome = ministros.first.nome
-  u.perfil = "ministro"
-  u.ministro_id = ministros.first.id
-  u.password = senha
-  u.password_confirmation = senha
-end
+ministro_user = User.find_or_initialize_by(email: "ministro@sacristiadigital.local")
+ministro_user.assign_attributes(
+  nome: ministros.first.nome,
+  perfis: %w[ministro],
+  ministro_id: ministros.first.id,
+  password: senha,
+  password_confirmation: senha
+)
+ministro_user.save!
 
 puts "   ✓ Usuários criados:"
 puts "      - admin@sacristiadigital.local (admin) - senha: #{senha}"

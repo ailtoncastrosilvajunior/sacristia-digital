@@ -5,3 +5,15 @@
 @source "../../components/**/*.erb";
 @source "../../components/**/*.html";
 @source "../../helpers/**/*.rb";
+
+/* Campos de texto/select/textarea: altura e padding confortáveis (classes de borda/cor vêm das utilities nas views) */
+@layer base {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="hidden"]):not([type="image"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea {
+    min-height: 2.75rem;
+    padding-block: 0.625rem;
+    padding-inline: 0.875rem;
+    line-height: 1.5;
+  }
+}

@@ -6,16 +6,21 @@
 <div class="min-h-full space-y-8">
   <div class="relative overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-950 via-indigo-900 to-slate-900 text-white shadow-xl">
     <div class="absolute inset-0 opacity-[0.06]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-    <div class="relative px-5 py-6 sm:px-8 sm:py-7 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-      <div>
-        <p class="text-violet-300/90 text-xs font-semibold tracking-wider uppercase">Agenda</p>
-        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mt-1">Meus serviços</h1>
-        <p class="mt-2 text-sm text-violet-100/85 max-w-xl leading-relaxed">Todos os dias em que você está na escala. Toque em um card para ver a equipe e confirmar presença.</p>
+    <div class="relative grid grid-cols-[minmax(7rem,34%)_minmax(0,1fr)] gap-x-3 gap-y-3 px-5 py-5 sm:px-6 sm:gap-x-4 lg:flex lg:flex-row lg:items-center lg:gap-6 lg:px-8 lg:py-7">
+      <div class="self-start lg:shrink-0 lg:pl-0">
+        <%= render "painel_ministro/header_fatima_visual" %>
       </div>
-      <%= link_to ministro_root_path, class: "inline-flex shrink-0 items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 text-white text-sm font-semibold ring-1 ring-white/20 hover:bg-white/15 transition-colors" do %>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        Ver calendário no painel
-      <% end %>
+      <div class="relative min-w-0 flex flex-col gap-3 lg:flex-1 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+        <div class="text-left lg:text-left">
+          <p class="text-violet-300/90 text-xs font-semibold tracking-wider uppercase">Agenda</p>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mt-1">Meus serviços</h1>
+          <p class="mt-2 text-sm text-violet-100/85 max-w-xl leading-snug lg:leading-relaxed">Todos os dias em que você está na escala. Toque em um card para ver a equipe e confirmar presença.</p>
+        </div>
+        <%= link_to ministro_root_path, class: "inline-flex shrink-0 items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 text-white text-sm font-semibold ring-1 ring-white/20 hover:bg-white/15 transition-colors w-full sm:w-auto lg:w-auto" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Ver calendário no painel
+        <% end %>
+      </div>
     </div>
   </div>
 

@@ -1,0 +1,93 @@
+<%= form_with model: [:admin, user], class: "space-y-6 rounded-2xl border border-stone-200 bg-white shadow-sm p-6 sm:p-8" do |f| %>
+  <% if user.errors.any? %>
+    <div class="rounded-xl bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm">
+      <p class="font-semibold"><%= pluralize(user.errors.count, "erro") %> impediram salvar:</p>
+      <ul class="list-disc list-inside mt-2 space-y-1">
+        <% user.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :email, class: "block text-sm font-medium text-stone-700 mb-1" %>
+    <%= f.email_field :email, required: true, autocomplete: "email", class: "block w-full rounded-xl border-stone-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" %>
+  </div>
+
+  <div>
+    <%= f.label :nome, class: "block text-sm font-medium text-stone-700 mb-1" %>
+    <span class="text-xs text-stone-400">(recomendado para admin e coordenador)</span>
+    <%= f.text_field :nome, autocomplete: "name", class: "block w-full rounded-xl border-stone-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" %>
+  </div>
+
+  <fieldset class="rounded-xl border border-stone-200 bg-stone-50/50 p-4">
+    <legend class="text-sm font-semibold text-stone-800 px-1">Perfis</legend>
+    <p class="text-xs text-stone-500 mb-3">Marque um ou mais. O usuário pode ser, por exemplo, admin e ministro ao mesmo tempo.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <% User::PERFIS_VALIDOS.each do |perfil| %>
+        <label class="flex items-center gap-3 p-3 rounded-lg border border-stone-200 bg-white cursor-pointer hover:border-sky-300 has-[:checked]:border-sky-400 has-[:checked]:ring-1 has-[:checked]:ring-sky-200">
+          <%= check_box_tag "user[perfis][]", perfil, user.perfis.include?(perfil), id: "user_perfis_#{perfil}", class: "rounded border-stone-300 text-sky-600 focus:ring-sky-500" %>
+          <span class="text-sm font-medium text-stone-800"><%= t("user.perfis.#{perfil}", default: perfil.humanize) %></span>
+        </label>
+      <% end %>
+    </div>
+    <%= hidden_field_tag "user[perfis][]", "" %>
+  </fieldset>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <section class="relative overflow-hidden rounded-2xl border border-violet-200/90 bg-gradient-to-br from-violet-50/95 via-white to-violet-50/40 p-5 shadow-sm ring-1 ring-violet-100/80">
+      <div class="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-400/15 blur-2xl" aria-hidden="true"></div>
+      <div class="relative flex gap-4">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-600/15 text-violet-700 shadow-inner shadow-violet-900/5">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+        <div class="min-w-0 flex-1 space-y-2">
+          <div>
+            <h3 class="text-sm font-semibold text-violet-950 tracking-tight">Ministro vinculado</h3>
+            <p class="mt-1 text-xs leading-relaxed text-violet-900/65">Obrigatório com perfil <strong class="text-violet-900/90">ministro</strong>. Admin/coordenador podem vincular para usar &quot;Minha escala&quot;.</p>
+          </div>
+          <%= f.label :ministro_id, "Selecionar ministro", class: "sr-only" %>
+          <%= f.collection_select :ministro_id, Ministro.ativos.ordenados_por_nome, :id, :nome,
+                { include_blank: "— Nenhum —" },
+                class: "block w-full rounded-xl border-violet-200/90 bg-white/90 shadow-sm focus:border-violet-500 focus:ring-violet-500/30" %>
+        </div>
+      </div>
+    </section>
+
+    <section class="relative overflow-hidden rounded-2xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50/95 via-white to-emerald-50/40 p-5 shadow-sm ring-1 ring-emerald-100/80">
+      <div class="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-400/15 blur-2xl" aria-hidden="true"></div>
+      <div class="relative flex gap-4">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-600/15 text-emerald-700 shadow-inner shadow-emerald-900/5">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div class="min-w-0 flex-1 space-y-2">
+          <div>
+            <h3 class="text-sm font-semibold text-emerald-950 tracking-tight">Sacerdote vinculado</h3>
+            <p class="mt-1 text-xs leading-relaxed text-emerald-900/65">Obrigatório com perfil <strong class="text-emerald-900/90">sacerdote</strong>.</p>
+          </div>
+          <%= f.label :sacerdote_id, "Selecionar sacerdote", class: "sr-only" %>
+          <%= f.collection_select :sacerdote_id, Sacerdote.ativos.ordenados_por_nome, :id, :nome,
+                { include_blank: "— Nenhum —" },
+                class: "block w-full rounded-xl border-emerald-200/90 bg-white/90 shadow-sm focus:border-emerald-500 focus:ring-emerald-500/30" %>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :password, user.new_record? ? "Senha" : "Nova senha (deixe em branco para manter)", class: "block text-sm font-medium text-stone-700 mb-1" %>
+      <%= f.password_field :password, autocomplete: "new-password", class: "block w-full rounded-xl border-stone-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" %>
+    </div>
+    <div>
+      <%= f.label :password_confirmation, "Confirmar senha", class: "block text-sm font-medium text-stone-700 mb-1" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "block w-full rounded-xl border-stone-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" %>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-3 pt-2">
+    <%= f.submit user.new_record? ? "Cadastrar usuário" : "Salvar alterações", class: "px-5 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 cursor-pointer shadow-md shadow-sky-900/15" %>
+    <%= link_to "Cancelar", user.persisted? ? admin_user_path(user) : admin_users_path, class: "px-5 py-2.5 rounded-xl border border-stone-200 text-sm font-semibold text-stone-700 hover:bg-stone-50 inline-flex items-center" %>
+  </div>
+<% end %>
