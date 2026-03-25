@@ -16,6 +16,6 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
   config.action_dispatch.default_headers = { "X-Frame-Options" => "SAMEORIGIN" }
 
-  # Hosts permitidos (App Platform / domínio próprio). Evita "Blocked host" sem abrir para qualquer Host.
+  # Hosts: ver config/initializers/allowed_hosts.rb (APP_HOST, ALLOWED_HOSTS, after_initialize).
   config.hosts << "sacristia-digital-app-2df7e.ondigitalocean.app"
 end
