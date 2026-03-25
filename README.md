@@ -51,6 +51,23 @@ docker compose exec web rails db:migrate
 docker compose exec web rails db:seed
 ```
 
+## Deploy (produção / DigitalOcean App Platform)
+
+O Rails **não sobe** em `RAILS_ENV=production` sem chave de sessão/cookies. Defina no painel do app (Environment Variables):
+
+| Variável | Obrigatório | Descrição |
+|----------|-------------|-----------|
+| `SECRET_KEY_BASE` | **Sim** | String longa e secreta. Gere na sua máquina: `bin/rails secret` ou `openssl rand -hex 64`. **Não commite** no repositório. |
+| `RAILS_ENV` | Recomendado | `production` |
+| `APP_HOST` | Recomendado | Host público sem esquema, ex.: `sacristia-digital-app-xxxx.ondigitalocean.app` (usado no mailer e em hosts permitidos). |
+| `ALLOWED_HOSTS` | Opcional | Domínios extras separados por vírgula, ex.: `meusite.com.br,www.meusite.com.br` |
+| `DATABASE_URL` | **Recomendado** | Connection string completa do PostgreSQL gerenciado (DigitalOcean → Database → Connection Details). Se existir, o Rails ignora `DATABASE_HOST` / `DATABASE_USERNAME` / `DATABASE_PASSWORD` separados. |
+| `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | Se não usar URL | Use o usuário e senha do painel (ex.: `doadmin`). O projeto aceita também `SACRISTIA_DIGITAL_DATABASE_PASSWORD` como fallback da senha. |
+| `DATABASE_NAME` | Se não usar URL | Nome do banco (no DO costuma ser `defaultdb` até você criar outro). |
+| `DATABASE_SSLMODE` | Opcional | O `bin/docker-entrypoint` exporta `PGSSLMODE` com padrão **`disable`** para evitar **dh key too small** (OpenSSL 3 × TLS antigo). Defina `require` quando o PostgreSQL gerenciado estiver atualizado. A senha continua obrigatória: use **`DATABASE_URL`** completa ou **`DATABASE_PASSWORD`**. |
+
+Variáveis de exemplo para desenvolvimento local: [.env.example](.env.example).
+
 ## Usuários de demonstração (após seeds)
 
 | E-mail | Senha | Perfil |
