@@ -34,7 +34,8 @@ Rails.application.routes.draw do
     get "relatorios", to: "relatorios#index"
   end
 
-  namespace :sacerdote do
+  # path e helpers permanecem /sacerdote e sacerdote_*; módulo PainelSacerdote evita colisão Zeitwerk com o model Sacerdote
+  scope path: "sacerdote", module: "painel_sacerdote", as: "sacerdote" do
     root "dashboard#index"
   end
 

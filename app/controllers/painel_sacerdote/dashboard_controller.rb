@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module Sacerdote
-  class DashboardController < Sacerdote::BaseController
+module PainelSacerdote
+  class DashboardController < PainelSacerdote::BaseController
     def index
       @sacerdote = current_user.sacerdote
     end

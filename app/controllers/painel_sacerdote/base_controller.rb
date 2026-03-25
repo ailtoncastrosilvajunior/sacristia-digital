@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Sacerdote
+module PainelSacerdote
   class BaseController < ApplicationController
     before_action :authorize_sacerdote!
 
