@@ -12,5 +12,7 @@ Devise.setup do |config|
   config.email_regexp = /\A[^@\s]+@[^@\s]+\z/
   config.reset_password_within = 6.hours
   config.sign_out_via = :delete
-  config.navigational_formats = []
+  # Lista vazia faz o Devise não redirecionar após entrar/sair (resposta “não navegável”),
+  # o que quebra logout com Turbo/HTML. Inclua :turbo_stream para formulários enviados pelo Turbo.
+  config.navigational_formats = %i[html turbo_stream]
 end

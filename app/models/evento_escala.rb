@@ -57,8 +57,8 @@ class EventoEscala < ApplicationRecord
     ador = ministro_adoracao
     ministros.map do |m|
       parts = [m.nome]
-      parts << "(coord.)" if coord && m.id == coord.id
-      parts << "(ador.)" if ador && m.id == ador.id
+      parts << "· coordenador" if coord && m.id == coord.id
+      parts << "· adoração" if ador && m.id == ador.id
       parts.join(" ")
     end.join(", ")
   end

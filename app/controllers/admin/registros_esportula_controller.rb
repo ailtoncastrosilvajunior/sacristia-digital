@@ -12,7 +12,12 @@ module Admin
     end
 
     def new
-      @registro = RegistroEsportula.new(data: Date.current)
+      attrs = { data: Date.current }
+      if params[:competencia_ano].present? && params[:competencia_mes].present?
+        attrs[:competencia_ano] = params[:competencia_ano].to_i
+        attrs[:competencia_mes] = params[:competencia_mes].to_i
+      end
+      @registro = RegistroEsportula.new(attrs)
     end
 
     def create

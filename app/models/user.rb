@@ -39,4 +39,12 @@ class User < ApplicationRecord
   def pode_ver_propria_agenda?
     true
   end
+
+  # Acesso à área "Minha escala" (dashboard ministro)
+  def pode_acessar_dashboard_ministro?
+    return true if ministro?
+    return true if ministro.present? && (admin? || coordenador?)
+
+    false
+  end
 end

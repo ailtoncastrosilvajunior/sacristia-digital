@@ -40,7 +40,8 @@ Rails.application.routes.draw do
     resources :eventos_extra, path: "eventos-extra"
   end
 
-  namespace :ministro do
+  # path e helpers permanecem /ministro e ministro_*; módulo PainelMinistro evita colisão Zeitwerk com o model Ministro
+  scope path: "ministro", module: "painel_ministro", as: "ministro" do
     root "dashboard#index"
     get "meus-servicos", to: "servicos#index"
     resources :servicos, only: [:show] do

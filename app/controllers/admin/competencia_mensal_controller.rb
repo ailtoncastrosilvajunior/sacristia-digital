@@ -15,7 +15,7 @@ module Admin
     end
 
     def show
-      @eventos = @competencia.evento_escalas.includes(:tipo_servico, :sacerdote, :ministros)
+      @eventos = @competencia.evento_escalas.includes(:tipo_servico, :sacerdote, escala_ministros: :ministro)
 
       @eventos = @eventos.where(tipo_servico_id: params[:tipo_servico_id]) if params[:tipo_servico_id].present?
       @eventos = @eventos.where(sacerdote_id: params[:sacerdote_id]) if params[:sacerdote_id].present?

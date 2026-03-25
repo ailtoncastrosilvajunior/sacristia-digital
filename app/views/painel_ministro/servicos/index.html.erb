@@ -1,0 +1,137 @@
+<% content_for :title, "Meus serviços — Sacristia Digital" %>
+<% hoje = Date.current %>
+<% futuros = @servicos.select { |e| e.data >= hoje } %>
+<% passados = @servicos.select { |e| e.data < hoje }.reverse %>
+
+<div class="min-h-full space-y-8">
+  <div class="relative overflow-hidden rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-950 via-indigo-900 to-slate-900 text-white shadow-xl">
+    <div class="absolute inset-0 opacity-[0.06]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+    <div class="relative px-5 py-6 sm:px-8 sm:py-7 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div>
+        <p class="text-violet-300/90 text-xs font-semibold tracking-wider uppercase">Agenda</p>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mt-1">Meus serviços</h1>
+        <p class="mt-2 text-sm text-violet-100/85 max-w-xl leading-relaxed">Todos os dias em que você está na escala. Toque em um card para ver a equipe e confirmar presença.</p>
+      </div>
+      <%= link_to ministro_root_path, class: "inline-flex shrink-0 items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 text-white text-sm font-semibold ring-1 ring-white/20 hover:bg-white/15 transition-colors" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Ver calendário no painel
+      <% end %>
+    </div>
+  </div>
+
+  <% if @servicos.blank? %>
+    <div class="rounded-2xl border border-dashed border-stone-300 bg-white/80 backdrop-blur-sm px-6 py-14 text-center shadow-sm">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 mb-4">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      </div>
+      <p class="text-stone-700 font-medium">Nenhum serviço na sua escala ainda</p>
+      <p class="text-stone-500 text-sm mt-2 max-w-sm mx-auto">Quando a coordenação incluir você em celebrações, elas aparecerão aqui e no painel <span class="text-stone-700 font-medium">Minha escala</span>.</p>
+      <%= link_to ministro_root_path, class: "inline-flex mt-6 items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors shadow-md shadow-violet-600/20" do %>
+        Ir para Minha escala
+      <% end %>
+    </div>
+  <% else %>
+    <% mid = current_user.ministro_id %>
+
+    <% if futuros.any? %>
+      <section>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </span>
+          <h2 class="text-lg font-semibold text-stone-900">Próximos</h2>
+          <span class="text-xs font-medium tabular-nums text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full"><%= futuros.size %></span>
+        </div>
+        <ul class="space-y-3">
+          <% futuros.each do |ev| %>
+            <% em = ev.escala_ministros.find { |x| x.ministro_id == mid } %>
+            <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+            <li>
+              <%= link_to ministro_servico_path(ev), class: "group flex flex-col sm:flex-row sm:items-stretch gap-0 rounded-2xl border border-stone-200/90 bg-white shadow-sm overflow-hidden ring-1 ring-transparent hover:ring-violet-200/80 hover:border-violet-200/60 hover:shadow-md transition-all" do %>
+                <div class="sm:w-28 shrink-0 flex flex-row sm:flex-col justify-center sm:justify-center gap-3 sm:gap-1 px-4 py-4 bg-gradient-to-br from-violet-50 to-indigo-50/80 sm:border-r border-stone-100 border-b sm:border-b-0">
+                  <span class="text-[11px] font-bold uppercase tracking-wide text-violet-600/90"><%= I18n.t("date.abbr_day_names")[ev.data.wday] %></span>
+                  <span class="text-lg font-bold tabular-nums text-stone-900 leading-none"><%= ev.data.day %></span>
+                  <span class="text-xs text-stone-600 tabular-nums font-medium"><%= l(ev.data, format: :short) %></span>
+                  <span class="text-sm font-semibold text-violet-800 tabular-nums sm:mt-1"><%= l(ev.horario, format: :time) %></span>
+                </div>
+                <div class="flex-1 min-w-0 px-4 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg border shadow-sm" style="background-color: <%= cor %>22; border-color: <%= cor %>55; color: #1e293b;"><%= ev.tipo_servico.nome %></span>
+                      <% if em&.confirmado? %>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200/80">
+                          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Confirmado
+                        </span>
+                      <% else %>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-800 ring-1 ring-amber-200/70">
+                          <span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span> Confirmar
+                        </span>
+                      <% end %>
+                    </div>
+                    <% if ev.sacerdote %>
+                      <p class="mt-2 text-sm text-stone-600 truncate"><span class="text-stone-400 font-medium text-xs uppercase tracking-wider mr-1">Sacerdote</span><%= ev.sacerdote.nome %></p>
+                    <% end %>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                      <% if em&.coordenador? %>
+                        <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-amber-100 text-amber-900 border border-amber-200/80">Coordenador</span>
+                      <% end %>
+                      <% if em&.adoracao? %>
+                        <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-fuchsia-100 text-fuchsia-900 border border-fuchsia-200/80">Adoração</span>
+                      <% end %>
+                      <% if em && !em.coordenador? && !em.adoracao? %>
+                        <span class="inline-flex px-2 py-0.5 text-[10px] font-semibold uppercase rounded-md bg-stone-100 text-stone-600 border border-stone-200/90">Na equipe</span>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div class="shrink-0 flex items-center justify-between sm:flex-col sm:justify-center gap-2 sm:pr-1">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-700 group-hover:bg-violet-600 group-hover:text-white transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+    <% if passados.any? %>
+      <section>
+        <div class="flex items-center gap-2 mb-4 pt-2">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-200/80 text-stone-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </span>
+          <h2 class="text-lg font-semibold text-stone-800">Realizados</h2>
+          <span class="text-xs font-medium tabular-nums text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full"><%= passados.size %></span>
+        </div>
+        <ul class="space-y-2">
+          <% passados.each do |ev| %>
+            <% em = ev.escala_ministros.find { |x| x.ministro_id == mid } %>
+            <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+            <li>
+              <%= link_to ministro_servico_path(ev), class: "group flex items-center gap-3 rounded-xl border border-stone-200/70 bg-stone-50/50 px-3 py-3 hover:bg-white hover:border-stone-300 hover:shadow-sm transition-all" do %>
+                <div class="shrink-0 text-center px-2 py-1 rounded-lg bg-white/80 border border-stone-200/80">
+                  <span class="block text-[10px] font-bold uppercase text-stone-400"><%= I18n.t("date.abbr_day_names")[ev.data.wday] %></span>
+                  <span class="block text-sm font-bold tabular-nums text-stone-700"><%= l(ev.data, format: :short) %></span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex px-2 py-0.5 text-[11px] font-semibold rounded-md border opacity-90" style="background-color: <%= cor %>18; border-color: <%= cor %>44; color: #334155;"><%= ev.tipo_servico.nome %></span>
+                    <span class="text-xs text-stone-500 tabular-nums"><%= l(ev.horario, format: :time) %></span>
+                  </div>
+                  <p class="text-xs text-stone-500 mt-1 truncate">
+                    <% if em&.coordenador? %><span class="text-amber-700 font-medium">Coord.</span><% end %>
+                    <% if em&.adoracao? %><span class="text-fuchsia-700 font-medium"><%= em&.coordenador? ? " · " : "" %>Ador.</span><% end %>
+                    <% if em && !em.coordenador? && !em.adoracao? %><span class="text-stone-500">Equipe</span><% end %>
+                  </p>
+                </div>
+                <svg class="w-4 h-4 text-stone-400 group-hover:text-violet-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+  <% end %>
+</div>

@@ -1,9 +1,35 @@
-<div class="max-w-4xl mx-auto py-6">
-  <div class="mb-6">
-    <%= link_to "← #{@evento.competencia_mensal.label}", admin_competencia_mensal_path(@evento.competencia_mensal, aba: "lista"), class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
-    <h1 class="text-2xl font-semibold text-stone-800">Escalar evento</h1>
-    <p class="text-stone-500 mt-1"><%= @evento.tipo_servico.nome %> · <%= l(@evento.data) %> às <%= l(@evento.horario, format: :time) %></p>
+<% content_for :title, "Escalar evento — Sacristia Digital" %>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+  <%= link_to admin_competencia_mensal_path(@evento.competencia_mensal, aba: "lista"), class: "inline-flex items-center gap-2 text-sm font-medium text-sky-700 hover:text-sky-900 mb-6 group" do %>
+    <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700 ring-1 ring-sky-200/70 group-hover:bg-sky-100 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </span>
+    <span><%= @evento.competencia_mensal.label %></span>
+  <% end %>
+
+  <div class="relative overflow-hidden rounded-3xl border border-sky-200/40 bg-gradient-to-br from-slate-900 via-slate-900 to-sky-950 text-white shadow-xl shadow-slate-900/20 mb-8">
+    <div class="absolute inset-0 opacity-[0.07]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');" aria-hidden="true"></div>
+    <div class="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-sky-500/20 blur-3xl pointer-events-none" aria-hidden="true"></div>
+    <div class="relative px-6 py-8 sm:px-10 sm:py-10">
+      <p class="text-sky-300/90 text-xs font-semibold tracking-[0.2em] uppercase">Montagem da escala</p>
+      <h1 class="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Escalar celebração</h1>
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <% cor = @evento.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-xl border shadow-sm" style="background-color: <%= cor %>33; border-color: <%= cor %>66; color: #f8fafc;"><%= @evento.tipo_servico.nome %></span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 text-sm text-slate-200 ring-1 ring-white/15 tabular-nums">
+          <svg class="w-4 h-4 text-sky-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <%= l(@evento.data, format: :long) %> · <%= l(@evento.horario, format: :time) %>
+        </span>
+      </div>
+      <p class="mt-4 text-sm text-slate-400 max-w-2xl leading-relaxed">Arraste sacerdote e ministros entre as zonas. Marque <strong class="text-amber-200/90 font-semibold">coordenador</strong> e <strong class="text-fuchsia-200/90 font-semibold">adoração</strong> em quem estiver neste evento.</p>
+    </div>
   </div>
 
-  <%= render "admin/evento_escala/escalar_form", evento: @evento, ministros_disponiveis: @ministros_disponiveis, ministros_escalados: @ministros_escalados, sacerdotes: @sacerdotes %>
+  <%= render "admin/evento_escala/escalar_form",
+        evento: @evento,
+        ministros_disponiveis: @ministros_disponiveis,
+        ministros_escalados: @ministros_escalados,
+        sacerdotes: @sacerdotes,
+        standalone: true %>
 </div>
