@@ -22,4 +22,5 @@ Rails.application.configure do
 
   # Hosts: ver config/initializers/allowed_hosts.rb (APP_HOST, ALLOWED_HOSTS, after_initialize).
   config.hosts << "sacristia-digital-app-2df7e.ondigitalocean.app"
+  config.hosts << "facedecristo.sacristia-digital.net.br"
 end
