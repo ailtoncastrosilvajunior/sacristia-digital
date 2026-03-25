@@ -19,4 +19,6 @@ Rails.application.configure do
   # Remover verificação de host (DigitalOcean App Platform)
   # config.hosts não está sendo respeitado no deploy; isso resolve o "Blocked hosts"
   config.middleware.delete ActionDispatch::HostAuthorization
+
+  config.hosts << "sacristia-digital-app-2df7e.ondigitalocean.app"
 end
