@@ -1,9 +1,14 @@
 <% standalone = local_assigns.fetch(:standalone, false) %>
+<% return_params = local_assigns.fetch(:return_params, {}) %>
 <% competencia_lista = admin_competencia_mensal_path(evento.competencia_mensal, aba: "lista") %>
 <% ministros_json = (ministros_disponiveis + ministros_escalados.map(&:ministro)).uniq.map { |m| { id: m.id, nome: m.nome } }.to_json %>
 <% sacerdotes_json = (sacerdotes || []).map { |s| { id: s.id, nome: s.nome } }.to_json %>
 <div class="space-y-8" data-controller="escalar-ministros" data-escalar-ministros-ministros-data-value="<%= h ministros_json %>" data-escalar-ministros-sacerdotes-data-value="<%= h sacerdotes_json %>">
-  <%= form_with url: update_escalar_ministros_admin_evento_escala_path(evento), method: :patch, data: { escalar_ministros_target: "form", turbo_frame: "_top" }, class: "space-y-8" do %>
+  <%= form_with url: update_escalar_ministros_admin_evento_escala_path(evento), method: :patch, data: { escalar_ministros_target: "form" }, class: "space-y-8" do %>
+    <% return_params.each do |k, v| %>
+      <%= hidden_field_tag k, v %>
+    <% end %>
+    <%= hidden_field_tag :escalar_context, standalone ? "page" : "modal" %>
     <div data-ministro-ids-container></div>
     <input type="hidden" name="ministro_coordenador_id" data-escalar-ministros-target="ministroCoordenadorId" value="<%= evento.ministro_coordenador&.id %>">
     <input type="hidden" name="ministro_adoracao_id" data-escalar-ministros-target="ministroAdoracaoId" value="<%= evento.ministro_adoracao&.id %>">

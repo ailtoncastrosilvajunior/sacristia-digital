@@ -17,3 +17,27 @@
     line-height: 1.5;
   }
 }
+
+/* Barra de progresso do Turbo Drive (navegação) */
+.turbo-progress-bar {
+  height: 3px !important;
+  background: linear-gradient(to right, #0284c7, #4f46e5, #0284c7) !important;
+  background-size: 200% 100% !important;
+  animation: turbo-progress-shimmer 1.2s ease-in-out infinite !important;
+  opacity: 0.95 !important;
+  z-index: 10000 !important;
+  box-shadow: 0 0 12px rgb(14 165 233 / 0.45) !important;
+}
+
+@keyframes turbo-progress-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+html.app-loading {
+  cursor: wait;
+}

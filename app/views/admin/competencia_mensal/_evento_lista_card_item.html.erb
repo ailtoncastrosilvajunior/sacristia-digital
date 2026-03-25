@@ -1,0 +1,86 @@
+<%# locals: ev, filtros %>
+<% ts = ev.tipo_servico %>
+<% cor = ts.cor_etiqueta.presence || "#64748b" %>
+<% lista_acoes_cartao = "inline-flex w-full min-h-[2.75rem] items-center justify-center gap-1.5 px-2 rounded-xl text-xs font-semibold text-center" %>
+<li id="<%= dom_id(ev, :lista_card) %>">
+  <div class="group flex flex-col sm:flex-row sm:items-stretch gap-0 rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-md shadow-slate-900/6 ring-1 ring-slate-100/80 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-300/50 hover:shadow-xl hover:shadow-sky-500/15 hover:ring-sky-200/40">
+    <div class="relative sm:w-[7rem] shrink-0 flex flex-row flex-wrap sm:flex-nowrap sm:flex-col items-center justify-center gap-x-3 gap-y-1 sm:gap-1 px-4 py-3 sm:py-4 bg-gradient-to-br from-indigo-600 via-sky-600 to-cyan-500 text-white sm:border-r border-white/20 border-b sm:border-b-0 shadow-inner">
+      <span class="absolute inset-0 opacity-[0.12] bg-[radial-gradient(circle_at_30%_20%,white,transparent_55%)] pointer-events-none" aria-hidden="true"></span>
+      <span class="relative text-[11px] font-bold uppercase tracking-widest text-white/90"><%= I18n.t("date.abbr_day_names")[ev.data.wday] %></span>
+      <span class="relative text-2xl font-extrabold tabular-nums leading-none sm:text-center drop-shadow-sm"><%= l(ev.data, format: :short) %></span>
+      <span class="relative text-xs text-white/85 tabular-nums font-medium sm:text-center">Às</span>
+      <span class="relative text-2xl font-extrabold tabular-nums leading-none sm:text-center drop-shadow-sm"><%= l(ev.horario, format: :time) %></span>
+    </div>
+    <div class="flex-1 min-w-0 px-4 py-3 sm:py-4 flex flex-col gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div class="min-w-0 space-y-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex px-3 py-1 text-xs font-bold rounded-xl border-2 shadow-md transition-transform group-hover:scale-[1.02]" style="background-color: <%= cor %>33; border-color: <%= cor %>; color: #0f172a;"><%= ts.nome %></span>
+            <% case ev.status
+                 when "confirmado" %>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200/80">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+              <%= I18n.t("activerecord.attributes.evento_escala.status_values.confirmado", default: "Confirmado") %>
+            </span>
+            <% when "concluido" %>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-sky-100 text-sky-800 ring-1 ring-sky-200/80">
+              <span class="h-1.5 w-1.5 rounded-full bg-sky-500 shrink-0"></span>
+              <%= I18n.t("activerecord.attributes.evento_escala.status_values.concluido", default: "Concluído") %>
+            </span>
+            <% when "cancelado" %>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-red-100 text-red-800 ring-1 ring-red-200/80">
+              <span class="h-1.5 w-1.5 rounded-full bg-red-500 shrink-0"></span>
+              <%= I18n.t("activerecord.attributes.evento_escala.status_values.cancelado", default: "Cancelado") %>
+            </span>
+            <% else %>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-800 ring-1 ring-amber-200/70">
+              <span class="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0"></span>
+              <%= I18n.t("activerecord.attributes.evento_escala.status_values.#{ev.status}", default: ev.status.humanize) %>
+            </span>
+            <% end %>
+          </div>
+          <p class="text-sm text-stone-600">
+            <span class="text-stone-400 font-medium text-[10px] uppercase tracking-wider">Sacerdote</span>
+            <%= ev.sacerdote&.nome || tag.span("—", class: "text-stone-400") %>
+          </p>
+          <div class="rounded-xl bg-gradient-to-br from-stone-50 to-sky-50/30 ring-1 ring-stone-200/80 border border-stone-100/80 px-3 py-3 shadow-inner shadow-stone-900/5">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-2.5 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Ministros
+            </p>
+            <%= render "admin/evento_escala/ministros_com_coordenador", evento: ev, variant: :chips %>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 grid-rows-2 gap-2 shrink-0 w-full sm:w-[11.5rem] sm:min-w-[11.5rem]">
+          <%= link_to admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, class: "#{lista_acoes_cartao} border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 hover:border-stone-300 transition-colors" do %>
+          <svg class="w-3.5 h-3.5 shrink-0 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          Ver
+          <% end %>
+          <%= link_to escalar_ministros_admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, class: "#{lista_acoes_cartao} bg-sky-600 text-white shadow-md shadow-sky-900/15 hover:bg-sky-700 transition-colors border border-sky-700/20" do %>
+          <svg class="w-3.5 h-3.5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Escalar
+          <% end %>
+          <%= link_to edit_admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, class: "#{lista_acoes_cartao} border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 transition-colors" do %>
+          <svg class="w-3.5 h-3.5 shrink-0 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Editar
+          <% end %>
+          <%= button_to admin_evento_escala_path(ev, filtros), method: :delete, data: { turbo_confirm: "Excluir este evento?" }, form: { class: "contents" }, class: "#{lista_acoes_cartao} border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors", title: "Excluir" do %>
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Excluir
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</li>

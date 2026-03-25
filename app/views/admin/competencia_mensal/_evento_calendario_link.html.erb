@@ -1,18 +1,20 @@
 <%# locals: ev, filtros %>
-<% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
-<% tip = "#{l(ev.horario, format: :time)} — #{ev.tipo_servico.nome} — Sacerdote: #{ev.sacerdote&.nome || '—'} — Ministros: #{ev.ministros_nomes_com_coordenador}" %>
-<% tem_coord = ev.escala_ministros.any?(&:coordenador?) %>
-<% tem_ador = ev.escala_ministros.any?(&:adoracao?) %>
-<%= link_to admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, title: tip, class: "block text-[10px] sm:text-xs py-0.5 sm:py-1 px-1.5 sm:px-2 rounded-lg mb-0.5 border transition-all hover:opacity-95 hover:shadow-sm hover:scale-[1.02] cursor-pointer origin-left", style: "background-color: #{cor}26; border-color: #{cor}; color: #1f2937;" do %>
-  <span class="block truncate font-medium leading-tight"><%= l(ev.horario, format: :time) %> <%= ev.tipo_servico.nome %><%= " — #{ev.sacerdote.nome}" if ev.tipo_servico.nome.downcase.include?("missa") && ev.sacerdote.present? %></span>
-  <% if tem_coord || tem_ador %>
-    <span class="mt-0.5 flex flex-wrap gap-0.5">
-      <% if tem_coord %>
-        <span class="text-[7px] sm:text-[8px] font-black uppercase leading-none px-1 py-px rounded-sm bg-amber-300/95 text-amber-950 ring-1 ring-amber-600/25 shadow-sm">C</span>
-      <% end %>
-      <% if tem_ador %>
-        <span class="text-[7px] sm:text-[8px] font-black uppercase leading-none px-1 py-px rounded-sm bg-fuchsia-300/95 text-fuchsia-950 ring-1 ring-fuchsia-600/25 shadow-sm">A</span>
-      <% end %>
-    </span>
+<div id="<%= dom_id(ev, :cal_chip) %>" class="block w-full">
+  <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+  <% tip = "#{l(ev.horario, format: :time)} — #{ev.tipo_servico.nome} — Sacerdote: #{ev.sacerdote&.nome || '—'} — Ministros: #{ev.ministros_nomes_com_coordenador}" %>
+  <% tem_coord = ev.escala_ministros.any?(&:coordenador?) %>
+  <% tem_ador = ev.escala_ministros.any?(&:adoracao?) %>
+  <%= link_to admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, title: tip, class: "block text-[10px] sm:text-xs py-0.5 sm:py-1 px-1.5 sm:px-2 rounded-lg mb-0.5 border transition-all hover:opacity-95 hover:shadow-sm hover:scale-[1.02] cursor-pointer origin-left", style: "background-color: #{cor}26; border-color: #{cor}; color: #1f2937;" do %>
+    <span class="block truncate font-medium leading-tight"><%= l(ev.horario, format: :time) %> <%= ev.tipo_servico.nome %><%= " — #{ev.sacerdote.nome}" if ev.tipo_servico.nome.downcase.include?("missa") && ev.sacerdote.present? %></span>
+    <% if tem_coord || tem_ador %>
+      <span class="mt-0.5 flex flex-wrap gap-0.5">
+        <% if tem_coord %>
+          <span class="text-[7px] sm:text-[8px] font-black uppercase leading-none px-1 py-px rounded-sm bg-amber-300/95 text-amber-950 ring-1 ring-amber-600/25 shadow-sm">C</span>
+        <% end %>
+        <% if tem_ador %>
+          <span class="text-[7px] sm:text-[8px] font-black uppercase leading-none px-1 py-px rounded-sm bg-fuchsia-300/95 text-fuchsia-950 ring-1 ring-fuchsia-600/25 shadow-sm">A</span>
+        <% end %>
+      </span>
+    <% end %>
   <% end %>
-<% end %>
+</div>

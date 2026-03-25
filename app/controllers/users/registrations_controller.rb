@@ -4,6 +4,10 @@ module Users
   class RegistrationsController < Devise::RegistrationsController
     protected
 
+    def after_update_path_for(_resource)
+      root_path
+    end
+
     def build_resource(hash = {})
       super
       if resource.new_record? && resource.perfis.blank?

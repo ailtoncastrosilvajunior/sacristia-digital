@@ -35,6 +35,7 @@ pt-BR:
         nome: Nome
         password: Senha
         password_confirmation: Confirmação da senha
+        current_password: Senha atual
       ministro:
         nome: Nome
         email: E-mail

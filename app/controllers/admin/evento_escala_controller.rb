@@ -69,6 +69,7 @@ module Admin
       @ministros_disponiveis = Ministro.ativos.ordenados_por_nome
       @ministros_escalados = @evento.escala_ministros.includes(:ministro).order(coordenador: :desc, adoracao: :desc)
       @sacerdotes = Sacerdote.ativos.ordenados_por_nome
+      @escalar_return_params = filter_params
       if turbo_frame_request?
         render partial: "escalar_modal", layout: false
       end
@@ -94,7 +95,21 @@ module Admin
         @evento.escala_ministros.find_by(ministro_id: adoracao_id)&.update_column(:adoracao, true)
       end
 
-      redirect_to admin_competencia_mensal_path(@evento.competencia_mensal, aba: "lista"), notice: "Escala atualizada com sucesso."
+      if params[:escalar_context] == "page"
+        redirect_to admin_competencia_mensal_path(@evento.competencia_mensal, filter_params), notice: "Escala atualizada com sucesso."
+        return
+      end
+
+      respond_to do |format|
+        format.turbo_stream do
+          @filter_params_hash = filter_params
+          @evento = EventoEscala.includes(:tipo_servico, :sacerdote, escala_ministros: :ministro).find(@evento.id)
+          render :update_escalar_ministros
+        end
+        format.html do
+          redirect_to admin_competencia_mensal_path(@evento.competencia_mensal, filter_params), notice: "Escala atualizada com sucesso."
+        end
+      end
     end
 
     private

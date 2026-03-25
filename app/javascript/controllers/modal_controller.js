@@ -4,6 +4,11 @@ export default class extends Controller {
   static targets = ["backdrop", "frame"]
 
   show() {
+    if (!this.hasFrameTarget) return
+    if (!this.frameTarget.innerHTML.trim()) {
+      this.close()
+      return
+    }
     if (this.hasBackdropTarget) {
       this.backdropTarget.classList.remove("hidden")
       this.backdropTarget.classList.add("flex")

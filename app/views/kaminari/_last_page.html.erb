@@ -1,0 +1,5 @@
+<% unless current_page.last? %>
+  <%= link_to url, remote: remote, class: "inline-flex h-10 min-w-[2.5rem] items-center justify-center rounded-xl text-stone-500 hover:bg-stone-100 hover:text-stone-800 transition-colors", title: "Última página", "aria-label": "Última página" do %>
+    <span class="text-xs font-black tracking-tighter" aria-hidden="true">»»</span>
+  <% end %>
+<% end %>

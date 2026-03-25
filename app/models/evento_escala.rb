@@ -52,13 +52,12 @@ class EventoEscala < ApplicationRecord
   end
 
   def ministros_nomes_com_coordenador
-    return "—" if ministros.empty?
-    coord = ministro_coordenador
-    ador = ministro_adoracao
-    ministros.map do |m|
-      parts = [m.nome]
-      parts << "· coordenador" if coord && m.id == coord.id
-      parts << "· adoração" if ador && m.id == ador.id
+    ems = escala_ministros.select { |em| em.ministro.present? }
+    return "—" if ems.empty?
+    ems.sort_by { |em| em.ministro.nome.to_s.downcase }.map do |em|
+      parts = [em.ministro.nome]
+      parts << "· coordenador" if em.coordenador?
+      parts << "· adoração" if em.adoracao?
       parts.join(" ")
     end.join(", ")
   end

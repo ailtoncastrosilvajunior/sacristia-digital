@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_25_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_26_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,6 +62,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_120000) do
     t.bigint "evento_escala_id", null: false
     t.bigint "ministro_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["ministro_id"], name: "index_escala_ministros_on_ministro_id"
   end
 
   create_table "evento_escala", force: :cascade do |t|

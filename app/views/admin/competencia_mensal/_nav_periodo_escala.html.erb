@@ -1,0 +1,37 @@
+<%# locals: filtros — usa @competencia, @aba, @vista_calendario, @data_ref, @domingo_semana %>
+<div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+  <div class="flex rounded-lg border border-stone-200 overflow-hidden">
+    <%= link_to admin_competencia_mensal_path(@competencia, filtros.merge(vista_calendario: "mes", aba: @aba).except(:data_ref)), class: "inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 text-xs font-medium transition-colors #{@vista_calendario == 'mes' ? 'bg-slate-600 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}" do %>
+    Mês
+    <% end %>
+    <%= link_to admin_competencia_mensal_path(@competencia, filtros.merge(vista_calendario: "semana", aba: @aba, data_ref: @domingo_semana)), class: "inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 text-xs font-medium transition-colors #{@vista_calendario == 'semana' ? 'bg-slate-600 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}" do %>
+    Semana
+    <% end %>
+    <%= link_to admin_competencia_mensal_path(@competencia, filtros.merge(vista_calendario: "dia", aba: @aba, data_ref: @data_ref)), class: "inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 text-xs font-medium transition-colors #{@vista_calendario == 'dia' ? 'bg-slate-600 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}" do %>
+    Dia
+    <% end %>
+  </div>
+  <% if @vista_calendario != "mes" %>
+  <div class="flex items-center gap-1">
+    <% prev_ref = @vista_calendario == "semana" ? (@domingo_semana - 7) : (@data_ref - 1) %>
+    <% next_ref = @vista_calendario == "semana" ? (@domingo_semana + 7) : (@data_ref + 1) %>
+    <%= link_to admin_competencia_mensal_path(@competencia, filtros.merge(vista_calendario: @vista_calendario, data_ref: prev_ref, aba: @aba)), class: "p-2 rounded-lg border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-colors" do %>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+    <% end %>
+    <span class="px-2 text-sm font-medium text-stone-700 min-w-[120px] text-center">
+      <% if @vista_calendario == "semana" %>
+      <%= l(@domingo_semana, format: :short) %> – <%= l(@domingo_semana + 6, format: :short) %>
+      <% else %>
+      <%= l(@data_ref, format: :long) %>
+      <% end %>
+    </span>
+    <%= link_to admin_competencia_mensal_path(@competencia, filtros.merge(vista_calendario: @vista_calendario, data_ref: next_ref, aba: @aba)), class: "p-2 rounded-lg border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-colors" do %>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    </svg>
+    <% end %>
+  </div>
+  <% end %>
+</div>

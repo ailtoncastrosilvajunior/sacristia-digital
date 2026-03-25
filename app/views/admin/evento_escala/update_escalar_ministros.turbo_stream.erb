@@ -1,0 +1,7 @@
+<%= turbo_stream.replace dom_id(@evento, :lista_card), partial: "admin/competencia_mensal/evento_lista_card_item", locals: { ev: @evento, filtros: @filter_params_hash } %>
+<%= turbo_stream.replace dom_id(@evento, :lista_tabela), partial: "admin/competencia_mensal/evento_lista_tabela_row", locals: { ev: @evento, filtros: @filter_params_hash } %>
+<%= turbo_stream.replace dom_id(@evento, :cal_chip), partial: "admin/competencia_mensal/evento_calendario_link", locals: { ev: @evento, filtros: @filter_params_hash } %>
+<%= turbo_stream.replace dom_id(@evento, :dia_lista_row), partial: "admin/competencia_mensal/evento_calendario_dia_row", locals: { ev: @evento, filtros: @filter_params_hash } %>
+<%= turbo_stream.replace "evento_modal" do %>
+  <%= turbo_frame_tag "evento_modal", data: { modal_target: "frame", action: "turbo:frame-load->modal#show turbo:frame-render->modal#show" } %>
+<% end %>
