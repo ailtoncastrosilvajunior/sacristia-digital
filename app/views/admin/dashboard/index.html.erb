@@ -3,14 +3,11 @@
   <%# Hero + seletor %>
   <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 text-white shadow-xl mb-8">
     <div class="absolute inset-0 opacity-[0.07]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-    <%# Mobile: arte sacra | texto + competência. lg+: 3 colunas (como painel do ministro). %>
-    <div class="relative grid grid-cols-[minmax(6.5rem,32%)_minmax(0,1fr)] grid-rows-[auto_auto] gap-x-3 gap-y-3.5 px-5 py-5 sm:px-6 sm:gap-x-4 sm:gap-y-4
+    <%# Mobile: texto + competência. lg+: 2 colunas (imagem removida). %>
+    <div class="relative grid grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto] gap-x-3 gap-y-3.5 px-5 py-5 sm:px-6 sm:gap-x-4 sm:gap-y-4
                 lg:grid-cols-[auto_minmax(0,1fr)_10.5rem] lg:grid-rows-1 lg:items-center lg:gap-5 lg:py-5 lg:px-8
                 xl:grid-cols-[auto_minmax(0,1fr)_11.25rem] xl:gap-7 xl:pr-8">
-      <div class="col-start-1 row-start-1 row-span-2 self-center lg:row-span-1">
-        <%= render "admin/dashboard/header_sacred_visual" %>
-      </div>
-      <div class="col-start-2 row-start-1 min-w-0 text-left">
+      <div class="col-start-1 row-start-1 min-w-0 text-left">
         <p class="text-sky-300/90 text-xs sm:text-sm font-medium tracking-wide uppercase">Painel</p>
         <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mt-1 lg:mt-1.5">Escala de serviços do período</h1>
         <p class="mt-2 text-slate-300 text-sm leading-snug lg:leading-relaxed">Escolha o período para ver estatísticas, próximos serviços e o mapa de intensidade do mês.</p>
