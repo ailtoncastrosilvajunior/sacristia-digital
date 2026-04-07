@@ -1,112 +1,109 @@
 <% content_for :title, "#{@ministro.nome} — Ministros" %>
 
-<div class="min-h-full">
-  <%# Header %>
-  <div class="border-b border-stone-200 bg-white">
-    <div class="px-6 py-5 sm:px-8">
-      <div class="flex items-center justify-between gap-6">
-        <div class="min-w-0">
-          <p class="text-xs font-medium text-stone-500 uppercase tracking-wide">Ministro</p>
-          <h1 class="mt-1 text-3xl font-semibold text-stone-900"><%= @ministro.nome %></h1>
-          <div class="mt-2 flex items-center gap-4">
-            <span class="inline-flex px-2.5 py-1 text-xs font-medium rounded <%= @ministro.ativo? ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-600' %>">
-              <%= @ministro.ativo? ? "Ativo" : "Inativo" %>
-            </span>
-            <% if @ministro.sexo.present? %>
-              <span class="text-sm text-stone-600"><%= @ministro.sexo %></span>
-            <% end %>
-          </div>
-        </div>
-        <div class="flex gap-2 shrink-0">
-          <%= link_to edit_admin_ministro_path(@ministro), class: "px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-lg hover:bg-stone-800 transition-colors" do %>
-            Editar
-          <% end %>
-          <%= button_to admin_ministro_path(@ministro), method: :delete, data: { turbo_confirm: "Tem certeza?" }, class: "px-4 py-2 border border-red-300 text-red-700 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors" do %>
-            Excluir
-          <% end %>
-        </div>
+<div class="space-y-6">
+  <div>
+    <%= link_to "← Ministros", admin_ministros_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-3 inline-block" %>
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div class="min-w-0">
+        <p class="text-xs font-medium uppercase tracking-wide text-stone-400">Ministro</p>
+        <h1 class="mt-1 text-2xl font-semibold text-stone-900 tracking-tight"><%= @ministro.nome %></h1>
+        <% if @ministro.sexo.present? %>
+          <p class="mt-1 text-stone-600"><%= @ministro.sexo %></p>
+        <% end %>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 shrink-0">
+        <%= link_to new_admin_ministro_path,
+            class: "inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm shadow-emerald-900/10" do %>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Novo ministro
+        <% end %>
+        <%= link_to "Editar", edit_admin_ministro_path(@ministro),
+            class: "inline-flex items-center justify-center px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors" %>
+        <%= button_to "Excluir", admin_ministro_path(@ministro), method: :delete, data: { turbo_confirm: "Tem certeza que deseja excluir este ministro?" },
+            class: "inline-flex items-center justify-center px-3 py-2 border border-red-200 text-red-700 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors bg-white cursor-pointer" %>
       </div>
     </div>
   </div>
 
-  <div class="space-y-6 p-6 sm:p-8">
-
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <%# Coluna esquerda: Informações básicas %>
-    <div class="lg:col-span-1">
-      <div class="relative overflow-hidden rounded-lg bg-stone-50/60 border border-stone-200/40 shadow-sm p-6 space-y-6">
-        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-400 to-slate-300"></div>
-        <div>
-          <p class="text-xs font-medium text-stone-500 uppercase tracking-wide">Email</p>
-          <p class="mt-2 text-stone-900"><%= @ministro.email %></p>
-        </div>
+  <div class="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-slate-50 via-white to-stone-50/80 p-6 sm:p-8 shadow-sm ring-1 ring-stone-100/80">
+    <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <div class="min-w-0 space-y-2">
+        <p class="text-xs font-medium uppercase tracking-wide text-stone-500">E-mail</p>
+        <p class="text-xl sm:text-2xl font-semibold text-stone-900 break-all leading-snug"><%= @ministro.email %></p>
         <% if @ministro.telefone.present? %>
-          <div>
-            <p class="text-xs font-medium text-stone-500 uppercase tracking-wide">Telefone</p>
-            <p class="mt-2 text-stone-900"><%= @ministro.telefone %></p>
-          </div>
+          <p class="text-lg text-stone-500 font-medium tabular-nums"><%= @ministro.telefone %></p>
         <% end %>
-        <% if @ministro.observacoes.present? %>
-          <div>
-            <p class="text-xs font-medium text-stone-500 uppercase tracking-wide">Observações</p>
-            <div class="mt-2 text-sm text-stone-700 leading-relaxed space-y-2">
-              <%= simple_format(@ministro.observacoes) %>
-            </div>
-          </div>
-        <% end %>
+      </div>
+      <div>
+        <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border <%= @ministro.ativo? ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-stone-100 text-stone-600 border-stone-200" %>">
+          <%= @ministro.ativo? ? "Ativo" : "Inativo" %>
+        </span>
       </div>
     </div>
+  </div>
 
-    <%# Coluna direita: Serviços %>
-    <div class="lg:col-span-2 space-y-6">
-      <%# KPIs %>
-      <div class="grid grid-cols-3 gap-4">
-        <div class="relative overflow-hidden rounded-lg bg-stone-50/60 border border-stone-200/40 shadow-sm p-4 text-center">
-          <div class="absolute inset-x-0 top-0 h-0.5 bg-sky-400"></div>
-          <p class="text-xs font-medium text-stone-500 uppercase tracking-wide">Serviços</p>
-          <p class="mt-3 text-2xl font-bold text-stone-900"><%= @ministro.evento_escalas.count %></p>
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden divide-y divide-stone-100">
+    <section class="p-6 sm:p-8">
+      <h2 class="text-sm font-semibold text-stone-900 mb-4">Indicadores</h2>
+      <% servicos_ct = @ministro.evento_escalas.count %>
+      <% confirmados_ct = @ministro.escala_ministros.where(confirmado: true).count %>
+      <% equipes_ct = @ministro.equipes.count %>
+      <div class="grid grid-cols-3 gap-2 sm:gap-4">
+        <div class="group relative min-w-0 overflow-hidden rounded-2xl bg-white p-3 sm:p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-sky-200/60 transition-all">
+          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-sky-500/10 blur-2xl group-hover:bg-sky-500/15 transition-colors" aria-hidden="true"></div>
+          <p class="relative text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-stone-500 truncate">Serviços</p>
+          <p class="relative mt-1.5 sm:mt-2 text-xl sm:text-3xl font-bold tabular-nums text-sky-800"><%= servicos_ct %></p>
+          <p class="relative mt-1 text-[10px] sm:text-xs text-stone-500 leading-snug line-clamp-2">Celebrações em que entrou na escala</p>
         </div>
-        <div class="relative overflow-hidden rounded-lg bg-stone-50/60 border border-stone-200/40 shadow-sm p-4 text-center">
-          <div class="absolute inset-x-0 top-0 h-0.5 bg-emerald-400"></div>
-          <p class="text-xs font-medium text-stone-500 uppercase tracking-wide">Confirmados</p>
-          <p class="mt-3 text-2xl font-bold text-stone-900"><%= @ministro.escala_ministros.where(confirmado: true).count %></p>
+        <div class="group relative min-w-0 overflow-hidden rounded-2xl bg-white p-3 sm:p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-emerald-200/60 transition-all">
+          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl group-hover:bg-emerald-500/15 transition-colors" aria-hidden="true"></div>
+          <p class="relative text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-stone-500 truncate">Confirmados</p>
+          <p class="relative mt-1.5 sm:mt-2 text-xl sm:text-3xl font-bold tabular-nums text-emerald-700"><%= confirmados_ct %></p>
+          <p class="relative mt-1 text-[10px] sm:text-xs text-stone-500 leading-snug line-clamp-2">Presença confirmada na escala</p>
         </div>
-        <div class="relative overflow-hidden rounded-lg bg-stone-50/60 border border-stone-200/40 shadow-sm p-4 text-center">
-          <div class="absolute inset-x-0 top-0 h-0.5 bg-amber-400"></div>
-          <p class="text-xs font-medium text-stone-500 uppercase tracking-wide">Equipes</p>
-          <p class="mt-3 text-2xl font-bold text-stone-900"><%= @ministro.equipes.count %></p>
+        <div class="group relative min-w-0 overflow-hidden rounded-2xl bg-white p-3 sm:p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-violet-200/60 transition-all">
+          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-violet-500/10 blur-2xl group-hover:bg-violet-500/15 transition-colors" aria-hidden="true"></div>
+          <p class="relative text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-stone-500 truncate">Equipes</p>
+          <p class="relative mt-1.5 sm:mt-2 text-xl sm:text-3xl font-bold tabular-nums text-violet-700"><%= equipes_ct %></p>
+          <p class="relative mt-1 text-[10px] sm:text-xs text-stone-500 leading-snug line-clamp-2">Equipes de plantão vinculadas</p>
         </div>
       </div>
+    </section>
 
-      <%# Tabela de serviços %>
-      <div class="relative overflow-hidden rounded-lg bg-stone-50/60 border border-stone-200/40 shadow-sm">
-        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-300 to-stone-300"></div>
-        <div class="border-b border-stone-200/40 bg-stone-50/80 px-6 py-4">
-          <h3 class="font-semibold text-stone-900 text-sm">Últimos serviços</h3>
-        </div>
-        <% if @ministro.evento_escalas.any? %>
-          <table class="w-full text-sm">
-            <tbody class="divide-y divide-stone-200">
+    <% if @ministro.observacoes.present? %>
+      <section class="p-6 sm:p-8">
+        <h2 class="text-sm font-semibold text-stone-900 mb-4">Observações</h2>
+        <div class="text-stone-800 text-sm leading-relaxed"><%= simple_format(@ministro.observacoes) %></div>
+      </section>
+    <% end %>
+
+    <section class="p-6 sm:p-8">
+      <h2 class="text-sm font-semibold text-stone-900 mb-4">Últimos serviços</h2>
+      <% if @ministro.evento_escalas.any? %>
+        <div class="rounded-xl border border-stone-100 overflow-hidden">
+          <table class="min-w-full text-sm">
+            <tbody class="divide-y divide-stone-100">
               <% @ministro.evento_escalas.order(data: :desc).limit(10).each do |evento| %>
-                <tr class="hover:bg-stone-50">
-                  <td class="px-6 py-3 text-stone-900 font-medium"><%= evento.tipo_servico.nome %></td>
-                  <td class="px-6 py-3 text-stone-600 tabular-nums text-right"><%= l(evento.data, format: :short) %></td>
-                  <td class="px-6 py-3 text-right">
+                <tr class="hover:bg-stone-50/80">
+                  <td class="px-4 py-3 text-stone-900 font-medium"><%= evento.tipo_servico.nome %></td>
+                  <td class="px-4 py-3 text-stone-600 tabular-nums text-right"><%= l(evento.data, format: :short) %></td>
+                  <td class="px-4 py-3 text-right">
                     <% em = evento.escala_ministros.find { |x| x.ministro_id == @ministro.id } %>
                     <% if em&.confirmado? %>
-                      <span class="inline-flex px-2 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 rounded">Confirmado</span>
+                      <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">Confirmado</span>
                     <% elsif em %>
-                      <span class="inline-flex px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded">Pendente</span>
+                      <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200">Pendente</span>
                     <% end %>
                   </td>
                 </tr>
               <% end %>
             </tbody>
           </table>
-        <% else %>
-          <div class="px-6 py-8 text-center text-stone-500 text-sm">Nenhum serviço registrado</div>
-        <% end %>
-      </div>
-    </div>
+        </div>
+      <% else %>
+        <p class="text-sm text-stone-500 text-center py-8 rounded-xl border border-dashed border-stone-200 bg-stone-50/40">Nenhum serviço registrado</p>
+      <% end %>
+    </section>
   </div>
 </div>

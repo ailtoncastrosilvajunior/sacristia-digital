@@ -54,6 +54,18 @@ pt-BR:
           confirmado: Confirmado
           concluido: Concluído
           cancelado: Cancelado
+          competencia_mensal_id: Competência Mensal
+          tipo_servico_id: Tipo de Serviço
+          data: Data
+          horario: Horário
+          quantidade_ministros: Quantidade de Ministros
+          local: Local
+          descricao: Descrição
+          observacoes: Observações
+          sacerdote_id: Sacerdote
+          valor_esportula: Valor Espórtula
+          equipe_id: Equipe
+          tipo_escala: Tipo de Escala
       sacerdote:
         nome: Nome
         email: E-mail

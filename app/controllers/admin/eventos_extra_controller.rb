@@ -13,8 +13,8 @@ module Admin
 
     def new
       data = params[:data].presence&.then { |d| Date.parse(d) } || Date.current
-      competencia = params[:competencia_mensal_id].present? ? CompetenciaMensal.find_by(id: params[:competencia_mensal_id]) : nil
-      @evento = EventoEscala.new(tipo_escala: "extra", data: data, competencia_mensal_id: competencia&.id)
+      competencia = params[:competencia_mensal_id].present? ? CompetenciaMensal.find_by(id: params[:competencia_mensal_id]) : competencia_mensal_atual
+      @evento = EventoEscala.new(tipo_escala: "extra", data: data, competencia_mensal_id: competencia[:id])
       @evento.equipe_id = Equipe.para_dia(data, competencia: competencia)&.id if @evento.equipe_id.blank?
     end
 
@@ -51,6 +51,10 @@ module Admin
 
     def evento_params
       params.require(:evento_escala).permit(:competencia_mensal_id, :tipo_servico_id, :data, :horario, :quantidade_ministros, :local, :descricao, :observacoes, :sacerdote_id, :valor_esportula, :equipe_id, :status)
+    end
+
+    def competencia_mensal_atual
+      CompetenciaMensal.where(ano: Date.current.year, mes: Date.current.month).order(created_at: :desc).first
     end
   end
 end

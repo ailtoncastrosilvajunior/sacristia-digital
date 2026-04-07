@@ -197,10 +197,10 @@
               <% txt = intensity >= 2 ? "text-white" : "text-stone-700" %>
               <% selected = @lista_desde == d %>
               <%= link_to admin_root_path(competencia_mensal_id: comp.id, lista_desde: d.strftime("%Y-%m-%d")),
-                    class: "aspect-square rounded-lg #{bg} flex flex-col items-center justify-center text-[10px] font-bold #{txt} shadow-sm ring-1 ring-black/5 min-h-[2rem] transition-transform hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 #{selected ? "ring-2 ring-sky-600 ring-offset-2 z-[1] scale-[1.02]" : ""}",
+                    class: "aspect-square rounded-lg #{bg} flex flex-col items-center justify-center gap-1.5 text-[10px] font-bold #{txt} shadow-sm ring-1 ring-black/5 min-h-[2rem] transition-transform hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 #{selected ? "ring-2 ring-sky-600 ring-offset-2 z-[1] scale-[1.02]" : ""}",
                     title: "#{l(d)}: #{c} #{c == 1 ? "serviço" : "serviços"} — filtrar lista" do %>
-                <span class="tabular-nums opacity-90"><%= d.day %></span>
-                <% if c > 0 %><span class="text-[9px] opacity-80 tabular-nums"><%= c %></span><% end %>
+                <span class="tabular-nums text-[9px] font-semibold opacity-80 leading-none"><%= l(d, format: :short) %></span>
+                <% if c > 0 %><span class="tabular-nums text-sm font-extrabold leading-none"><%= c %></span><% end %>
               <% end %>
             <% end %>
           </div>
