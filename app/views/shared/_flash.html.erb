@@ -1,0 +1,10 @@
+<%# Mensagens notice/alert como toast, com botão de fechar. %>
+<% { notice => "bg-emerald-100 text-emerald-800", alert => "bg-amber-100 text-amber-800" }.each do |msg, cores| %>
+  <% next if msg.blank? %>
+  <div data-controller="flash" role="status" class="fixed top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm z-50 flex items-start gap-2 pl-4 pr-2 py-2 rounded-lg shadow-lg <%= cores %>">
+    <p class="flex-1 py-0.5"><%= msg %></p>
+    <button type="button" data-action="flash#close" aria-label="Fechar mensagem" class="shrink-0 rounded-md p-1 opacity-70 hover:opacity-100 hover:bg-black/5">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+<% end %>
