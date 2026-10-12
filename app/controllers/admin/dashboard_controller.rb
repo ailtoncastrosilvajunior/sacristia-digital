@@ -19,7 +19,6 @@ module Admin
       @proximos = @eventos.select { |e| e.data >= inicio_lista }.first(12)
       @recentes_passados = @eventos.select { |e| e.data < hoje }.last(5).reverse
       @heatmap = build_heatmap(@competencia, @eventos)
-      @picos_mes = @eventos.group_by(&:data).transform_values(&:size).sort_by { |_d, n| -n }.first(3)
       @eventos_dia_filtro = @lista_desde ? @eventos.select { |e| e.data == @lista_desde }.sort_by(&:horario) : []
       load_esportulas_resumo(@competencia)
     end
@@ -97,9 +96,11 @@ module Admin
     def build_heatmap(competencia, eventos)
       inicio = competencia.periodo
       fim = competencia.periodo_fim
-      counts = eventos.group_by(&:data).transform_values(&:size)
+      por_dia = eventos.group_by(&:data)
       (inicio..fim).map do |d|
-        { data: d, count: counts[d] || 0 }
+        evs = por_dia[d] || []
+        extras = evs.count(&:extra?)
+        { data: d, count: evs.size, padrao: evs.size - extras, extra: extras }
       end
     end
   end

@@ -1,23 +1,23 @@
 <% content_for :title, "Dashboard — Sacristia Digital" %>
 <div class="min-h-full">
   <%# Hero + seletor %>
-  <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 text-white shadow-xl mb-8">
+  <div class="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 text-white shadow-md mb-5">
     <div class="absolute inset-0 opacity-[0.07]" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
     <%# Mobile: texto + competência. lg+: 2 colunas (imagem removida). %>
-    <div class="relative grid grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto] gap-x-3 gap-y-3.5 px-5 py-5 sm:px-6 sm:gap-x-4 sm:gap-y-4
-                lg:grid-cols-[auto_minmax(0,1fr)_10.5rem] lg:grid-rows-1 lg:items-center lg:gap-5 lg:py-5 lg:px-8
+    <div class="relative grid grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto] gap-x-3 gap-y-2 px-4 py-3 sm:px-5 sm:gap-x-4
+                lg:grid-cols-[auto_minmax(0,1fr)_10.5rem] lg:grid-rows-1 lg:items-center lg:gap-4 lg:py-3 lg:px-6
                 xl:grid-cols-[auto_minmax(0,1fr)_11.25rem] xl:gap-7 xl:pr-8">
       <div class="col-start-1 row-start-1 min-w-0 text-left">
-        <p class="text-sky-300/90 text-xs sm:text-sm font-medium tracking-wide uppercase">Painel</p>
-        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mt-1 lg:mt-1.5">Escala de serviços do período</h1>
-        <p class="mt-2 text-slate-300 text-sm leading-snug lg:leading-relaxed">Escolha o período para ver estatísticas, próximos serviços e o mapa de intensidade do mês.</p>
+        <p class="text-sky-300/90 text-[10px] sm:text-xs font-medium tracking-wide uppercase">Painel</p>
+        <h1 class="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight mt-0.5">Escala de serviços do período</h1>
+        <p class="mt-1 text-slate-300 text-xs sm:text-sm leading-snug hidden sm:block">Escolha o período para ver estatísticas, próximos serviços e o mapa de intensidade do mês.</p>
       </div>
       <div class="col-start-2 row-start-2 min-w-0 w-full lg:col-start-3 lg:row-start-1 flex flex-col justify-center">
-        <%= form_with url: admin_root_path, method: :get, local: true, class: "space-y-1.5" do %>
-          <label for="dash_competencia" class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Competência</label>
+        <%= form_with url: admin_root_path, method: :get, local: true, class: "space-y-1" do %>
+          <label for="dash_competencia" class="block text-[10px] font-medium text-slate-400 uppercase tracking-wider">Competência</label>
           <%= select_tag :competencia_mensal_id,
                 options_from_collection_for_select(@competencias, :id, :label, @competencia&.id),
-                { id: "dash_competencia", class: "w-full rounded-xl border-0 bg-white/10 text-white placeholder-slate-400 ring-1 ring-white/20 px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-sky-400 focus:outline-none [&>option]:text-slate-900",
+                { id: "dash_competencia", class: "w-full rounded-xl border-0 bg-white/10 text-white placeholder-slate-400 ring-1 ring-white/20 px-3 py-1.5 text-sm font-medium focus:ring-2 focus:ring-sky-400 focus:outline-none [&>option]:text-slate-900",
                   onchange: "this.form.requestSubmit()" } %>
           <noscript>
             <%= submit_tag "Atualizar", class: "w-full rounded-xl bg-sky-500 hover:bg-sky-400 px-3 py-2 text-sm font-semibold text-white" %>
@@ -65,41 +65,42 @@
     </div>
 
     <%# KPIs %>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-      <div class="group relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-sky-200/60 transition-all">
-        <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-sky-500/10 blur-2xl group-hover:bg-sky-500/15 transition-colors"></div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">Serviços no mês</p>
-        <p class="mt-2 text-3xl font-bold tabular-nums text-stone-900"><%= s[:total] %></p>
-        <p class="mt-1 text-xs text-stone-500"><%= s[:dias_com_servico] %> dias com celebração</p>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-5">
+      <div class="group relative overflow-hidden rounded-xl bg-white px-3 py-2.5 shadow-sm ring-1 ring-stone-200/80 hover:ring-sky-200/60 transition-all">
+        <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-sky-500/10 blur-2xl group-hover:bg-sky-500/15 transition-colors"></div>
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-stone-500">Serviços no mês</p>
+        <p class="mt-0.5 text-2xl font-bold tabular-nums text-stone-900"><%= s[:total] %></p>
+        <p class="text-[11px] text-stone-500"><%= s[:dias_com_servico] %> dias com celebração</p>
       </div>
-      <div class="group relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-sky-200/60 transition-all">
-        <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-sky-500/10 blur-2xl"></div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">Com ministros</p>
-        <p class="mt-2 text-3xl font-bold tabular-nums text-sky-700"><%= s[:com_ministros] %></p>
-        <p class="mt-1 text-xs text-stone-500"><%= s[:pct_equipe] %>% da escala preenchida</p>
+      <div class="group relative overflow-hidden rounded-xl bg-white px-3 py-2.5 shadow-sm ring-1 ring-stone-200/80 hover:ring-sky-200/60 transition-all">
+        <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-sky-500/10 blur-2xl"></div>
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-stone-500">Com ministros</p>
+        <p class="mt-0.5 text-2xl font-bold tabular-nums text-sky-700"><%= s[:com_ministros] %></p>
+        <p class="text-[11px] text-stone-500"><%= s[:pct_equipe] %>% da escala preenchida</p>
       </div>
-      <div class="group relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-amber-200/60 transition-all">
-        <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-amber-500/10 blur-2xl"></div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">Coordenação</p>
-        <p class="mt-2 text-3xl font-bold tabular-nums text-amber-700"><%= s[:com_coord] %></p>
-        <p class="mt-1 text-xs text-stone-500"><%= s[:com_adoracao] %> com adoração marcada</p>
+      <div class="group relative overflow-hidden rounded-xl bg-white px-3 py-2.5 shadow-sm ring-1 ring-stone-200/80 hover:ring-amber-200/60 transition-all">
+        <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-amber-500/10 blur-2xl"></div>
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-stone-500">Coordenação</p>
+        <p class="mt-0.5 text-2xl font-bold tabular-nums text-amber-700"><%= s[:com_coord] %></p>
+        <p class="text-[11px] text-stone-500"><%= s[:com_adoracao] %> com adoração marcada</p>
       </div>
-      <div class="group relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-emerald-200/60 transition-all">
-        <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl"></div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">Status</p>
-        <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold tabular-nums">
+      <div class="group relative overflow-hidden rounded-xl bg-white px-3 py-2.5 shadow-sm ring-1 ring-stone-200/80 hover:ring-emerald-200/60 transition-all">
+        <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-emerald-500/10 blur-2xl"></div>
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-stone-500">Status</p>
+        <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold tabular-nums">
           <span class="text-amber-600"><%= s[:pendentes] %> pend.</span>
           <span class="text-emerald-600"><%= s[:confirmados] %> conf.</span>
           <span class="text-sky-600"><%= s[:concluidos] %> conc.</span>
         </div>
-        <p class="mt-1 text-xs text-stone-500"><%= s[:com_sacerdote] %> com sacerdote</p>
+        <p class="text-[11px] text-stone-500"><%= s[:com_sacerdote] %> com sacerdote</p>
       </div>
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
       <%# Próximos %>
       <div class="xl:col-span-7 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+       <div class="rounded-2xl border border-stone-200 bg-white shadow-sm overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 px-4 py-3 border-b border-stone-100 bg-gradient-to-b from-sky-50/60 to-white">
           <div class="flex items-start gap-3 min-w-0">
             <span class="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700 ring-1 ring-sky-200/80 shadow-sm">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -126,6 +127,7 @@
           <% end %>
         </div>
 
+        <div class="p-3">
         <% if @proximos.empty? %>
           <div class="rounded-2xl border border-dashed border-stone-200/90 bg-gradient-to-b from-sky-50/50 via-white to-white px-6 py-12 text-center shadow-sm">
             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 ring-1 ring-sky-200/70 mb-4">
@@ -140,12 +142,14 @@
             <% end %>
           </div>
         <% else %>
-          <ul class="space-y-3">
+          <ul class="space-y-3 max-h-[28rem] overflow-y-auto pr-1">
             <% @proximos.each do |ev| %>
               <%= render "admin/dashboard/card_servico", ev: ev, comp: comp %>
             <% end %>
           </ul>
         <% end %>
+        </div>
+       </div>
 
         <% if @recentes_passados.any? %>
           <details class="group rounded-2xl border border-stone-200 bg-white shadow-sm overflow-hidden">
@@ -153,12 +157,9 @@
               <span>Serviços recentes (já realizados)</span>
               <svg class="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </summary>
-            <ul class="border-t border-stone-100 divide-y divide-stone-50 text-sm text-stone-600 px-4 py-2">
+            <ul class="border-t border-stone-100 space-y-2 p-3 max-h-80 overflow-y-auto">
               <% @recentes_passados.each do |ev| %>
-                <li class="py-2 flex justify-between gap-2">
-                  <span class="tabular-nums text-stone-500"><%= l(ev.data) %> <%= l(ev.horario, format: :time) %></span>
-                  <span class="truncate font-medium text-stone-800"><%= ev.tipo_servico.nome %></span>
-                </li>
+                <%= render "admin/dashboard/card_servico", ev: ev, comp: comp, passado: true %>
               <% end %>
             </ul>
           </details>
@@ -170,7 +171,7 @@
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between gap-2">
             <h3 class="text-lg font-semibold text-stone-900">Intensidade no mês</h3>
-            <span class="text-xs text-stone-500 shrink-0">Mais escuro = mais serviços</span>
+            
           </div>
           <p class="text-xs text-stone-600 leading-relaxed">Clique em um <strong class="text-stone-800">dia</strong> para filtrar a lista de próximos serviços a partir dessa data.</p>
         </div>
@@ -197,10 +198,10 @@
               <% txt = intensity >= 2 ? "text-white" : "text-stone-700" %>
               <% selected = @lista_desde == d %>
               <%= link_to admin_root_path(competencia_mensal_id: comp.id, lista_desde: d.strftime("%Y-%m-%d")),
-                    class: "aspect-square rounded-lg #{bg} flex flex-col items-center justify-center gap-1.5 text-[10px] font-bold #{txt} shadow-sm ring-1 ring-black/5 min-h-[2rem] transition-transform hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 #{selected ? "ring-2 ring-sky-600 ring-offset-2 z-[1] scale-[1.02]" : ""}",
-                    title: "#{l(d)}: #{c} #{c == 1 ? "serviço" : "serviços"} — filtrar lista" do %>
-                <span class="tabular-nums text-[9px] font-semibold opacity-80 leading-none"><%= l(d, format: :short) %></span>
-                <% if c > 0 %><span class="tabular-nums text-sm font-extrabold leading-none"><%= c %></span><% end %>
+                    class: "aspect-square rounded-lg #{bg} overflow-hidden flex flex-col items-center justify-start text-[10px] font-bold #{txt} shadow-sm ring-1 ring-black/5 min-h-[2rem] transition-transform hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 #{selected ? "ring-2 ring-sky-600 ring-offset-2 z-[1] scale-[1.02]" : ""}",
+                    title: "#{l(d)}: #{cell[:padrao]} da escala padrão, #{cell[:extra]} da escala extra — filtrar lista" do %>
+                <span class="w-full text-center tabular-nums text-[10px] font-bold leading-none py-1 border-b <%= intensity >= 2 ? "border-white/40 text-white" : "border-stone-400/40 text-stone-700" %>"><%= l(d, format: :short) %></span>
+                <% if c > 0 %><span class="flex-1 flex items-center tabular-nums text-sm font-extrabold leading-none"><%= cell[:padrao] %><span class="opacity-70 font-bold">/</span><%= cell[:extra] %></span><% end %>
               <% end %>
             <% end %>
           </div>
@@ -211,25 +212,10 @@
             <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-sky-600"></span> 3+</span>
           </div>
 
-          <% if @picos_mes.present? %>
-            <div class="rounded-xl bg-stone-50 border border-stone-100 p-3">
-              <p class="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-2">Dias com mais serviços</p>
-              <ul class="space-y-1.5">
-                <% @picos_mes.each do |dia, n| %>
-                  <li class="flex items-center justify-between text-sm">
-                    <%= link_to admin_root_path(competencia_mensal_id: comp.id, lista_desde: dia.strftime("%Y-%m-%d")), class: "text-sky-700 font-medium hover:underline tabular-nums" do %>
-                      <%= l(dia, format: :short) %>
-                    <% end %>
-                    <span class="text-stone-600 tabular-nums"><%= n %> <%= n == 1 ? "serviço" : "serviços" %></span>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
-          <% end %>
 
           <% if @lista_desde && @eventos_dia_filtro.any? %>
             <div class="rounded-xl bg-sky-50/80 border border-sky-100 p-3">
-              <p class="text-[10px] font-bold uppercase tracking-wider text-sky-800 mb-2">Neste dia</p>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-sky-800 mb-2">Neste dia · <span class="tabular-nums"><%= l(@lista_desde, format: :short) %></span> <span class="normal-case tracking-normal font-semibold">(<%= l(@lista_desde, format: "%A") %>)</span></p>
               <ul class="space-y-2 max-h-40 overflow-y-auto">
                 <% @eventos_dia_filtro.each do |ev| %>
                   <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
@@ -246,72 +232,76 @@
         </div>
 
         <div class="rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-5 shadow-lg">
-          <p class="text-sm font-medium text-slate-300">Dica</p>
-          <p class="mt-2 text-sm leading-relaxed text-slate-200">Use <strong class="text-white">Escalar</strong> para definir sacerdote, ministros, coordenador e adoração em um único fluxo — ou abra a <strong class="text-white">lista</strong> para edição em massa.</p>
+          <p class="text-sm font-medium text-slate-300">Como ler o calendário</p>
+          <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-slate-200 list-disc pl-4">
+            <li>Cada quadrado é um dia. O número grande é <strong class="text-white">padrão/extra</strong>: serviços da escala padrão / serviços da escala extra (ex.: <strong class="text-white">3/1</strong>).</li>
+            <li>Quanto mais escura a cor, mais serviços no dia (cinza = nenhum, azul claro = 1, médio = 2, escuro = 3 ou mais).</li>
+            <li>Clique em um dia para listar os próximos serviços a partir dele; o detalhe do dia aparece abaixo do calendário.</li>
+          </ul>
         </div>
       </div>
     </div>
 
     <%# Espórtulas da competência %>
     <% es = @esportulas_stats %>
-    <div class="mt-10 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-white to-teal-50/60 shadow-sm overflow-hidden ring-1 ring-emerald-100/60">
-      <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-emerald-100/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="mt-6 rounded-2xl border border-sky-200/80 bg-gradient-to-br from-sky-50 via-white to-blue-50/60 shadow-sm overflow-hidden ring-1 ring-sky-100/60">
+      <div class="px-4 py-2.5 sm:px-5 border-b border-sky-100/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div class="flex items-start gap-3">
-          <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/25">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white shadow-sm shadow-sky-600/25">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-stone-900">Espórtulas</h3>
-            <p class="text-sm text-stone-600 mt-0.5">Registros vinculados a <span class="font-medium text-stone-800"><%= comp.label %></span> (competência do registro).</p>
+            <h3 class="text-base font-semibold text-stone-900">Espórtulas</h3>
+            <p class="text-xs text-stone-600">Registros vinculados a <span class="font-medium text-stone-800"><%= comp.label %></span> (competência do registro).</p>
           </div>
         </div>
         <div class="flex flex-wrap gap-2 shrink-0">
-          <%= link_to admin_registros_esportula_index_path, class: "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 text-white text-sm font-semibold hover:bg-emerald-800 transition-colors shadow-sm" do %>
+          <%= link_to admin_registros_esportula_index_path, class: "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-sky-700 text-white text-sm font-semibold hover:bg-sky-800 transition-colors shadow-sm" do %>
             Ver todas
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           <% end %>
-          <%= link_to new_admin_registros_esportula_path(competencia_ano: comp.ano, competencia_mes: comp.mes), class: "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-300 bg-white text-emerald-900 text-sm font-semibold hover:bg-emerald-50 transition-colors" do %>
+          <%= link_to new_admin_registros_esportula_path(competencia_ano: comp.ano, competencia_mes: comp.mes), class: "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-sky-300 bg-white text-sky-900 text-sm font-semibold hover:bg-sky-50 transition-colors" do %>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Novo registro
           <% end %>
         </div>
       </div>
-      <div class="px-5 py-4 sm:px-6 sm:py-5 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div class="rounded-xl bg-white/90 border border-emerald-100 p-4 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-700/80">Registros</p>
-          <p class="mt-1 text-2xl font-bold tabular-nums text-stone-900"><%= es[:total] %></p>
-          <p class="text-xs text-stone-500 mt-1"><%= es[:pendentes] %> pend. · <%= es[:pagos] %> pagos</p>
+      <div class="px-4 py-3 sm:px-5 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+        <div class="rounded-xl bg-white/90 border border-sky-100 px-3 py-2 shadow-sm">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-sky-700/80">Registros</p>
+          <p class="text-2xl font-bold tabular-nums text-stone-900"><%= es[:total] %></p>
+          <p class="text-[11px] text-stone-500"><%= es[:pendentes] %> pend. · <%= es[:pagos] %> pagos</p>
         </div>
-        <div class="rounded-xl bg-white/90 border border-amber-100 p-4 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-amber-800/90">A pagar</p>
-          <p class="mt-1 text-xl sm:text-2xl font-bold tabular-nums text-amber-900"><%= number_to_currency(es[:valor_pendente]) %></p>
-          <p class="text-xs text-stone-500 mt-1">Soma status pendente</p>
+        <div class="rounded-xl bg-white/90 border border-indigo-100 px-3 py-2 shadow-sm">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-indigo-800/90">A pagar</p>
+          <p class="text-lg sm:text-xl font-bold tabular-nums text-indigo-900"><%= number_to_currency(es[:valor_pendente]) %></p>
+          <p class="text-[11px] text-stone-500">Soma status pendente</p>
         </div>
-        <div class="rounded-xl bg-white/90 border border-emerald-100 p-4 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-800/90">Quitado</p>
-          <p class="mt-1 text-xl sm:text-2xl font-bold tabular-nums text-emerald-800"><%= number_to_currency(es[:valor_pago]) %></p>
-          <p class="text-xs text-stone-500 mt-1">Soma status pago</p>
+        <div class="rounded-xl bg-white/90 border border-sky-100 px-3 py-2 shadow-sm">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-sky-800/90">Quitado</p>
+          <p class="text-lg sm:text-xl font-bold tabular-nums text-sky-800"><%= number_to_currency(es[:valor_pago]) %></p>
+          <p class="text-[11px] text-stone-500">Soma status pago</p>
         </div>
-        <div class="rounded-xl bg-white/90 border border-stone-200 p-4 shadow-sm">
+        <div class="rounded-xl bg-white/90 border border-stone-200 px-3 py-2 shadow-sm">
           <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">No mês</p>
-          <p class="mt-1 text-xl sm:text-2xl font-bold tabular-nums text-stone-900"><%= number_to_currency(es[:valor_pendente] + es[:valor_pago]) %></p>
-          <p class="text-xs text-stone-500 mt-1">Total movimentado</p>
+          <p class="text-lg sm:text-xl font-bold tabular-nums text-stone-900"><%= number_to_currency(es[:valor_pendente] + es[:valor_pago]) %></p>
+          <p class="text-[11px] text-stone-500">Total movimentado</p>
         </div>
       </div>
       <% if @esportulas_recentes.any? %>
-        <div class="px-5 pb-5 sm:px-6 sm:pb-6">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">Últimos lançamentos</p>
-          <ul class="divide-y divide-emerald-100/80 rounded-xl border border-emerald-100 bg-white/80 overflow-hidden">
+        <div class="px-4 pb-3 sm:px-5">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">Últimos lançamentos</p>
+          <ul class="divide-y divide-sky-100/80 rounded-xl border border-sky-100 bg-white/80 overflow-hidden">
             <% @esportulas_recentes.each do |reg| %>
               <li>
-                <%= link_to admin_registros_esportula_path(reg), class: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-3 hover:bg-emerald-50/60 transition-colors group" do %>
+                <%= link_to admin_registros_esportula_path(reg), class: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-2 hover:bg-sky-50/60 transition-colors group" do %>
                   <div class="min-w-0">
-                    <p class="text-sm font-medium text-stone-900 group-hover:text-emerald-900"><%= reg.sacerdote.nome %></p>
+                    <p class="text-sm font-medium text-stone-900 group-hover:text-sky-900"><%= reg.sacerdote.nome %></p>
                     <p class="text-xs text-stone-500 tabular-nums"><%= l(reg.data) %></p>
                   </div>
                   <div class="flex items-center gap-3 shrink-0">
                     <span class="text-sm font-semibold tabular-nums text-stone-800"><%= number_to_currency(reg.valor) %></span>
-                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase rounded-full <%= reg.status == "pago" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800" %>">
+                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase rounded-full <%= reg.status == "pago" ? "bg-sky-100 text-sky-800" : "bg-indigo-100 text-indigo-800" %>">
                       <%= reg.status %>
                     </span>
                   </div>
@@ -321,9 +311,9 @@
           </ul>
         </div>
       <% else %>
-        <div class="px-5 pb-6 sm:px-6 text-center">
-          <p class="text-sm text-stone-600 mb-3">Nenhuma espórtula registrada para esta competência ainda.</p>
-          <%= link_to "Cadastrar primeira espórtula", new_admin_registros_esportula_path(competencia_ano: comp.ano, competencia_mes: comp.mes), class: "inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-900" %>
+        <div class="px-4 pb-3 sm:px-5 text-center">
+          <p class="text-xs text-stone-600 mb-1">Nenhuma espórtula registrada para esta competência ainda.</p>
+          <%= link_to "Cadastrar primeira espórtula", new_admin_registros_esportula_path(competencia_ano: comp.ano, competencia_mes: comp.mes), class: "inline-flex items-center gap-2 text-sm font-semibold text-sky-700 hover:text-sky-900" %>
         </div>
       <% end %>
     </div>
