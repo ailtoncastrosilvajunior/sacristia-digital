@@ -1,0 +1,18 @@
+<% content_for :title, "Solicitação enviada — Sacristia Digital" %>
+
+<div class="relative min-h-screen flex items-center justify-center px-4 py-12 overflow-hidden">
+  <div class="absolute inset-0 bg-slate-950" aria-hidden="true"></div>
+  <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-blue-950/40 to-slate-950" aria-hidden="true"></div>
+
+  <div class="relative z-10 w-full max-w-[420px] rounded-3xl bg-white/[0.97] shadow-2xl ring-1 ring-white/60 px-8 py-10 text-center">
+    <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h1 class="text-xl font-semibold text-stone-900">Solicitação enviada</h1>
+    <p class="mt-3 text-sm text-stone-600 leading-relaxed">
+      A coordenação vai analisar seu cadastro. Depois da aprovação, entre com o e-mail e a senha que você escolheu.
+    </p>
+    <%= link_to "Ir para o login", new_user_session_path,
+        class: "mt-7 inline-flex rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 px-5 py-3 text-sm font-semibold text-white" %>
+  </div>
+</div>

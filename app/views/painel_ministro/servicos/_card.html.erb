@@ -1,0 +1,32 @@
+<% em = ev.escala_ministros.find { |x| x.ministro_id == mid } %>
+<% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+<% passado = local_assigns.fetch(:passado, false) %>
+      <%= link_to ministro_servico_path(ev), class: "group relative flex items-stretch rounded-xl border border-stone-200/80 #{passado ? "bg-stone-50/70 opacity-80 hover:opacity-100" : "bg-white"} shadow-sm overflow-hidden hover:border-sky-300 hover:shadow-md active:scale-[0.99] transition-all" do %>
+        <div class="w-16 shrink-0 flex flex-col items-center justify-center py-2 bg-gradient-to-b from-sky-50 to-white border-r border-stone-100">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-sky-600"><%= I18n.t("date.abbr_day_names")[ev.data.wday] %></span>
+          <span class="text-xl font-extrabold tabular-nums text-stone-900 leading-tight"><%= ev.data.day %></span>
+          <span class="mt-0.5 inline-flex items-center gap-0.5 text-[11px] font-semibold text-sky-800 tabular-nums">
+            <svg class="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <%= l(ev.horario, format: :time) %>
+          </span>
+        </div>
+        <div class="flex-1 min-w-0 px-3 py-2.5">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-md border" style="background-color: <%= cor %>22; border-color: <%= cor %>55; color: #1e293b;"><%= ev.tipo_servico.nome %></span>
+            <% if ev.sacerdote %>
+              <span class="text-sm font-bold text-stone-800 truncate"><%= ev.sacerdote.nome %></span>
+            <% end %>
+          </div>
+          <% ministros = escala_ministros_do_evento(ev, mid) %>
+          <% if ministros.any? %>
+            <div class="mt-2 flex flex-wrap gap-1">
+              <% ministros.each do |m| %>
+                <%= render "painel_ministro/escala_mensal/ministro_badge", nome: m[:nome], meu: m[:meu], adoracao: m[:adoracao] %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        <span class="self-center mr-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700 group-hover:bg-sky-600 group-hover:text-white transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      <% end %>

@@ -37,7 +37,7 @@
         <% if @sacerdote.por_missa? %>
           <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border bg-sky-100 text-sky-800 border-sky-300">Por missa</span>
         <% else %>
-          <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border bg-violet-100 text-violet-800 border-violet-300">Por período</span>
+          <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border bg-sky-100 text-sky-800 border-sky-300">Por período</span>
         <% end %>
       </div>
     </div>
@@ -76,10 +76,10 @@
           <p class="relative mt-1.5 sm:mt-2 text-xl sm:text-3xl font-bold tabular-nums text-emerald-700"><%= esportulas_ct %></p>
           <p class="relative mt-1 text-[10px] sm:text-xs text-stone-500 leading-snug line-clamp-2">Registros de espórtula</p>
         </div>
-        <div class="group relative min-w-0 overflow-hidden rounded-2xl bg-white p-3 sm:p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-violet-200/60 transition-all">
-          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-violet-500/10 blur-2xl group-hover:bg-violet-500/15 transition-colors" aria-hidden="true"></div>
+        <div class="group relative min-w-0 overflow-hidden rounded-2xl bg-white p-3 sm:p-5 shadow-sm ring-1 ring-stone-200/80 hover:ring-sky-200/60 transition-all">
+          <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-sky-500/10 blur-2xl group-hover:bg-sky-500/15 transition-colors" aria-hidden="true"></div>
           <p class="relative text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-stone-500 truncate">Total recebido</p>
-          <p class="relative mt-1.5 sm:mt-2 text-sm sm:text-2xl font-bold tabular-nums text-violet-700 leading-tight break-words"><%= number_to_currency(total_recebido) %></p>
+          <p class="relative mt-1.5 sm:mt-2 text-sm sm:text-2xl font-bold tabular-nums text-sky-700 leading-tight break-words"><%= number_to_currency(total_recebido) %></p>
           <p class="relative mt-1 text-[10px] sm:text-xs text-stone-500 leading-snug line-clamp-2">Soma dos valores registrados</p>
         </div>
       </div>

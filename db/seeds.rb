@@ -103,33 +103,6 @@ calendario_base.each do |attrs|
 end
 puts "   ✓ #{CalendarioBase.count} entradas no calendário base"
 
-# Equipes de plantão
-puts "\n👥 Criando equipes de plantão..."
-equipes_data = [
-  { nome: "Equipe A" },
-  { nome: "Equipe B" },
-  { nome: "Equipe C" },
-  { nome: "Equipe D" },
-  { nome: "Equipe E" }
-]
-
-equipes = []
-equipes_data.each do |attrs|
-  e = Equipe.find_or_create_by!(nome: attrs[:nome])
-  equipes << e
-end
-
-# Distribuir ministros nas equipes
-ministros_ativos = Ministro.ativos.to_a
-equipes.each_with_index do |equipe, idx|
-  ministros_ativos.each_with_index do |ministro, m_idx|
-    next unless (m_idx % equipes.size) == idx
-    EquipeMinistro.find_or_create_by!(equipe: equipe, ministro: ministro) do |em|
-      em.ordem = m_idx
-    end
-  end
-end
-puts "   ✓ #{Equipe.count} equipes com ministros vinculados"
 
 # Usuários e autenticação
 puts "\n🔐 Criando usuários..."

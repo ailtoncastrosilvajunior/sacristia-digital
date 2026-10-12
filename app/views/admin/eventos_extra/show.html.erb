@@ -69,8 +69,8 @@
           <dd class="mt-1 text-stone-900 font-medium"><%= @evento.sacerdote&.nome || "—" %></dd>
         </div>
         <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
-          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Equipe de plantão</dt>
-          <dd class="mt-1 text-stone-900 font-medium"><%= @evento.equipe&.nome || "—" %></dd>
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Plantão</dt>
+          <dd class="mt-1 text-stone-900 font-medium"><%= @evento.plantao_periodo ? "#{@evento.plantao_periodo.rotulo}: #{@evento.plantao_periodo.nomes_ministros}" : "—" %></dd>
         </div>
         <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
           <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Quantidade de ministros</dt>

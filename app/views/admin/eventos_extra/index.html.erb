@@ -1,69 +1,253 @@
-<div class="space-y-6">
+<% filtros = params.permit(:q, :status, :tipo_servico_id, :aba, :vista_calendario, :data_ref).to_unsafe_h.compact_blank %>
+<% filtros_busca = filtros.except(:aba, :vista_calendario, :data_ref) %>
+<% base_path = ->(extra = {}) { admin_eventos_extra_index_path(filtros.merge(extra)) } %>
+<% eventos_por_dia = @eventos_lista.group_by(&:data) %>
+<div class="space-y-4 sm:space-y-6" data-controller="modal drawer">
+  <div id="evento-modal-backdrop" data-modal-target="backdrop" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/50 p-4" data-action="click->modal#closeBackground">
+    <div data-action="click->modal#stopPropagation" class="w-full max-w-4xl">
+      <turbo-frame id="evento_modal" data-modal-target="frame" data-action="turbo:frame-load->modal#show turbo:frame-render->modal#show"></turbo-frame>
+    </div>
+  </div>
+
+  <%# Drawer lateral com os dados do evento (carregado via turbo-frame) %>
+  <div data-controller="drawer" class="contents">
+    <div data-drawer-target="overlay" class="fixed inset-0 z-40 bg-stone-900/30 transition-opacity duration-300 invisible opacity-0 pointer-events-none" data-action="click->drawer#closeOverlay"></div>
+    <div data-drawer-target="panel" class="fixed top-0 right-0 z-50 h-full w-full sm:w-[26rem] max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-out translate-x-full border-l border-stone-200 flex flex-col">
+      <turbo-frame id="evento_drawer" data-action="turbo:frame-load->drawer#open" class="flex flex-col h-full min-h-0"></turbo-frame>
+    </div>
+  </div>
+
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-semibold text-stone-800">Eventos Extra</h1>
       <p class="text-stone-500 mt-1">Missas e celebrações fora do calendário padrão</p>
     </div>
-    <%= link_to "Novo evento", new_admin_eventos_extra_path,
+    <%= link_to "Novo evento", new_admin_eventos_extra_path(data: (@data_ref if @vista_calendario == "dia")),
         class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
   </div>
 
-  <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-    <table class="min-w-full divide-y divide-stone-200">
-      <thead class="bg-stone-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Data</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Horário</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Tipo</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Local</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Status</th>
-          <th class="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">Ações</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-stone-200">
-        <% @eventos.each do |evento| %>
-          <tr class="hover:bg-stone-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-800"><%= l(evento.data) %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-600"><%= l(evento.horario, format: :time) %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-600"><%= evento.tipo_servico.nome %></td>
-            <td class="px-6 py-4 text-sm text-stone-600"><%= evento.local || "—" %></td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                <%= case evento.status
-                    when 'concluido' then 'bg-emerald-100 text-emerald-800'
-                    when 'confirmado' then 'bg-blue-100 text-blue-800'
-                    when 'cancelado' then 'bg-stone-100 text-stone-600'
-                    else 'bg-amber-100 text-amber-800'
-                    end %>">
-                <%= evento.status.capitalize %>
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center justify-end gap-1">
-                <%= link_to admin_eventos_extra_path(evento), title: "Ver detalhes", class: "p-2 rounded-lg text-stone-400 hover:text-slate-600 hover:bg-stone-100 transition-colors" do %>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                <% end %>
-                <%= link_to edit_admin_eventos_extra_path(evento), title: "Editar", class: "p-2 rounded-lg text-stone-400 hover:text-sky-600 hover:bg-sky-50 transition-colors" do %>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                <% end %>
-                <%= button_to admin_eventos_extra_path(evento), method: :delete, data: { turbo_confirm: "Tem certeza que deseja excluir este evento?" }, form: { class: "inline" }, title: "Excluir", class: "p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors border-0 bg-transparent cursor-pointer" do %>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <%# Busca + filtros (recarrega a página mantendo aba e período) %>
+  <div data-controller="drawer">
+    <%= form_with url: admin_eventos_extra_index_path, method: :get, local: true, data: { action: "submit->drawer#close" } do %>
+      <%= hidden_field_tag :aba, @aba %>
+      <%= hidden_field_tag :vista_calendario, @vista_calendario %>
+      <%= hidden_field_tag :data_ref, @data_ref %>
+      <div class="flex items-center gap-2">
+        <div class="relative flex-1">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+          <%= search_field_tag :q, params[:q], placeholder: "Buscar por tipo ou local...", autocomplete: "off",
+                class: "w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-stone-300 bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500" %>
+        </div>
+        <button type="button" data-action="click->drawer#open" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 transition-colors">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+          Filtros
+          <% n = %i[status tipo_servico_id].count { |f| params[f].present? } %>
+          <% if n.positive? %><span class="inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs rounded-full bg-slate-600 text-white"><%= n %></span><% end %>
+        </button>
+        <button type="submit" class="px-3 py-2 text-sm font-medium rounded-lg bg-slate-600 hover:bg-slate-700 text-white">Buscar</button>
+      </div>
 
-    <% if @eventos.empty? %>
-      <div class="px-6 py-12 text-center text-stone-500">
-        Nenhum evento extra cadastrado. <%= link_to "Cadastrar o primeiro", new_admin_eventos_extra_path, class: "text-slate-600 hover:text-slate-800" %>
+      <div data-drawer-target="overlay" class="fixed inset-0 z-40 bg-stone-900/30 transition-opacity duration-300 invisible opacity-0 pointer-events-none" data-action="click->drawer#closeOverlay"></div>
+      <div data-drawer-target="panel" class="fixed top-0 right-0 z-50 h-full w-full sm:w-96 max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-out translate-x-full border-l border-stone-200 flex flex-col">
+        <div class="flex items-center justify-between px-4 py-4 border-b border-stone-200">
+          <h4 class="text-base font-semibold text-stone-800">Filtros</h4>
+          <button type="button" data-action="click->drawer#close" class="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors" aria-label="Fechar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          <%= filtro_select :status, "Status", EventoEscala::STATUS.map { |s| [s.capitalize, s] } %>
+          <%= filtro_select :tipo_servico_id, "Tipo de serviço", TipoServico.order(:nome).map { |t| [t.nome, t.id] } %>
+        </div>
+        <div class="flex items-center gap-2 px-4 py-4 border-t border-stone-200">
+          <%= link_to "Limpar", admin_eventos_extra_index_path(aba: @aba, vista_calendario: @vista_calendario, data_ref: @data_ref), class: "flex-1 text-center px-4 py-2 text-sm font-medium rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-50" %>
+          <button type="submit" class="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-slate-600 hover:bg-slate-700 text-white">Aplicar</button>
+        </div>
       </div>
     <% end %>
   </div>
 
-  <div class="flex justify-center">
-    <%= paginate @eventos %>
+  <div class="rounded-2xl border border-stone-200/90 bg-white shadow-lg shadow-stone-900/5 ring-1 ring-stone-100 overflow-hidden">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between mb-4 pb-4 border-b border-stone-100">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center gap-2 text-sm font-semibold text-stone-800">
+            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 text-sky-700 ring-1 ring-sky-200/70">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </span>
+            <%= @eventos_contagem %> <%= @eventos_contagem == 1 ? "evento" : "eventos" %>
+          </span>
+          <div class="flex rounded-xl border border-stone-200/90 overflow-hidden shadow-sm">
+            <%= link_to base_path.call(aba: "calendario"), class: "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors #{@aba == 'calendario' ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}" do %>
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Calendário
+            <% end %>
+            <%= link_to base_path.call(aba: "lista"), class: "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors #{@aba == 'lista' ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}" do %>
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+              Lista
+            <% end %>
+          </div>
+        </div>
+
+        <%# Navegação de período %>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
+          <div class="flex rounded-lg border border-stone-200 overflow-hidden">
+            <% { "mes" => "Mês", "semana" => "Semana", "dia" => "Dia" }.each do |v, rotulo| %>
+              <%= link_to rotulo, base_path.call(vista_calendario: v, data_ref: (v == "semana" ? @domingo_semana : @data_ref)), class: "inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 text-xs font-medium transition-colors #{@vista_calendario == v ? 'bg-slate-600 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}" %>
+            <% end %>
+          </div>
+          <% prev_ref, next_ref = case @vista_calendario
+                                  when "semana" then [@domingo_semana - 7, @domingo_semana + 7]
+                                  when "dia" then [@data_ref - 1, @data_ref + 1]
+                                  else [@inicio_mes - 1.month, @inicio_mes + 1.month]
+                                  end %>
+          <div class="flex items-center gap-1">
+            <%= link_to base_path.call(data_ref: prev_ref), aria: { label: "Anterior" }, class: "p-2 rounded-lg border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-colors" do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            <% end %>
+            <span class="px-2 text-sm font-medium text-stone-700 min-w-[140px] text-center capitalize">
+              <% if @vista_calendario == "semana" %>
+                <%= l(@domingo_semana, format: :short) %> – <%= l(@domingo_semana + 6, format: :short) %>
+              <% elsif @vista_calendario == "dia" %>
+                <%= l(@data_ref, format: :long) %>
+              <% else %>
+                <%= I18n.t("date.month_names")[@inicio_mes.month] %> <%= @inicio_mes.year %>
+              <% end %>
+            </span>
+            <%= link_to base_path.call(data_ref: next_ref), aria: { label: "Próximo" }, class: "p-2 rounded-lg border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-colors" do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            <% end %>
+            <%= link_to "Hoje", base_path.call(data_ref: Date.current), class: "ml-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-colors" %>
+          </div>
+        </div>
+      </div>
+
+      <% if @eventos_total.zero? && !lista_filtrada?(:status, :tipo_servico_id) %>
+        <p class="text-stone-500 text-sm py-4">Nenhum evento extra cadastrado. <%= link_to "Cadastrar o primeiro", new_admin_eventos_extra_path, class: "text-slate-600 hover:text-slate-800 underline" %></p>
+      <% elsif @aba == "calendario" %>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3 sm:mb-4 text-xs text-stone-600">
+          <% @eventos_lista.map(&:tipo_servico).uniq(&:id).sort_by(&:nome).each do |ts| %>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-1 h-4 rounded-full shrink-0" style="background-color: <%= ts.cor_etiqueta %>;"></span>
+              <%= ts.nome %>
+            </span>
+          <% end %>
+        </div>
+
+        <div class="mb-6 sm:mb-8 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <% if @vista_calendario == "mes" %>
+            <% domingo_primeira_semana = @inicio_mes - @inicio_mes.wday %>
+            <div class="min-w-[640px] lg:min-w-[760px] rounded-xl border border-stone-200 overflow-hidden bg-white shadow-sm">
+              <div class="grid grid-cols-7 bg-slate-800 text-white">
+                <% %w[Domingo Segunda Terça Quarta Quinta Sexta Sábado].each do |dia| %>
+                  <div class="px-2 py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider"><%= dia %></div>
+                <% end %>
+              </div>
+              <div class="grid grid-cols-7">
+                <% 42.times do |i| %>
+                  <% data = domingo_primeira_semana + i %>
+                  <% next if i >= 35 && (domingo_primeira_semana + 35) > @fim_mes %>
+                  <% no_mes = (@inicio_mes..@fim_mes).cover?(data) %>
+                  <% hoje = data == Date.current %>
+                  <% fim_semana = data.sunday? || data.saturday? %>
+                  <% evs = no_mes ? (eventos_por_dia[data] || []).sort_by(&:horario) : [] %>
+                  <div class="min-h-[110px] sm:min-h-[130px] p-1.5 border-b border-r border-stone-200 <%= no_mes ? (fim_semana ? 'bg-stone-50/70' : 'bg-white') : 'bg-stone-100/60' %>">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs font-bold tabular-nums <%= hoje ? 'bg-sky-600 text-white' : (no_mes ? 'text-stone-700' : 'text-stone-300') %>"><%= data.day %></span>
+                      <% if evs.any? %>
+                        <%= link_to base_path.call(vista_calendario: "dia", data_ref: data, aba: "calendario"), title: "Ver o dia", class: "text-[10px] font-medium text-stone-400 hover:text-sky-600" do %><%= evs.size %> <%= evs.size == 1 ? "evento" : "eventos" %><% end %>
+                      <% end %>
+                    </div>
+                    <% evs.each do |ev| %>
+                      <%= render "admin/competencia_mensal/evento_calendario_link", ev: ev, filtros: filtros %>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% elsif @vista_calendario == "semana" %>
+            <div class="min-w-[320px] sm:min-w-[500px] lg:min-w-[700px] rounded-lg border border-stone-200 overflow-hidden">
+              <div class="grid grid-cols-7 bg-stone-100 border-b border-stone-200">
+                <% 7.times do |i| %>
+                  <% d = @domingo_semana + i %>
+                  <div class="px-1 sm:px-2 py-1.5 sm:py-2 text-center">
+                    <div class="text-[10px] sm:text-xs font-semibold text-stone-600"><%= I18n.t("date.abbr_day_names")[d.wday] %></div>
+                    <div class="text-xs font-medium text-stone-700"><%= d.day %></div>
+                  </div>
+                <% end %>
+              </div>
+              <div class="grid grid-cols-7 bg-white">
+                <% 7.times do |i| %>
+                  <% data = @domingo_semana + i %>
+                  <div class="min-h-[120px] sm:min-h-[160px] p-1.5 sm:p-2 border-b border-r border-stone-100 <%= data == Date.current ? 'bg-sky-50/50 ring-1 ring-sky-300' : '' %>">
+                    <% (eventos_por_dia[data] || []).sort_by(&:horario).each do |ev| %>
+                      <%= render "admin/competencia_mensal/evento_calendario_link", ev: ev, filtros: filtros %>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <% eventos_do_dia = (eventos_por_dia[@data_ref] || []).sort_by(&:horario) %>
+            <div class="max-w-2xl rounded-lg border border-stone-200 overflow-hidden">
+              <div class="bg-stone-100 px-4 py-3 border-b border-stone-200">
+                <h3 class="text-base font-semibold text-stone-800"><%= l(@data_ref, format: :long) %></h3>
+                <p class="text-sm text-stone-500"><%= I18n.t("date.day_names")[@data_ref.wday] %></p>
+              </div>
+              <div class="bg-white divide-y divide-stone-100">
+                <% if eventos_do_dia.any? %>
+                  <% eventos_do_dia.each do |ev| %>
+                    <%= render "admin/competencia_mensal/evento_calendario_dia_row", ev: ev, filtros: filtros %>
+                  <% end %>
+                <% else %>
+                  <div class="px-4 py-8 text-center text-stone-500 text-sm">Nenhum evento neste dia</div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <% if @eventos_lista.empty? %>
+          <p class="text-stone-500 text-sm py-4">
+            <%= lista_filtrada?(:status, :tipo_servico_id) ? "Nenhum resultado para a busca/filtros neste período." : "Nenhum evento extra neste período." %>
+          </p>
+        <% else %>
+          <% grupos = eventos_por_dia %>
+          <div data-controller="agenda-nav" class="flex gap-3 h-[60vh] sm:h-[min(70vh,520px)] lg:h-[560px] rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-50/90 to-white shadow-xl shadow-slate-900/10 ring-1 ring-slate-200/50 overflow-hidden">
+            <nav class="w-20 sm:w-24 shrink-0 overflow-y-auto border-r border-slate-200/80 bg-slate-50/80 p-2 space-y-1.5" aria-label="Datas">
+              <% grupos.each do |data, eventos_do_dia| %>
+                <button type="button" data-agenda-nav-target="data" data-data="<%= data.iso8601 %>" data-action="agenda-nav#ir"
+                        class="w-full flex flex-col items-center rounded-xl border border-slate-200 bg-white text-slate-700 px-1 py-2 shadow-sm hover:border-sky-300 transition-colors cursor-pointer">
+                  <span class="text-[10px] font-bold uppercase tracking-widest opacity-80"><%= I18n.t("date.abbr_day_names")[data.wday] %></span>
+                  <span class="text-xl font-extrabold tabular-nums leading-tight"><%= l(data, format: "%d") %></span>
+                  <span class="text-[10px] uppercase opacity-70"><%= I18n.t("date.abbr_month_names")[data.month] %></span>
+                  <span class="mt-1 text-[10px] font-semibold px-1.5 rounded-full bg-slate-200/70 text-slate-600"><%= eventos_do_dia.size %></span>
+                </button>
+              <% end %>
+            </nav>
+            <div data-agenda-nav-target="lista" data-action="scroll->agenda-nav#marcar" class="flex-1 min-w-0 overflow-y-auto p-3 sm:p-4 space-y-5">
+              <% grupos.each do |data, eventos_do_dia| %>
+                <section data-agenda-nav-target="secao" data-data="<%= data.iso8601 %>">
+                  <div class="sticky top-0 z-10 py-1.5 mb-2 flex items-center gap-3 bg-slate-50">
+                    <div class="flex items-baseline gap-2">
+                      <span class="text-base font-extrabold text-sky-900 capitalize"><%= l(data, format: "%A") %></span>
+                      <span class="text-sm font-semibold text-sky-700 tabular-nums"><%= l(data, format: "%d/%m") %></span>
+                      <% if data == Date.current %><span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-sky-600 text-white">Hoje</span><% end %>
+                    </div>
+                    <span class="h-px flex-1 bg-sky-200"></span>
+                    <span class="text-xs font-semibold text-sky-700"><%= eventos_do_dia.size %> <%= eventos_do_dia.size == 1 ? "evento" : "eventos" %></span>
+                  </div>
+                  <ul class="space-y-2.5">
+                    <% eventos_do_dia.sort_by(&:horario).each do |ev| %>
+                      <%= render "admin/competencia_mensal/evento_lista_card_item", ev: ev, filtros: filtros, extra: true %>
+                    <% end %>
+                  </ul>
+                </section>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
   </div>
 </div>

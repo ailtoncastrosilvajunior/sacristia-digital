@@ -24,19 +24,17 @@ module PainelMinistro
       inicio_lista = @lista_desde || hoje
       @proximos = @eventos.select { |e| e.data >= inicio_lista }.first(12)
       @recentes_passados = @eventos.select { |e| e.data < hoje }.last(5).reverse
-      @heatmap = build_heatmap_ministro(@competencia, @eventos)
-      @picos_mes = @eventos.group_by(&:data).transform_values(&:size).sort_by { |_d, n| -n }.first(3)
+      @plantao_por_dia = build_plantao_por_dia(@competencia, @ministro_record)
+      @heatmap = build_heatmap_ministro(@competencia, @eventos, @plantao_por_dia)
       @eventos_dia_filtro = @lista_desde ? @eventos.select { |e| e.data == @lista_desde }.sort_by(&:horario) : []
     end
 
     private
 
-    def competencias_do_ministro(ministro)
+    def competencias_do_ministro(_ministro)
       CompetenciaMensal
-        .joins(evento_escalas: :escala_ministros)
-        .where(escala_ministros: { ministro_id: ministro.id })
-        .distinct
-        .order(ano: :desc, mes: :desc)
+        .liberadas_para_ministros
+        .ordenados
         .limit(48)
     end
 
@@ -66,7 +64,16 @@ module PainelMinistro
 
     def build_stats(eventos, ministro_id)
       total = eventos.size
-      return { total: 0 } if total.zero?
+      if total.zero?
+        return {
+          total: 0,
+          como_coord: 0,
+          como_ador: 0,
+          confirmados: 0,
+          pendentes_confirmacao: 0,
+          dias_com_servico: 0
+        }
+      end
 
       como_coord = eventos.count { |e| papel_no_evento(e, ministro_id)&.coordenador? }
       como_ador = eventos.count { |e| papel_no_evento(e, ministro_id)&.adoracao? }
@@ -87,10 +94,34 @@ module PainelMinistro
       evento.escala_ministros.find { |em| em.ministro_id == ministro_id }
     end
 
-    def build_heatmap_ministro(competencia, eventos)
-      counts = eventos.group_by(&:data).transform_values(&:size)
+    # { Date => PlantaoPeriodo } dos dias em que o ministro está de plantão (escala extra).
+    def build_plantao_por_dia(competencia, ministro)
+      blocos = PlantaoPeriodo
+        .joins(:plantao_periodo_ministros)
+        .where(competencia_mensal_id: competencia.id, plantao_periodo_ministros: { ministro_id: ministro.id })
+        .includes(plantao_periodo_ministros: :ministro)
+        .ordenados
+
+      ultimo = competencia.periodo_fim.day
+      blocos.each_with_object({}) do |bloco, mapa|
+        bloco.range_dias.each do |dia|
+          next if dia > ultimo
+          mapa[Date.new(competencia.ano, competencia.mes, dia)] = bloco
+        end
+      end
+    end
+
+    def build_heatmap_ministro(competencia, eventos, plantao_por_dia)
+      por_dia = eventos.group_by(&:data)
       (competencia.periodo..competencia.periodo_fim).map do |d|
-        { data: d, count: counts[d] || 0 }
+        dia_eventos = por_dia[d] || []
+        {
+          data: d,
+          count: dia_eventos.size,
+          ordinaria: dia_eventos.count(&:ordinario?),
+          extra: dia_eventos.count(&:extra?),
+          plantao: plantao_por_dia.key?(d)
+        }
       end
     end
   end

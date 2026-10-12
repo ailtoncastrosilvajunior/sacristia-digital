@@ -1,0 +1,52 @@
+<% content_for :title, "#{@solicitacao.nome} — Solicitação de cadastro" %>
+
+<div class="space-y-4 max-w-2xl">
+  <div>
+    <%= link_to "← Solicitações", admin_solicitacao_cadastros_path, class: "text-xs text-stone-500 hover:text-stone-700" %>
+    <h1 class="text-xl font-semibold text-stone-900 tracking-tight"><%= @solicitacao.nome %></h1>
+    <p class="text-sm text-stone-500">Enviada em <%= @solicitacao.created_at.strftime("%d/%m/%Y %H:%M") %> · <%= @solicitacao.status.capitalize %></p>
+  </div>
+
+  <div class="bg-white rounded-lg border border-stone-200 px-4 py-3">
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+      <div><dt class="text-xs uppercase tracking-wider text-stone-500">Nome completo</dt><dd class="text-stone-900"><%= @solicitacao.nome_completo.presence || "—" %></dd></div>
+      <div><dt class="text-xs uppercase tracking-wider text-stone-500">Nome curto (escala)</dt><dd class="text-stone-900"><%= @solicitacao.nome %></dd></div>
+      <div><dt class="text-xs uppercase tracking-wider text-stone-500">E-mail</dt><dd class="break-all text-stone-900"><%= @solicitacao.email %></dd></div>
+      <div><dt class="text-xs uppercase tracking-wider text-stone-500">Telefone</dt><dd class="text-stone-900"><%= @solicitacao.telefone.presence || "—" %></dd></div>
+      <div><dt class="text-xs uppercase tracking-wider text-stone-500">Sexo</dt><dd class="text-stone-900"><%= @solicitacao.sexo.presence || "—" %></dd></div>
+      <% if @solicitacao.ministro %>
+        <div><dt class="text-xs uppercase tracking-wider text-stone-500">Ministro</dt>
+          <dd><%= link_to @solicitacao.ministro.nome, admin_ministro_path(@solicitacao.ministro), class: "text-sky-700 hover:underline" %></dd></div>
+      <% end %>
+      <% if @solicitacao.motivo_rejeicao.present? %>
+        <div class="sm:col-span-2"><dt class="text-xs uppercase tracking-wider text-stone-500">Motivo da rejeição</dt><dd class="text-stone-900"><%= @solicitacao.motivo_rejeicao %></dd></div>
+      <% end %>
+    </dl>
+  </div>
+
+  <% if @solicitacao.pendente? %>
+    <div class="bg-white rounded-lg border border-stone-200 px-4 py-3 space-y-3">
+      <h2 class="text-sm font-semibold text-stone-900">Aprovar</h2>
+      <p class="text-xs text-stone-500">
+        Se este ministro já está cadastrado (por exemplo com e-mail provisório), selecione-o para atualizar
+        o cadastro em vez de criar um duplicado. O e-mail informado acima substituirá o atual.
+      </p>
+      <%= form_with url: aprovar_admin_solicitacao_cadastro_path(@solicitacao), method: :post, class: "space-y-3" do %>
+        <%= select_tag :ministro_id,
+              options_for_select([["Criar novo ministro", ""]] + @ministros_disponiveis.map { |m| ["#{m.nome} (#{m.email})", m.id] }, @ministro_sugerido&.id),
+              class: "w-full px-3 py-2 rounded-lg border border-stone-300 text-sm" %>
+        <%= submit_tag "Aprovar e criar acesso", data: { turbo_confirm: "Confirmar aprovação?" },
+              class: "px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg cursor-pointer" %>
+      <% end %>
+    </div>
+
+    <div class="bg-white rounded-lg border border-stone-200 px-4 py-3 space-y-3">
+      <h2 class="text-sm font-semibold text-stone-900">Rejeitar</h2>
+      <%= form_with url: rejeitar_admin_solicitacao_cadastro_path(@solicitacao), method: :post, class: "space-y-3" do %>
+        <%= text_area_tag :motivo, nil, rows: 2, placeholder: "Motivo (opcional)", class: "w-full px-3 py-2 rounded-lg border border-stone-300 text-sm" %>
+        <%= submit_tag "Rejeitar", data: { turbo_confirm: "Rejeitar esta solicitação?" },
+              class: "px-4 py-2 border border-red-200 text-red-700 hover:bg-red-50 text-sm font-medium rounded-lg bg-white cursor-pointer" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -5,7 +5,11 @@ module Admin
     before_action :set_registro, only: [:show, :edit, :update, :destroy]
 
     def index
-      @registros = RegistroEsportula.includes(:sacerdote).order(created_at: :desc).page(params[:page])
+      scope = RegistroEsportula.joins(:sacerdote).includes(:sacerdote)
+      scope = busca_em(scope, %w[sacerdotes.nome])
+      scope = scope.where(status: params[:status]) if RegistroEsportula::STATUS.include?(params[:status])
+      scope = scope.where(sacerdote_id: params[:sacerdote_id]) if params[:sacerdote_id].present?
+      @registros = scope.order(created_at: :desc).page(params[:page])
     end
 
     def show

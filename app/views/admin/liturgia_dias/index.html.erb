@@ -1,0 +1,104 @@
+<% mes_param = ->(d) { d.strftime("%Y-%m") } %>
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-semibold text-stone-800">Liturgia do dia</h1>
+      <p class="text-stone-500 mt-1">Leituras, cor litúrgica e santo do dia. Só chegam ao ministro depois de validadas.</p>
+    </div>
+    <%= button_to buscar_admin_liturgia_dias_path(mes: mes_param[@mes]), method: :post,
+          data: { turbo_confirm: "Buscar na Canção Nova os dias que ainda não passaram neste mês? Dias já validados não são alterados." },
+          class: "inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white font-medium rounded-xl shadow-sm transition-colors cursor-pointer" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M5.5 15A7 7 0 0018.4 9M18.5 9A7 7 0 005.6 15"/></svg>
+      Buscar leituras do mês
+    <% end %>
+  </div>
+
+  <div class="flex items-center justify-between bg-white rounded-2xl border border-stone-200 shadow-sm px-4 py-3">
+    <%= link_to "← #{l(@mes.prev_month, format: :month_year)}", admin_liturgia_dias_path(mes: mes_param[@mes.prev_month]), class: "text-sm text-slate-600 hover:text-slate-900" %>
+    <h2 class="font-semibold text-stone-800 capitalize"><%= l(@mes, format: :month_year) %></h2>
+    <%= link_to "#{l(@mes.next_month, format: :month_year)} →", admin_liturgia_dias_path(mes: mes_param[@mes.next_month]), class: "text-sm text-slate-600 hover:text-slate-900" %>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <% [
+      [@resumo[:validadas], "Validadas", "border-emerald-200 bg-emerald-50", "text-emerald-700", "text-emerald-800", "M5 13l4 4L19 7"],
+      [@resumo[:rascunhos], "Aguardando validação", "border-amber-200 bg-amber-50", "text-amber-700", "text-amber-800", "M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"],
+      [@resumo[:divergentes], "Com divergência", "border-red-200 bg-red-50", "text-red-700", "text-red-800", "M12 9v2m0 4h.01M10.3 3.9L2.4 17.5A2 2 0 004.1 20.5h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"],
+      [@resumo[:faltando], "Sem busca", "border-stone-200 bg-stone-50", "text-stone-600", "text-stone-700", "M20 12H4"]
+    ].each do |valor, rotulo, caixa, cor_icone, cor_valor, icone| %>
+      <div class="flex items-center gap-3 rounded-2xl border <%= caixa %> px-4 py-3">
+        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 <%= cor_icone %>">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= icone %>"/></svg>
+        </span>
+        <div>
+          <p class="text-2xl font-semibold leading-none <%= cor_valor %>"><%= valor %></p>
+          <p class="mt-1 text-xs <%= cor_icone %>"><%= rotulo %></p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <% @dias.each do |data, reg| %>
+      <% hoje = data == Date.current %>
+      <% passado = data < Date.current %>
+      <article class="group flex items-center gap-3 overflow-hidden rounded-xl border bg-white px-3 py-2 transition hover:shadow-sm
+                      <%= hoje ? 'border-sky-400 ring-1 ring-sky-200' : 'border-stone-200' %> <%= 'opacity-75 hover:opacity-100' if passado && !reg&.rascunho? %>">
+        <% if reg %>
+          <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-stone-300" style="background-color: <%= reg.cor_css %>; color: <%= reg.cor_texto_css %>">
+            <span class="text-lg font-bold leading-none tabular-nums"><%= data.day %></span>
+            <span class="mt-0.5 text-[9px] font-semibold uppercase tracking-wider"><%= t("date.abbr_day_names")[data.wday] %></span>
+          </div>
+        <% else %>
+          <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-stone-100 text-stone-500">
+            <span class="text-lg font-bold leading-none tabular-nums"><%= data.day %></span>
+            <span class="mt-0.5 text-[9px] font-semibold uppercase tracking-wider"><%= t("date.abbr_day_names")[data.wday] %></span>
+          </div>
+        <% end %>
+
+        <div class="min-w-0 flex-1">
+          <% if reg %>
+            <div class="flex items-baseline gap-2">
+              <%= link_to (reg.titulo.presence || "Sem título"), admin_liturgia_dia_path(reg), class: "truncate text-sm font-semibold text-stone-900 group-hover:text-sky-800" %>
+              <span class="shrink-0 text-xs text-stone-400"><%= reg.cor %></span>
+              <% if reg.santo_nome.present? %><span class="hidden truncate text-xs font-medium text-amber-800 lg:inline">✦ <%= reg.santo_nome %></span><% end %>
+            </div>
+            <div class="mt-1 flex flex-wrap gap-1">
+              <% reg.leituras_ordenadas.each do |lei| %>
+                <span class="inline-flex items-center rounded-md bg-stone-50 border border-stone-200 px-1.5 py-0.5 text-[11px] text-stone-600" title="<%= reg.rotulo_leitura(lei) %>">
+                  <span class="mr-1 font-semibold text-stone-500"><%= reg.rotulo_leitura(lei).sub("ª Leitura", "ª L.").sub("Evangelho", "Ev.") %></span>
+                  <%= lei["referencia"].to_s.sub(/\s*\(R\..*\)/, "").truncate(22) %>
+                </span>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-sm text-stone-400">Liturgia ainda não buscada</p>
+          <% end %>
+        </div>
+
+        <div class="flex shrink-0 items-center gap-2 text-[11px] font-medium">
+          <% if hoje %><span class="rounded-full bg-sky-100 px-2 py-0.5 text-sky-800">Hoje</span><% end %>
+          <% if reg.nil? %>
+            <span class="hidden rounded-full bg-stone-200 px-2 py-0.5 text-stone-600 sm:inline">Não buscada</span>
+          <% elsif reg.validada? %>
+            <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-800">✓ Validada</span>
+          <% else %>
+            <span class="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800">Rascunho</span>
+            <% if reg.divergente? %>
+              <span class="rounded-full bg-red-100 px-2 py-0.5 text-red-800" title="<%= reg.divergencias.join(' | ') %>">⚠ <%= reg.divergencias.size %></span>
+            <% end %>
+          <% end %>
+
+          <div class="w-20 text-right text-sm">
+            <% if reg %>
+              <%= link_to "#{reg.validada? ? 'Ver' : 'Revisar'} →", admin_liturgia_dia_path(reg), class: "font-medium #{reg.validada? ? 'text-stone-600' : 'text-sky-700'} hover:underline" %>
+            <% else %>
+              <%= button_to "Buscar", buscar_admin_liturgia_dias_path(data: data), method: :post, form: { class: "inline" },
+                    class: "rounded-lg bg-white border border-stone-300 px-2.5 py-0.5 text-sm font-medium text-slate-700 hover:bg-stone-100 cursor-pointer" %>
+            <% end %>
+          </div>
+        </div>
+      </article>
+    <% end %>
+  </div>
+</div>

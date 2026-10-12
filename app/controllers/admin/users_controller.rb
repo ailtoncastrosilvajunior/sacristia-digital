@@ -5,7 +5,9 @@ module Admin
     before_action :set_user, only: [:show, :edit, :update, :destroy]
 
     def index
-      @users = User.order(:email).page(params[:page])
+      scope = busca_em(User.all, %w[email nome])
+      scope = scope.com_perfil(params[:perfil]) if User::PERFIS_VALIDOS.include?(params[:perfil])
+      @users = scope.order(:email)
     end
 
     def show

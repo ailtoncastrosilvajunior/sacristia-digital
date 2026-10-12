@@ -1,0 +1,53 @@
+<%# locals: dia — usa @meu_id, @hoje, @apoios, @competencia %>
+<% plantonistas = dia.plantao ? dia.plantao.ministros.to_a.sort_by { |m| I18n.transliterate(m.nome.to_s).downcase } : [] %>
+<% no_plantao = plantonistas.any? { |m| m.id == @meu_id } %>
+<% oferta = @apoios[dia.data] %>
+<% apoiadores = (@apoiadores_por_dia[dia.data] || []).reject { |o| plantonistas.any? { |m| m.id == o.ministro_id } } %>
+<% total = plantonistas.size + apoiadores.size %>
+<% pode_oferecer = dia.plantao && dia.data >= @hoje && !no_plantao %>
+<li class="px-2.5 py-1.5">
+  <div class="space-y-1.5 rounded-xl bg-sky-50 px-2.5 py-2 ring-1 ring-sky-100">
+    <% if dia.plantao %>
+      <div class="flex items-center justify-between gap-2">
+        <p class="text-xs font-bold uppercase tracking-wide text-sky-800">Plantão do dia</p>
+        <span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-sky-700 ring-1 ring-sky-100"><%= total %> <%= total == 1 ? "ministro" : "ministros" %></span>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap gap-1">
+          <% plantonistas.each do |m| %>
+            <%= render "painel_ministro/escala_mensal/ministro_badge", nome: m.nome, meu: m.id == @meu_id %>
+          <% end %>
+          <% apoiadores.each do |o| %>
+            <span class="rounded-md border border-dashed px-2 py-0.5 text-xs font-semibold leading-5 <%= o.ministro_id == @meu_id ? 'border-sky-400 bg-sky-100 text-sky-900 font-bold' : 'border-sky-300 bg-white text-sky-950' %>" title="Apoio"><%= o.ministro.nome %> <span class="font-medium opacity-70">· apoio</span></span>
+          <% end %>
+        </div>
+        <% if oferta %>
+          <%= button_to "Retirar apoio", ministro_oferta_apoio_path(oferta), method: :delete,
+                class: "rounded-full bg-white px-3 py-1.5 text-xs font-bold text-sky-700 ring-1 ring-sky-300" %>
+        <% elsif pode_oferecer %>
+          <%= button_to "+ Oferecer apoio", ministro_oferta_apoios_path, method: :post, params: { data: dia.data.iso8601 },
+                class: "rounded-full bg-white px-3 py-1.5 text-xs font-bold text-sky-700 ring-1 ring-sky-300 active:bg-sky-100" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% dia.extras.each do |ex| %>
+      <% ex_ministros = ex.plantao_periodo_id.nil? ? escala_ministros_do_evento(ex, @meu_id) : [] %>
+      <div class="rounded-xl bg-white/80 px-2.5 py-1.5 ring-1 ring-sky-100">
+        <p class="text-sm font-semibold text-slate-900">
+          <span class="font-extrabold tabular-nums text-sky-600"><%= ex.horario.strftime("%-H:%M") %></span>
+          <span class="ml-1"><%= ex.tipo_servico&.nome %></span>
+          <% if ex.sacerdote %><span class="font-normal text-slate-500">· <%= ex.sacerdote.nome %></span><% end %>
+        </p>
+        <% if ex.descricao.present? %><p class="text-xs text-slate-500"><%= ex.descricao %></p><% end %>
+        <% if ex_ministros.any? %>
+          <div class="mt-1 flex flex-wrap gap-1">
+            <% ex_ministros.each do |m| %>
+              <%= render "painel_ministro/escala_mensal/ministro_badge", nome: m[:nome], meu: m[:meu], adoracao: m[:adoracao] %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</li>

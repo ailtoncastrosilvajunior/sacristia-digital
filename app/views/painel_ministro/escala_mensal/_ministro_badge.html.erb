@@ -1,0 +1,10 @@
+<%# locals: nome, meu: false, adoracao: false — padrão único de badge de ministro na escala mensal %>
+<% meu = local_assigns.fetch(:meu, false) %>
+<% adoracao = local_assigns.fetch(:adoracao, false) %>
+<% classes = if meu then "bg-sky-100 text-sky-900 font-bold ring-1 ring-sky-300"
+             elsif adoracao then "bg-white text-orange-900 font-semibold ring-1 ring-orange-400"
+             else "bg-slate-50 text-slate-900 font-medium ring-1 ring-slate-200" end %>
+<span class="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs leading-5 <%= classes %>">
+  <%= nome %>
+  <% if adoracao %><%= image_tag "custodia.png", alt: "Adoração", title: "Adoração", class: "h-4 w-auto" %><% end %>
+</span>

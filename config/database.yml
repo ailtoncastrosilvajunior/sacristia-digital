@@ -9,13 +9,22 @@ default: &default
   username: <%= ENV.fetch("DATABASE_USERNAME", "postgres") %>
   password: <%= ENV.fetch("DATABASE_PASSWORD", "") %>
 
+<% dev_url = ENV["DATABASE_URL"].to_s.strip.presence %>
 development:
   <<: *default
+<% if dev_url %>
+  url: <%= dev_url %>
+<% else %>
   database: <%= ENV.fetch("DATABASE_NAME", "sacristia_digital_dev") %>
+<% end %>
 
 test:
   <<: *default
+<% if ENV["TEST_DATABASE_URL"].to_s.strip.present? %>
+  url: <%= ENV["TEST_DATABASE_URL"].strip %>
+<% else %>
   database: <%= ENV.fetch("TEST_DATABASE_NAME", "sacristia_digital_test") %>
+<% end %>
 
 # Produção: use DATABASE_URL (recomendado na DigitalOcean) ou host/usuário/senha.
 # SSL: padrão "disable" evita "dh key too small" (OpenSSL 3 × TLS antigo no PG).

@@ -13,6 +13,10 @@ Rails.application.configure do
   )
   config.action_controller.perform_caching = true
   config.cache_store = :solid_cache_store
+
+  # Imagens (ex.: santo do dia). Disco local: monte um volume persistente em /app/storage
+  # ou troque por S3/Spaces em config/storage.yml.
+  config.active_storage.service = :local
   config.action_mailer.perform_caching = false
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost") }
   config.i18n.fallbacks = true

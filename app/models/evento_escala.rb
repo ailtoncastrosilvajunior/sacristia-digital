@@ -6,7 +6,7 @@ class EventoEscala < ApplicationRecord
   belongs_to :competencia_mensal
   belongs_to :tipo_servico
   belongs_to :sacerdote, optional: true
-  belongs_to :equipe, optional: true
+  belongs_to :plantao_periodo, optional: true
 
   has_many :escala_ministros, dependent: :destroy
   has_many :ministros, through: :escala_ministros
@@ -24,6 +24,16 @@ class EventoEscala < ApplicationRecord
   validates :quantidade_ministros, numericality: { greater_than_or_equal_to: 0 }
   validates :tipo_escala, inclusion: { in: TIPOS_ESCALA }
   validates :status, inclusion: { in: STATUS }
+  validate :plantao_apenas_para_extra
+
+  # Preenche a escala do evento com os ministros do bloco de plantão (cópia).
+  def popular_escala_do_plantao!
+    return unless plantao_periodo && escala_ministros.none?
+
+    plantao_periodo.ministros.each do |ministro|
+      escala_ministros.create!(ministro: ministro)
+    end
+  end
 
   scope :ordinarios, -> { where(tipo_escala: "ordinaria") }
   scope :extras, -> { where(tipo_escala: "extra") }
@@ -47,6 +57,11 @@ class EventoEscala < ApplicationRecord
     status == "cancelado"
   end
 
+  # Eventos com 0 ministros (ex.: confissão) não entram na escala de ministros.
+  def requer_ministros?
+    quantidade_ministros.positive? || escala_ministros.any?
+  end
+
   def to_s
     "#{tipo_servico.nome} - #{I18n.l(data)}"
   end
@@ -60,5 +75,16 @@ class EventoEscala < ApplicationRecord
       parts << "· adoração" if em.adoracao?
       parts.join(" ")
     end.join(", ")
+  end
+
+  private
+
+  def plantao_apenas_para_extra
+    return if plantao_periodo_id.blank?
+
+    errors.add(:plantao_periodo_id, "só se aplica a eventos extras") unless extra?
+    if plantao_periodo && plantao_periodo.competencia_mensal_id != competencia_mensal_id
+      errors.add(:plantao_periodo_id, "deve pertencer à mesma competência do evento")
+    end
   end
 end

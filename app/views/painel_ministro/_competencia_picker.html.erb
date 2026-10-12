@@ -1,0 +1,53 @@
+<%# locals: comp, competencias, rota (opcional: lambda(id) -> path) — lista da mais recente para a mais antiga. Seletor de mês com setas que indicam o mês de destino (abreviado no celular). %>
+<% rota = local_assigns[:rota] || ->(id) { ministro_root_path(competencia_mensal_id: id) } %>
+<% idx = competencias.index { |c| c.id == comp.id } %>
+<% mais_antiga = idx && idx < competencias.size - 1 ? competencias[idx + 1] : nil %>
+<% mais_nova = idx && idx.positive? ? competencias[idx - 1] : nil %>
+<% abrev = ->(c) { "#{I18n.t('date.abbr_month_names')[c.mes]&.downcase}/#{c.ano}" } %>
+<%# Sem competência liberada ao lado: mostra o mês do calendário, apagado e sem link. %>
+<% vizinho = ->(delta) { d = comp.periodo.advance(months: delta); [I18n.l(d, format: :month_year), "#{I18n.t('date.abbr_month_names')[d.month]&.downcase}/#{d.year}"] } %>
+<% btn = "flex min-w-0 items-center gap-1 rounded-full px-2 py-2 text-xs font-medium text-slate-600 active:bg-stone-100 sm:gap-1.5 sm:px-3 sm:text-sm" %>
+<% btn_off = "flex min-w-0 items-center gap-1 px-2 py-2 text-xs text-stone-300 sm:gap-1.5 sm:px-3 sm:text-sm" %>
+<% seta_esq = '<svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>'.html_safe %>
+<% seta_dir = '<svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>'.html_safe %>
+
+<nav class="grid items-center gap-1 border-b border-stone-200 px-1 py-1 sm:px-2" style="grid-template-columns: 1fr auto 1fr" aria-label="Competência">
+  <div class="flex justify-start">
+    <% if mais_antiga %>
+      <%= link_to rota.call(mais_antiga.id), class: btn, title: mais_antiga.label, aria: { label: "Mês anterior: #{mais_antiga.label}" } do %>
+        <%= seta_esq %>
+        <span class="truncate sm:hidden"><%= abrev.call(mais_antiga) %></span>
+        <span class="hidden truncate sm:inline"><%= mais_antiga.label %></span>
+      <% end %>
+    <% else %>
+      <% cheio, curto = vizinho.call(-1) %>
+      <span class="<%= btn_off %>" title="<%= cheio %> (sem escala liberada)">
+        <%= seta_esq %>
+        <span class="truncate sm:hidden"><%= curto %></span>
+        <span class="hidden truncate sm:inline"><%= cheio %></span>
+      </span>
+    <% end %>
+  </div>
+
+  <h2 class="px-1 text-sm font-bold text-slate-900 sm:text-base">
+    <span class="sm:hidden"><%= abrev.call(comp) %></span>
+    <span class="hidden sm:inline"><%= comp.label %></span>
+  </h2>
+
+  <div class="flex justify-end">
+    <% if mais_nova %>
+      <%= link_to rota.call(mais_nova.id), class: btn, title: mais_nova.label, aria: { label: "Próximo mês: #{mais_nova.label}" } do %>
+        <span class="truncate sm:hidden"><%= abrev.call(mais_nova) %></span>
+        <span class="hidden truncate sm:inline"><%= mais_nova.label %></span>
+        <%= seta_dir %>
+      <% end %>
+    <% else %>
+      <% cheio, curto = vizinho.call(1) %>
+      <span class="<%= btn_off %>" title="<%= cheio %> (sem escala liberada)">
+        <span class="truncate sm:hidden"><%= curto %></span>
+        <span class="hidden truncate sm:inline"><%= cheio %></span>
+        <%= seta_dir %>
+      </span>
+    <% end %>
+  </div>
+</nav>

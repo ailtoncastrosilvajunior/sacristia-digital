@@ -1,0 +1,92 @@
+<% conferencia = @liturgia_dia.leituras_conferencia.group_by { |l| l["tipo"] } %>
+<div class="space-y-6 max-w-5xl">
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <%= link_to "← Liturgia do mês", admin_liturgia_dias_path(mes: @liturgia_dia.data.strftime("%Y-%m")), class: "text-sm text-slate-500 hover:text-slate-800" %>
+      <h1 class="text-2xl font-semibold text-stone-800 mt-1"><%= l(@liturgia_dia.data, format: "%A, %d de %B de %Y").capitalize %></h1>
+      <p class="text-stone-600 mt-1">
+        <span class="inline-block w-3 h-3 rounded-full border border-stone-300 align-middle" style="background-color: <%= @liturgia_dia.cor_css %>"></span>
+        <%= @liturgia_dia.titulo %> · Cor: <%= @liturgia_dia.cor.presence || "—" %>
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to "Editar", edit_admin_liturgia_dia_path(@liturgia_dia), class: "px-3 py-2 rounded-lg border border-stone-300 text-sm text-stone-700 hover:bg-stone-50" %>
+      <%= button_to "Buscar novamente", sincronizar_admin_liturgia_dia_path(@liturgia_dia), method: :post,
+            data: { turbo_confirm: "Substituir as leituras atuais pelas da fonte? Edições manuais serão perdidas." },
+            class: "px-3 py-2 rounded-lg border border-stone-300 text-sm text-stone-700 hover:bg-stone-50 cursor-pointer" %>
+      <% if @liturgia_dia.validada? %>
+        <%= button_to "Retirar dos ministros", reabrir_admin_liturgia_dia_path(@liturgia_dia), method: :post,
+              class: "px-3 py-2 rounded-lg bg-amber-100 text-amber-900 text-sm hover:bg-amber-200 cursor-pointer" %>
+      <% else %>
+        <%= button_to "Validar e liberar", validar_admin_liturgia_dia_path(@liturgia_dia), method: :post,
+              data: { turbo_confirm: "Confirma que conferiu as leituras? Elas ficarão visíveis para todos os ministros." },
+              class: "px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 cursor-pointer" %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @liturgia_dia.validada? %>
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+      Validada por <strong><%= @liturgia_dia.validado_por&.nome.presence || @liturgia_dia.validado_por&.email || "—" %></strong>
+      em <%= l(@liturgia_dia.validado_em, format: "%d/%m/%Y %H:%M") if @liturgia_dia.validado_em %>. Visível aos ministros.
+    </div>
+  <% else %>
+    <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      Rascunho: ainda <strong>não</strong> aparece para os ministros. Confira cada leitura com o lecionário antes de validar.
+    </div>
+  <% end %>
+
+  <% if @liturgia_dia.divergente? %>
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+      <p class="font-semibold mb-1">Pontos de atenção na conferência entre fontes</p>
+      <ul class="list-disc pl-5 space-y-0.5">
+        <% @liturgia_dia.divergencias.each do |d| %><li><%= d %></li><% end %>
+      </ul>
+    </div>
+  <% elsif @liturgia_dia.fonte_conferencia.present? %>
+    <div class="rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-emerald-800">As duas fontes concordam (referências e textos).</div>
+  <% end %>
+
+  <div class="bg-white rounded-xl border border-stone-200 p-4 flex gap-4">
+    <% if @liturgia_dia.imagem_santo.attached? %>
+      <%= image_tag url_for(@liturgia_dia.imagem_santo), class: "w-24 h-24 rounded-lg object-cover border border-stone-200", alt: @liturgia_dia.santo_nome %>
+    <% end %>
+    <div>
+      <p class="text-xs uppercase tracking-wider text-stone-500">Santo / memória do dia</p>
+      <p class="font-semibold text-stone-800"><%= @liturgia_dia.santo_nome.presence || "Não informado" %></p>
+      <% if @liturgia_dia.santo_descricao.present? %><p class="text-sm text-stone-600 mt-1 whitespace-pre-line"><%= @liturgia_dia.santo_descricao %></p><% end %>
+    </div>
+  </div>
+
+  <% idx = Hash.new(0) %>
+  <% @liturgia_dia.leituras_ordenadas.each do |leitura| %>
+    <% outra = Array(conferencia[leitura["tipo"]])[idx[leitura["tipo"]]]; idx[leitura["tipo"]] += 1 %>
+    <section class="bg-white rounded-xl border border-stone-200 overflow-hidden">
+      <header class="px-4 py-3 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+        <h2 class="font-semibold text-stone-800"><%= @liturgia_dia.rotulo_leitura(leitura) %> <span class="font-normal text-stone-500">· <%= leitura["referencia"] %></span></h2>
+        <% if outra && outra["referencia"].to_s.squish != leitura["referencia"].to_s.squish %>
+          <span class="text-xs text-red-700">2ª fonte: <%= outra["referencia"] %></span>
+        <% end %>
+      </header>
+      <div class="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-stone-200">
+        <div class="p-4">
+          <p class="text-xs uppercase tracking-wider text-stone-400 mb-2"><%= @liturgia_dia.fonte %></p>
+          <p class="text-sm leading-relaxed text-stone-800 whitespace-pre-line"><%= leitura["texto"] %></p>
+        </div>
+        <div class="p-4 bg-stone-50/60">
+          <p class="text-xs uppercase tracking-wider text-stone-400 mb-2"><%= @liturgia_dia.fonte_conferencia.presence || "Segunda fonte" %></p>
+          <% if outra %>
+            <p class="text-sm leading-relaxed text-stone-600 whitespace-pre-line"><%= outra["texto"] %></p>
+          <% else %>
+            <p class="text-sm text-stone-400">Sem conferência.</p>
+          <% end %>
+        </div>
+      </div>
+    </section>
+  <% end %>
+
+  <p class="text-xs text-stone-400">
+    Fonte: <%= link_to @liturgia_dia.fonte, @liturgia_dia.fonte_url, target: "_blank", rel: "noopener", class: "underline" if @liturgia_dia.fonte_url.present? %>
+    <% if @liturgia_dia.buscado_em %>· buscado em <%= l(@liturgia_dia.buscado_em, format: "%d/%m/%Y %H:%M") %><% end %>
+  </p>
+</div>

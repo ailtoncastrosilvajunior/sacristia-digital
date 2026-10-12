@@ -5,7 +5,26 @@ module Admin
     before_action :set_evento, only: [:show, :edit, :update, :destroy]
 
     def index
-      @eventos = EventoEscala.extras.por_data.page(params[:page])
+      scope = EventoEscala.extras.joins(:tipo_servico).includes(:tipo_servico, :sacerdote, escala_ministros: :ministro)
+      scope = busca_em(scope, %w[evento_escala.local tipo_servicos.nome])
+      scope = scope.where(status: params[:status]) if EventoEscala::STATUS.include?(params[:status])
+      scope = scope.where(tipo_servico_id: params[:tipo_servico_id]) if params[:tipo_servico_id].present?
+
+      @aba = params[:aba] == "lista" ? "lista" : "calendario"
+      @vista_calendario = %w[semana dia].include?(params[:vista_calendario]) ? params[:vista_calendario] : "mes"
+      @data_ref = (params[:data_ref].presence && (Date.parse(params[:data_ref]) rescue nil)) || Date.current
+      @domingo_semana = @data_ref - @data_ref.wday
+      @inicio_mes = @data_ref.beginning_of_month
+      @fim_mes = @data_ref.end_of_month
+
+      @periodo = case @vista_calendario
+                 when "semana" then @domingo_semana..(@domingo_semana + 6)
+                 when "dia" then @data_ref..@data_ref
+                 else @inicio_mes..@fim_mes
+                 end
+      @eventos_total = scope.count
+      @eventos_lista = scope.where(data: @periodo).por_data.to_a
+      @eventos_contagem = @eventos_lista.size
     end
 
     def show
@@ -15,12 +34,13 @@ module Admin
       data = params[:data].presence&.then { |d| Date.parse(d) } || Date.current
       competencia = params[:competencia_mensal_id].present? ? CompetenciaMensal.find_by(id: params[:competencia_mensal_id]) : competencia_mensal_atual
       @evento = EventoEscala.new(tipo_escala: "extra", data: data, competencia_mensal_id: competencia[:id])
-      @evento.equipe_id = Equipe.para_dia(data, competencia: competencia)&.id if @evento.equipe_id.blank?
+      @evento.plantao_periodo_id = competencia.plantao_para_dia(data)&.id
     end
 
     def create
       @evento = EventoEscala.new(evento_params.merge(tipo_escala: "extra"))
       if @evento.save
+        @evento.popular_escala_do_plantao!
         redirect_to admin_eventos_extra_path(@evento), notice: "Evento extra criado com sucesso."
       else
         render :new, status: :unprocessable_entity
@@ -50,7 +70,7 @@ module Admin
     end
 
     def evento_params
-      params.require(:evento_escala).permit(:competencia_mensal_id, :tipo_servico_id, :data, :horario, :quantidade_ministros, :local, :descricao, :observacoes, :sacerdote_id, :valor_esportula, :equipe_id, :status)
+      params.require(:evento_escala).permit(:competencia_mensal_id, :tipo_servico_id, :data, :horario, :quantidade_ministros, :local, :descricao, :observacoes, :sacerdote_id, :valor_esportula, :plantao_periodo_id, :status)
     end
 
     def competencia_mensal_atual

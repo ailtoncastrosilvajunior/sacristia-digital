@@ -9,18 +9,31 @@ Rails.application.routes.draw do
 
   root "dashboard#index"
 
+  # Pré-cadastro público de ministro (precisa de aprovação do admin)
+  get "cadastro-ministro", to: "pre_cadastros#new", as: :novo_pre_cadastro
+  post "cadastro-ministro", to: "pre_cadastros#create", as: :pre_cadastros
+  get "cadastro-ministro/enviado", to: "pre_cadastros#enviado", as: :pre_cadastro_enviado
+
   namespace :admin do
     root "dashboard#index"
     resources :users
     resources :ministros
+    resources :solicitacao_cadastros, path: "solicitacoes-cadastro", only: [:index, :show] do
+      member do
+        post :aprovar
+        post :rejeitar
+      end
+    end
     resources :sacerdotes
     resources :tipo_servicos, path: "tipo-servicos"
     resources :calendario_base, path: "calendario-base"
-    resources :equipes
     resources :competencia_mensal, path: "competencia-mensal" do
       member do
         post :gerar_escala
         post :regenerar_escala
+      end
+      resources :plantao_periodos, path: "plantao", except: [:show] do
+        collection { post :copiar_anterior }
       end
     end
     resources :evento_escala, path: "eventos-escala", only: [:show, :new, :create, :edit, :update, :destroy] do
@@ -30,6 +43,15 @@ Rails.application.routes.draw do
       end
     end
     resources :eventos_extra, path: "eventos-extra"
+    resources :liturgia_dias, path: "liturgia", only: [:index, :show, :edit, :update] do
+      collection { post :buscar }
+      member do
+        post :validar
+        post :reabrir
+        post :sincronizar
+        delete :remover_imagem
+      end
+    end
     resources :registros_esportula, path: "esportulas"
     get "relatorios", to: "relatorios#index"
   end
@@ -50,6 +72,17 @@ Rails.application.routes.draw do
   scope path: "ministro", module: "painel_ministro", as: "ministro" do
     root "dashboard#index"
     get "meus-servicos", to: "servicos#index"
+    get "escala-do-mes", to: "escala_mensal#show", as: :escala_mensal
+    get "escala-do-mes/imprimir", to: "escala_mensal#imprimir", as: :escala_mensal_imprimir
+    get "liturgia", to: "liturgia#index", as: :liturgia_index
+    get "liturgia/:data", to: "liturgia#show", as: :liturgia, constraints: { data: /\d{4}-\d{2}-\d{2}/ }
+    resources :solicitacao_trocas, path: "trocas", only: [:create, :destroy] do
+      member do
+        patch :aceitar
+        patch :recusar
+      end
+    end
+    resources :oferta_apoios, path: "apoios", only: [:create, :destroy]
     resources :servicos, only: [:show] do
       member do
         patch :confirmar

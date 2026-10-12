@@ -84,8 +84,14 @@ module Admin
     end
 
     def gerar_escala
-      ::GeracaoEscalaService.new(@competencia).gerar!
-      redirect_to admin_competencia_mensal_path(@competencia), notice: "Escala gerada com sucesso."
+      modo = params[:modo].to_s
+      criados = ::GeracaoEscalaService.new(@competencia).gerar!(modo: modo)
+      notice = if modo == "manter"
+        "Eventos existentes mantidos. #{criados} #{criados == 1 ? 'novo evento criado' : 'novos eventos criados'}."
+      else
+        "Escala gerada com sucesso."
+      end
+      redirect_to admin_competencia_mensal_path(@competencia), notice: notice
     rescue ActiveRecord::RecordInvalid => e
       redirect_to admin_competencia_mensal_path(@competencia), alert: "Erro ao gerar escala: #{e.message}"
     end
@@ -112,7 +118,7 @@ module Admin
     end
 
     def assign_tabs_and_periodo!
-      @vista_lista = params[:vista] == "card" ? "card" : "tabela"
+      @vista_lista = "card"
       @aba = params[:aba] == "lista" ? "lista" : "calendario"
       @vista_calendario = %w[semana dia].include?(params[:vista_calendario]) ? params[:vista_calendario] : "mes"
       ref = params[:data_ref].presence&.then { |d| Date.parse(d) rescue nil }

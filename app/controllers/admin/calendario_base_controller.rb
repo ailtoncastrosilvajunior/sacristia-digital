@@ -5,7 +5,17 @@ module Admin
     before_action :set_calendario_base, only: [:show, :edit, :update, :destroy]
 
     def index
-      @calendario_base = CalendarioBase.ativos.order(:dia_da_semana, :horario)
+      scope = CalendarioBase.left_joins(:sacerdote).includes(:sacerdote)
+      scope = busca_em(scope, %w[sacerdotes.nome])
+      scope = case params[:status]
+              when "inativo" then scope.where(ativo: false)
+              when "todos" then scope
+              else scope.where(ativo: true)
+              end
+      scope = scope.where(dia_da_semana: params[:dia_da_semana]) if params[:dia_da_semana].present?
+      scope = scope.where(tipo: params[:tipo]) if CalendarioBase.tipos.key?(params[:tipo])
+      @calendario_base = scope.order(:dia_da_semana, :horario)
+      @por_dia = @calendario_base.group_by(&:dia_da_semana)
     end
 
     def show
@@ -13,6 +23,8 @@ module Admin
 
     def new
       @calendario_base = CalendarioBase.new
+      dia = params[:dia_da_semana]
+      @calendario_base.dia_da_semana = dia.to_i if dia.present? && (0..6).cover?(dia.to_i)
     end
 
     def create

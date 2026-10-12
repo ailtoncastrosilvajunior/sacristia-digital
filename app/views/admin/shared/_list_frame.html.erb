@@ -1,0 +1,15 @@
+<%# Lista com scroll vertical (cabeçalho fixo) dentro de um turbo-frame, com paginação opcional.
+    Uso: render layout: "admin/shared/list_frame", locals: { collection: @itens } do ... <table> ... end %>
+<%= turbo_frame_tag "lista", target: "_top" do %>
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+    <div class="overflow-auto max-h-[calc(100vh-18rem)] min-h-40">
+      <%= yield %>
+    </div>
+  </div>
+
+  <% if local_assigns[:collection].respond_to?(:total_pages) %>
+    <div class="flex justify-center mt-6">
+      <%= paginate collection %>
+    </div>
+  <% end %>
+<% end %>

@@ -1,0 +1,129 @@
+<%#
+  Componente de seleção de ministros (arrastar e soltar + busca).
+  Deve ser renderizado DENTRO de um elemento com data-controller="escalar-ministros"
+  e de um <form> que contenha <div data-ministro-ids-container></div>.
+
+  Locais:
+    disponiveis        - ministros que podem ser escolhidos (obrigatório)
+    escalados          - itens já selecionados; Ministro ou objeto com #ministro (ex.: EscalaMinistro) (obrigatório)
+    roles              - exibe botões Coord./Ador. (padrão: true)
+    recarregar         - exibe botão "Recarregar" (precisa de data-escalar-ministros-url-value; padrão: true)
+    oculto             - esconde a seção (padrão: false)
+    titulo             - título da seção (padrão: "Ministros")
+    descricao          - texto de ajuda (HTML seguro opcional)
+    titulo_escalados   - título da coluna da direita (padrão: "Neste evento")
+    vazio_titulo / vazio_texto - mensagem da coluna da direita vazia
+%>
+<% roles = local_assigns.fetch(:roles, true) %>
+<% recarregar = local_assigns.fetch(:recarregar, true) %>
+<% oculto = local_assigns.fetch(:oculto, false) %>
+<% titulo = local_assigns.fetch(:titulo, "Ministros") %>
+<% titulo_escalados = local_assigns.fetch(:titulo_escalados, "Neste evento") %>
+<% vazio_titulo = local_assigns.fetch(:vazio_titulo, "Arraste ministros para cá") %>
+<% vazio_texto = local_assigns.fetch(:vazio_texto, "Solte na zona à direita para formar a equipe desta celebração.") %>
+<% descricao = local_assigns[:descricao] || (roles ? safe_join(["Monte a equipe à direita. Um ", tag.span("coordenador", class: "font-semibold text-amber-700"), " e um responsável pela ", tag.span("adoração", class: "font-semibold text-fuchsia-700"), " (opcional)."]) : "Arraste os ministros da lista à esquerda para a coluna da direita.") %>
+<% itens_escalados = escalados.map { |e| m = e.respond_to?(:ministro) ? e.ministro : e; [e, m] }.select { |_, m| m.present? } %>
+<% ids_escalados = itens_escalados.map { |_, m| m.id } %>
+<section class="<%= 'hidden ' if oculto %>rounded-2xl border border-stone-200/90 bg-white shadow-md shadow-stone-900/5 ring-1 ring-stone-100 overflow-hidden">
+  <div class="px-5 py-4 sm:px-6 border-b border-stone-100 bg-gradient-to-r from-sky-50/90 via-white to-cyan-50/40 flex items-start gap-4">
+    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-sky-200/70 text-sky-700">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    </span>
+    <div class="min-w-0 pt-0.5">
+      <h3 class="text-base font-bold text-stone-900 tracking-tight"><%= titulo %></h3>
+      <p class="text-xs text-stone-500 mt-1 leading-relaxed"><%= descricao %></p>
+    </div>
+  </div>
+  <div class="p-5 sm:p-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
+      <div class="rounded-2xl border-2 border-dashed border-stone-200/90 bg-gradient-to-b from-stone-50/90 to-white p-4 sm:p-5 min-h-[12rem] ring-1 ring-stone-100" data-zone="disponiveis"
+           data-action="dragover->escalar-ministros#dragOver drop->escalar-ministros#drop">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-stone-500">Disponíveis</h4>
+          <% if recarregar %>
+            <button type="button" data-action="click->escalar-ministros#recarregar" data-tipo="ministros" data-escalar-ministros-target="botaoRecarregar" title="Recarregar lista de ministros" aria-label="Recarregar lista de ministros"
+                    class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-stone-300 bg-white text-[11px] font-semibold normal-case tracking-normal text-stone-600 hover:bg-stone-50 hover:border-stone-400 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
+              <svg class="w-3.5 h-3.5" data-icone fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Recarregar
+            </button>
+          <% end %>
+        </div>
+        <div class="relative mb-3">
+          <svg class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+          <input type="search" autocomplete="off" placeholder="Buscar ministro… (Enter adiciona)" aria-label="Buscar ministro"
+                 data-escalar-ministros-target="busca"
+                 data-action="input->escalar-ministros#buscar keydown->escalar-ministros#buscaTecla"
+                 class="block w-full rounded-lg border border-stone-300 bg-white pl-8 pr-3 py-1.5 text-sm text-stone-800 placeholder:text-stone-400 shadow-sm focus:border-sky-500 focus:ring-sky-500">
+        </div>
+        <div class="flex flex-wrap gap-2 max-h-[220px] overflow-y-auto pr-1" data-escalar-ministros-target="listaDisponiveis">
+          <% disponiveis.each do |m| %>
+            <% next if ids_escalados.include?(m.id) %>
+            <div data-ministro-id="<%= m.id %>" data-ministro-json='<%= { id: m.id, nome: m.nome }.to_json %>'
+                 class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-stone-200/90 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:border-sky-400 hover:shadow-md hover:ring-1 hover:ring-sky-200/50 transition-all text-xs font-semibold text-stone-800"
+                 draggable="true" data-action="dragstart->escalar-ministros#dragStart dragend->escalar-ministros#dragEnd">
+              <span class="text-stone-400"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></span>
+              <%= m.nome %>
+            </div>
+          <% end %>
+          <p data-escalar-ministros-target="buscaVazia" class="hidden text-stone-500 text-sm py-4 w-full text-center">Nenhum ministro encontrado.</p>
+          <% if (disponiveis.map(&:id) - ids_escalados).empty? %>
+            <p class="text-stone-500 text-sm py-6 w-full text-center rounded-xl border border-dashed border-stone-200 bg-white/70">Todos os ministros já foram selecionados.</p>
+          <% end %>
+        </div>
+      </div>
+      <div class="rounded-2xl border-2 border-sky-400/50 bg-gradient-to-br from-sky-50 via-white to-blue-50/50 p-3 min-h-[12rem] shadow-inner shadow-sky-900/5 ring-1 ring-sky-200/50" data-zone="escalados"
+           data-action="dragover->escalar-ministros#dragOver drop->escalar-ministros#drop">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-sky-900/90"><%= titulo_escalados %></h4>
+          <% if roles %>
+            <span class="text-[10px] font-semibold text-sky-700/80 bg-sky-100/80 px-2 py-0.5 rounded-full">Coord. · Ador.</span>
+          <% end %>
+        </div>
+        <div class="space-y-1 min-h-[120px]" data-escalar-ministros-target="escalados" data-zone="escalados"
+             data-vazio-titulo="<%= vazio_titulo %>" data-vazio-texto="<%= vazio_texto %>"
+             data-action="dragover->escalar-ministros#dragOver drop->escalar-ministros#drop">
+          <% itens_escalados.each do |item, m| %>
+            <% coord = roles && item.respond_to?(:coordenador?) && item.coordenador? %>
+            <% ador = roles && item.respond_to?(:adoracao?) && item.adoracao? %>
+            <div data-ministro-id="<%= m.id %>" data-ministro-json='<%= { id: m.id, nome: m.nome }.to_json %>'
+                 class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-sky-200/80 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:border-sky-400 hover:shadow-md transition-all group"
+                 draggable="true"
+                 data-action="dragstart->escalar-ministros#dragStart dragend->escalar-ministros#dragEnd dragover->escalar-ministros#dragOver drop->escalar-ministros#drop">
+              <% if roles %>
+                <span class="shrink-0 <%= coord ? "text-amber-500" : "text-stone-300" %>">
+                  <svg class="w-4 h-4 <%= coord ? "fill-amber-500" : "" %>" fill="<%= coord ? "currentColor" : "none" %>" stroke="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                </span>
+              <% end %>
+              <span class="text-[13px] font-semibold flex-1 min-w-0 truncate <%= coord ? "text-sky-800" : "text-stone-800" %>"><%= m.nome %></span>
+              <div class="flex items-center gap-1 shrink-0">
+                <% if roles %>
+                  <button type="button" class="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-md <%= coord ? "bg-amber-100 text-amber-900 ring-1 ring-amber-200/80" : "bg-stone-100 text-stone-600 hover:bg-amber-50 hover:text-amber-800 ring-1 ring-stone-200/80" %> transition-colors"
+                          data-action="click->escalar-ministros#setCoordenadorClick" data-ministro-id="<%= m.id %>" title="Coordenador">
+                    <%= coord ? "★ Coord." : "Coord." %>
+                  </button>
+                  <button type="button" class="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-md <%= ador ? "bg-fuchsia-100 text-fuchsia-900 ring-1 ring-fuchsia-200/80" : "bg-stone-100 text-stone-600 hover:bg-fuchsia-50 hover:text-fuchsia-800 ring-1 ring-stone-200/80" %> transition-colors"
+                          data-action="click->escalar-ministros#setAdoracaoClick" data-ministro-id="<%= m.id %>" title="Adoração">
+                    <%= ador ? "♥ Ador." : "Ador." %>
+                  </button>
+                <% end %>
+                <button type="button" class="shrink-0 p-1 rounded-md text-stone-400 hover:text-red-600 hover:bg-red-50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                        data-action="click->escalar-ministros#removeClick" title="Remover">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+          <% end %>
+          <% if itens_escalados.empty? %>
+            <div class="flex flex-col items-center justify-center py-10 rounded-xl border border-dashed border-sky-300/70 bg-white/60 text-center">
+              <div class="h-10 w-10 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center mb-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              </div>
+              <p class="text-sm font-medium text-sky-900/90"><%= vazio_titulo %></p>
+              <p class="text-xs text-sky-700/70 mt-1 max-w-[14rem]"><%= vazio_texto %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

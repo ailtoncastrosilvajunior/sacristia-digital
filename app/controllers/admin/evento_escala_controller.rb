@@ -2,11 +2,14 @@
 
 module Admin
   class EventoEscalaController < Admin::BaseController
-    before_action :set_evento, only: [:show, :edit, :update, :destroy, :escalar_ministros, :update_escalar_ministros]
+    before_action :set_evento_completo, only: [:show]
+    before_action :set_evento, only: [:edit, :update, :destroy, :escalar_ministros, :update_escalar_ministros]
     before_action :set_competencia, only: [:new, :create]
 
     def show
-      if turbo_frame_request?
+      if request.headers["Turbo-Frame"] == "evento_drawer"
+        render partial: "show_drawer", layout: false
+      elsif turbo_frame_request?
         render partial: "show_modal", layout: false
       end
     end
@@ -17,7 +20,7 @@ module Admin
         horario: params[:horario].presence || "08:00",
         quantidade_ministros: 2,
         tipo_escala: "ordinaria",
-        status: "pendente"
+        status: "confirmado"
       )
       @evento.tipo_servico = TipoServico.ativos.ordinarios.first if TipoServico.ativos.ordinarios.any?
 
@@ -114,17 +117,26 @@ module Admin
 
     private
 
+    # Carrega tudo o que o drawer/ficha exibe em 1 consulta + 1 por associação (sem N+1).
+    def set_evento_completo
+      @evento = EventoEscala
+        .includes(:tipo_servico, :sacerdote, :plantao_periodo, :competencia_mensal, escala_ministros: :ministro)
+        .find(params[:id])
+    end
+
     def set_evento
       @evento = EventoEscala.find(params[:id])
     end
 
     def set_competencia
-      @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
+      # No "new" vem na raiz da URL; no "create" o formulário envia aninhado em evento_escala[...]
+      id = params[:competencia_mensal_id].presence || params.dig(:evento_escala, :competencia_mensal_id)
+      @competencia = CompetenciaMensal.find(id)
     end
 
     def evento_params
       p = params.require(:evento_escala).permit(:competencia_mensal_id, :tipo_servico_id, :data, :horario,
-        :quantidade_ministros, :local, :descricao, :observacoes, :sacerdote_id, :valor_esportula, :equipe_id, :status,
+        :quantidade_ministros, :local, :descricao, :observacoes, :sacerdote_id, :valor_esportula, :plantao_periodo_id, :status,
         ministro_ids: [])
       p[:ministro_ids] = (p[:ministro_ids] || []).reject(&:blank?)
       p

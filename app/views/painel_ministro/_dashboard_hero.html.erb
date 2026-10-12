@@ -1,0 +1,7 @@
+<%# locals: primeiro_nome, resumo (optional) %>
+<header class="mb-4">
+  <h1 class="text-2xl font-bold tracking-tight text-slate-900">Olá, <%= primeiro_nome %></h1>
+  <% if local_assigns[:resumo].present? %>
+    <p class="mt-0.5 text-sm text-stone-500"><%= resumo %></p>
+  <% end %>
+</header>

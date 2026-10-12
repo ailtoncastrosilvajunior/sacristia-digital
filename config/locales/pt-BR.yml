@@ -6,30 +6,79 @@ pt-BR:
       ministro: Ministro
       sacerdote: Sacerdote
   errors:
-    messages:
+    format: "%{attribute} %{message}"
+    messages: &mensagens_erro
+      accepted: "deve ser aceito"
+      blank: "não pode ficar em branco"
+      present: "deve ficar em branco"
       confirmation: "não confere com %{attribute}"
+      empty: "não pode ficar vazio"
+      equal_to: "deve ser igual a %{count}"
+      even: "deve ser par"
+      exclusion: "não está disponível"
+      greater_than: "deve ser maior que %{count}"
+      greater_than_or_equal_to: "deve ser maior ou igual a %{count}"
+      inclusion: "não está incluído na lista"
+      invalid: "não é válido"
+      less_than: "deve ser menor que %{count}"
+      less_than_or_equal_to: "deve ser menor ou igual a %{count}"
+      not_a_number: "não é um número"
+      not_an_integer: "deve ser um número inteiro"
+      odd: "deve ser ímpar"
+      required: "é obrigatório"
+      taken: "já está em uso"
+      too_long:
+        one: "é muito longo (máximo: 1 caractere)"
+        other: "é muito longo (máximo: %{count} caracteres)"
+      too_short:
+        one: "é muito curto (mínimo: 1 caractere)"
+        other: "é muito curto (mínimo: %{count} caracteres)"
+      wrong_length:
+        one: "deve ter 1 caractere"
+        other: "deve ter %{count} caracteres"
+      other_than: "deve ser diferente de %{count}"
   activerecord:
     errors:
       messages:
-        confirmation: "não confere com %{attribute}"
+        <<: *mensagens_erro
+        record_invalid: "A validação falhou: %{errors}"
+        restrict_dependent_destroy:
+          has_one: "Não é possível excluir o registro pois existe um(a) %{record} dependente"
+          has_many: "Não é possível excluir o registro pois existem %{record} dependentes"
       models:
         user:
           attributes:
             password_confirmation:
               confirmation: "não confere com a senha"
+        solicitacao_cadastro:
+          attributes:
+            password_confirmation:
+              confirmation: "não confere com a senha"
+            email_confirmation:
+              confirmation: "não confere com o e-mail"
     models:
       user: Usuário
       ministro: Ministro
       sacerdote: Sacerdote
       tipo_servico: Tipo de Serviço
       calendario_base: Calendário Base
-      equipe: Equipe
       competencia_mensal: Competência Mensal
       evento_escala: Evento da Escala
       escala_ministro: Escala do Ministro
       plantao_periodo: Período de Plantão
       registro_esportula: Registro de Espórtula
+      solicitacao_cadastro: Solicitação de Cadastro
     attributes:
+      solicitacao_cadastro:
+        nome_completo: Nome completo
+        nome: Nome curto
+        email: E-mail
+        email_confirmation: Confirmação do e-mail
+        telefone: Telefone
+        sexo: Sexo
+        password: Senha
+        password_confirmation: Confirmação da senha
+        status: Status
       user:
         email: E-mail
         nome: Nome
@@ -37,7 +86,8 @@ pt-BR:
         password_confirmation: Confirmação da senha
         current_password: Senha atual
       ministro:
-        nome: Nome
+        nome: Nome curto
+        nome_completo: Nome completo
         email: E-mail
         telefone: Telefone
         sexo: Sexo
@@ -64,7 +114,7 @@ pt-BR:
           observacoes: Observações
           sacerdote_id: Sacerdote
           valor_esportula: Valor Espórtula
-          equipe_id: Equipe
+          plantao_periodo_id: Plantão
           tipo_escala: Tipo de Escala
       sacerdote:
         nome: Nome

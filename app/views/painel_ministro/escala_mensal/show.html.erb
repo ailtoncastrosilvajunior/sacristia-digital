@@ -1,0 +1,116 @@
+<% content_for :title, "Escala de #{@competencia.label}" %>
+<% mes_params = { competencia_mensal_id: @competencia.id } %>
+<%# Área de altura fixa: cabeçalho, faixa de dias e filtros ficam parados; só a lista de cards rola. %>
+<div class="flex h-[calc(100dvh-9.5rem)] flex-col gap-2 sm:h-[calc(100dvh-11rem)]" <%= 'data-controller=escala-filtro' if @dias.any? %>>
+  <header class="flex shrink-0 items-center justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Escala do mês</h1>
+      <p class="hidden text-sm text-stone-500 sm:block">Todos os horários e ministros de <%= @competencia.label %>.</p>
+    </div>
+    <%= link_to ministro_escala_mensal_imprimir_path(mes_params), target: "_blank", rel: "noopener",
+          class: "shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-white active:bg-slate-900" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+      Imprimir / PDF
+    <% end %>
+  </header>
+
+  <div class="shrink-0 rounded-2xl border border-stone-200 bg-white">
+    <%= render "painel_ministro/competencia_picker", comp: @competencia, competencias: @competencias,
+          rota: ->(id) { ministro_escala_mensal_path(competencia_mensal_id: id) } %>
+  </div>
+
+  <% if @dias.empty? %>
+    <p class="py-8 text-center text-base text-stone-500">Nenhum serviço escalado neste mês.</p>
+  <% else %>
+    <%# Faixa de dias do mês %>
+    <% por_data = @dias.index_by(&:data) %>
+    <div data-escala-filtro-target="faixa" class="relative flex shrink-0 gap-1.5 overflow-x-auto pb-3">
+      <% (@competencia.periodo..@competencia.periodo_fim).each do |d| %>
+        <% dia = por_data[d] %>
+        <% eh_hoje = d == @hoje %>
+        <% tag = dia ? :a : :span %>
+        <%= content_tag tag, (dia ? { href: "#dia-#{d.day}", data: { action: "click->escala-filtro#irParaDia", dia: d.day, hoje: eh_hoje.to_s } } : { data: { hoje: eh_hoje.to_s } }).merge(
+              class: "flex w-11 shrink-0 flex-col items-center rounded-xl py-1.5 ring-1 #{eh_hoje ? 'bg-sky-500 text-white ring-sky-500' : (dia ? 'bg-white text-slate-900 ring-slate-200' : 'bg-transparent text-slate-300 ring-transparent')}") do %>
+          <span class="text-[10px] font-bold uppercase <%= eh_hoje ? 'text-sky-100' : 'text-slate-500' %>"><%= I18n.t("date.abbr_day_names")[d.wday] %></span>
+          <span class="text-base font-extrabold tabular-nums leading-tight"><%= d.day %></span>
+          <span class="mt-0.5 h-1.5 w-1.5 rounded-full <%= @dias_meus.include?(d) ? (eh_hoje ? 'bg-white' : 'bg-sky-500') : (dia ? (eh_hoje ? 'bg-sky-300' : 'bg-slate-300') : 'bg-transparent') %>"></span>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%# Filtros %>
+    <div class="relative flex shrink-0 gap-1.5 overflow-x-auto">
+      <% [["todos", "Todos os dias", @dias.size], ["meus", "Minha escala", @dias_meus.size]].each do |chave, rotulo, qtd| %>
+        <button type="button" data-escala-filtro-target="botao" data-filtro="<%= chave %>" data-action="escala-filtro#filtrar"
+                class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 ring-slate-200 <%= chave == 'todos' ? 'bg-sky-600 text-white' : 'bg-white text-slate-700' %>">
+          <%= rotulo %> (<%= qtd %>)
+        </button>
+      <% end %>
+    </div>
+
+    <%# Lista do mês inteiro, renderizada de uma vez: filtrar ou escolher um dia não consulta o banco. %>
+    <div data-escala-filtro-target="lista" class="relative min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain px-0.5 pb-2 pt-0.5">
+      <% if @trocas_recebidas.any? %>
+    <section class="space-y-2 rounded-2xl bg-sky-100 p-3 ring-1 ring-sky-200">
+      <p class="text-[11px] font-bold uppercase tracking-wider text-sky-800">Pedidos de troca para você (<%= @trocas_recebidas.size %>)</p>
+      <% @trocas_recebidas.each do |t| %>
+        <% ev = t.evento_escala %>
+        <div class="space-y-2 rounded-xl bg-white p-3 text-slate-900">
+          <p class="text-sm"><strong><%= t.solicitante.nome %></strong> pede que você assuma:</p>
+          <p class="text-base font-bold"><%= l(ev.data, format: "%A, %d/%m") %> · <span class="tabular-nums text-sky-600"><%= ev.horario.strftime("%-H:%M") %></span>
+            <span class="text-sm font-semibold text-slate-500"><%= ev.tipo_servico&.nome %><%= " · #{ev.sacerdote.nome}" if ev.sacerdote %></span></p>
+          <% if t.motivo.present? %><p class="text-sm italic text-slate-600">“<%= t.motivo %>”</p><% end %>
+          <div class="grid grid-cols-2 gap-2">
+            <%= button_to "Aceitar", aceitar_ministro_solicitacao_troca_path(t), method: :patch, class: "w-full rounded-xl bg-sky-600 px-3 py-2.5 text-sm font-bold text-white active:bg-sky-700" %>
+            <%= button_to "Recusar", recusar_ministro_solicitacao_troca_path(t), method: :patch, class: "w-full rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 active:bg-slate-50" %>
+          </div>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+
+    <% @dias.each do |dia| %>
+      <% eh_hoje = dia.data == @hoje %>
+      <% passado = dia.data < @hoje %>
+      <% fds = dia.data.saturday? || dia.data.sunday? %>
+      <% meu_dia = @dias_meus.include?(dia.data) %>
+      <section id="dia-<%= dia.data.day %>" data-escala-filtro-target="dia" data-dia="<%= dia.data.day %>" data-meu="<%= meu_dia %>"
+               class="overflow-hidden rounded-2xl bg-white <%= eh_hoje ? 'border-2 border-sky-500 shadow-md shadow-sky-500/20' : 'border border-slate-200' %> <%= 'opacity-70' if passado %>">
+        <div class="flex items-center gap-2.5 border-b border-slate-100 bg-white px-3 py-1.5">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg font-extrabold tabular-nums <%= eh_hoje ? 'bg-sky-500 text-white' : (fds ? 'bg-sky-700 text-white' : 'bg-slate-200 text-slate-900') %>"><%= dia.data.day %></span>
+          <p class="flex-1 text-base font-bold capitalize text-slate-900"><%= escala_dia_semana(dia.data) %></p>
+          <% if eh_hoje %>
+            <span class="rounded-full bg-sky-500 px-2 py-0.5 text-xs font-bold text-white">Hoje</span>
+          <% elsif meu_dia %>
+            <span class="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-700">Você serve</span>
+          <% end %>
+        </div>
+
+        <ul class="divide-y divide-slate-100">
+          <% dia.eventos.each do |ev| %>
+            <%= render "painel_ministro/escala_mensal/celebracao", ev: ev, dia: dia %>
+          <% end %>
+
+          <% if dia.plantao || dia.extras.any? %>
+            <%= render "painel_ministro/escala_mensal/plantao", dia: dia %>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+
+  <p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-slate-500">
+    <span class="inline-flex items-center gap-1.5"><%= image_tag "custodia.png", alt: "", class: "h-4 w-auto" %> adoração</span>
+    <span>o 1º da lista coordena</span>
+  </p>
+    </div>
+  <% end %>
+</div>
+
+<%# Detalhes da celebração: o conteúdo é buscado só ao tocar em "Ver detalhes", sem recarregar a lista. %>
+<div data-controller="modal">
+  <div data-modal-target="backdrop" class="fixed inset-0 z-50 hidden items-end justify-center bg-stone-900/50 p-3 sm:items-center" data-action="click->modal#closeBackground">
+    <div data-action="click->modal#stopPropagation" class="w-full max-w-lg">
+      <turbo-frame id="servico_modal" data-modal-target="frame" data-action="turbo:frame-load->modal#show turbo:frame-render->modal#show"></turbo-frame>
+    </div>
+  </div>
+</div>

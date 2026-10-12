@@ -1,0 +1,13 @@
+<turbo-frame id="servico_modal">
+  <div class="flex max-h-[88vh] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-stone-200">
+    <div class="flex shrink-0 items-center justify-between border-b border-stone-200 px-4 py-2.5">
+      <p class="text-sm font-bold text-slate-900">Detalhes da celebração</p>
+      <button type="button" data-action="click->modal#close" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700" aria-label="Fechar">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-3">
+      <%= render template: "painel_ministro/servicos/show" %>
+    </div>
+  </div>
+</turbo-frame>

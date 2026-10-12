@@ -1,5 +1,5 @@
-<% equipes_plantao = Equipe.where.not(dia_inicio: nil).where.not(dia_fim: nil).map { |e| { id: e.id, dia_inicio: e.dia_inicio, dia_fim: e.dia_fim } } %>
-<div class="space-y-6" data-controller="equipe-sugestor" data-equipe-sugestor-equipes-value='<%= equipes_plantao.to_json %>'>
+<% plantoes = CompetenciaMensal.find_by(id: @evento.competencia_mensal_id)&.plantao_periodos&.includes(:ministros)&.ordenados.to_a %>
+<div class="space-y-6" data-controller="plantao-sugestor" data-plantao-sugestor-periodos-value='<%= plantoes.map { |pp| { id: pp.id, dia_inicio: pp.dia_inicio, dia_fim: pp.dia_fim } }.to_json %>'>
   <div>
     <%= link_to "← Eventos Extra", admin_eventos_extra_index_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
     <h1 class="text-2xl font-semibold text-stone-800">Novo evento extra</h1>
@@ -34,7 +34,7 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <%= f.label :data, class: "block text-sm font-medium text-stone-700 mb-1" %>
-          <%= f.date_field :data, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", data: { equipe_sugestor_target: "dataInput", action: "change->equipe-sugestor#sugerir" } %>
+          <%= f.date_field :data, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", data: { plantao_sugestor_target: "dataInput", action: "change->plantao-sugestor#sugerir" } %>
         </div>
         <div>
           <%= f.label :horario, "Horário", class: "block text-sm font-medium text-stone-700 mb-1" %>
@@ -59,10 +59,10 @@
       </div>
 
       <div>
-        <%= f.label :equipe_id, "Equipe de plantão", class: "block text-sm font-medium text-stone-700 mb-1" %>
-        <%= f.collection_select :equipe_id, Equipe.order(:nome), :id, :nome, { include_blank: "Selecione (ou deixe em branco)" },
-            class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", data: { equipe_sugestor_target: "equipeSelect" } %>
-        <p class="mt-1 text-sm text-stone-500">Sugerida automaticamente conforme os dias de plantão da equipe</p>
+        <%= f.label :plantao_periodo_id, "Plantão da competência", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.collection_select :plantao_periodo_id, plantoes, :id, ->(pp) { "#{pp.rotulo}: #{pp.nomes_ministros}" }, { include_blank: "Selecione (ou deixe em branco)" },
+            class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", data: { plantao_sugestor_target: "periodoSelect" } %>
+        <p class="mt-1 text-sm text-stone-500">Sugerido pela data conforme o plantão da competência. Os ministros do bloco são escalados ao salvar.</p>
       </div>
 
       <div>

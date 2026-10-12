@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title><%= content_for(:title) || "Sacristia Digital - Minha Escala" %></title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -22,20 +22,36 @@
       </div>
     <% end %>
 
-    <div class="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-      <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-6 border-b border-stone-200/80">
-        <div>
-          <h1 class="text-lg font-semibold text-stone-900">Sacristia Digital</h1>
-          <p class="text-sm text-violet-700/90 font-medium">Área do ministro</p>
+    <% escala_ativa = request.path == ministro_root_path %>
+    <% servicos_ativos = request.path.start_with?("/ministro/meus-servicos") || request.path.match?(%r{^/ministro/servicos/}) %>
+    <% trocas_recebidas_ct = current_user.ministro_id ? SolicitacaoTroca.pendentes.where(substituto_id: current_user.ministro_id).count : 0 %>
+    <% escala_mes_ativa = request.path.start_with?("/ministro/escala-do-mes") %>
+    <% liturgia_ativa = request.path.start_with?("/ministro/liturgia") %>
+    <% icone_liturgia = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'.html_safe %>
+
+    <div class="max-w-6xl mx-auto px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 pb-[calc(4.5rem+env(safe-area-inset-bottom))] sm:pb-6 lg:pb-8">
+      <header class="sticky top-0 z-30 -mx-3 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-stone-200 bg-white/95 px-4 py-2.5 backdrop-blur sm:static sm:mx-0 sm:mt-0 sm:mb-6 sm:border-stone-200/80 sm:bg-transparent sm:px-0 sm:py-0 sm:pb-5 sm:backdrop-blur-none">
+        <div class="min-w-0">
+          <h1 class="text-base sm:text-lg font-semibold text-stone-900 truncate">Sacristia Digital</h1>
+          <p class="text-xs sm:text-sm text-stone-500 font-medium">Área do ministro</p>
         </div>
-        <nav class="flex flex-wrap items-center gap-2">
-          <%= link_to ministro_root_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium #{request.path == ministro_root_path ? "bg-violet-100 text-violet-900" : "text-stone-600 hover:bg-stone-100"}" do %>
+        <nav class="hidden sm:flex flex-wrap items-center justify-end gap-2">
+          <%= link_to ministro_root_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium #{escala_ativa ? "bg-sky-100 text-sky-900" : "text-stone-600 hover:bg-stone-100"}" do %>
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             Minha escala
           <% end %>
-          <%= link_to ministro_meus_servicos_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium #{request.path.start_with?("/ministro/meus-servicos") || request.path.match?(%r{^/ministro/servicos/}) ? "bg-violet-100 text-violet-900" : "text-stone-600 hover:bg-stone-100"}" do %>
+          <%= link_to ministro_meus_servicos_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium #{servicos_ativos ? "bg-sky-100 text-sky-900" : "text-stone-600 hover:bg-stone-100"}" do %>
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
             Meus serviços
+          <% end %>
+          <%= link_to ministro_escala_mensal_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium #{escala_mes_ativa ? "bg-sky-100 text-sky-900" : "text-stone-600 hover:bg-stone-100"}" do %>
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            Escala do mês
+            <% if trocas_recebidas_ct.positive? %><span class="inline-flex min-w-5 justify-center rounded-full bg-sky-600 px-1.5 text-xs font-semibold text-white"><%= trocas_recebidas_ct %></span><% end %>
+          <% end %>
+          <%= link_to ministro_liturgia_index_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium #{liturgia_ativa ? "bg-sky-100 text-sky-900" : "text-stone-600 hover:bg-stone-100"}" do %>
+            <span class="[&>svg]:w-4 [&>svg]:h-4 shrink-0"><%= icone_liturgia %></span>
+            Liturgia
           <% end %>
           <% if current_user.admin? %>
             <%= link_to admin_root_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-sky-800 bg-sky-50 border border-sky-200/80 hover:bg-sky-100" do %>
@@ -44,7 +60,7 @@
             <% end %>
           <% end %>
           <% if current_user.coordenador? %>
-            <%= link_to coordenador_root_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-indigo-800 bg-indigo-50 border border-indigo-200/80 hover:bg-indigo-100" do %>
+            <%= link_to coordenador_root_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-blue-800 bg-blue-50 border border-blue-200/80 hover:bg-blue-100" do %>
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
               Painel coordenador
             <% end %>
@@ -58,8 +74,45 @@
             Sair
           <% end %>
         </nav>
+        <details class="sm:hidden relative shrink-0 group" data-controller="dropdown" data-action="click->dropdown#closeOnItem">
+          <summary class="list-none cursor-pointer inline-flex items-center justify-center h-10 w-10 rounded-full text-slate-700 active:bg-stone-100">
+            <span class="sr-only">Menu da conta</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </summary>
+          <div class="absolute right-0 top-full mt-2 w-56 rounded-xl border border-stone-200 bg-white py-2 shadow-lg z-50">
+            <% if current_user.admin? %>
+              <%= link_to "Painel admin", admin_root_path, class: "block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50" %>
+            <% end %>
+            <% if current_user.coordenador? %>
+              <%= link_to "Painel coordenador", coordenador_root_path, class: "block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50" %>
+            <% end %>
+            <%= link_to "Conta e senha", edit_user_registration_path, class: "block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50" %>
+            <%= button_to "Sair", destroy_user_session_path, method: :delete, form: { data: { turbo: false }, class: "w-full text-left" }, class: "w-full px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50" %>
+          </div>
+        </details>
       </header>
       <%= yield %>
     </div>
+
+    <nav class="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-stone-200 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]" aria-label="Navegação principal">
+      <div class="grid grid-cols-4 max-w-6xl mx-auto">
+        <%= link_to ministro_root_path, class: "flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 min-h-[3.25rem] #{escala_ativa ? "text-sky-800" : "text-stone-500"}" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span class="text-[11px] font-semibold">Minha escala</span>
+        <% end %>
+        <%= link_to ministro_meus_servicos_path, class: "flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 min-h-[3.25rem] #{servicos_ativos ? "text-sky-800" : "text-stone-500"}" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          <span class="text-[11px] font-semibold">Meus serviços</span>
+        <% end %>
+        <%= link_to ministro_escala_mensal_path, class: "flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 min-h-[3.25rem] #{escala_mes_ativa ? "text-sky-800" : "text-stone-500"}" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+          <span class="relative text-[11px] font-semibold">Escala do mês<% if trocas_recebidas_ct.positive? %><span class="absolute -right-2.5 -top-5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"><%= trocas_recebidas_ct %></span><% end %></span>
+        <% end %>
+        <%= link_to ministro_liturgia_index_path, class: "flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 min-h-[3.25rem] #{liturgia_ativa ? "text-sky-800" : "text-stone-500"}" do %>
+          <%= icone_liturgia %>
+          <span class="text-[11px] font-semibold">Liturgia</span>
+        <% end %>
+      </div>
+    </nav>
   </body>
 </html>

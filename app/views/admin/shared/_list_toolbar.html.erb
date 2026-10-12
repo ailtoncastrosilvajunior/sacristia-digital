@@ -1,0 +1,38 @@
+<%# Barra de busca rápida + drawer de filtros (abre da direita para a esquerda).
+    Uso: render layout: "admin/shared/list_toolbar", locals: { placeholder: "..." } do ... campos de filtro ... end %>
+<div data-controller="drawer">
+  <%= form_with url: url_for(action: :index), method: :get,
+        data: { controller: "search", turbo_frame: "lista", turbo_action: "advance",
+                action: "submit->drawer#close submit->search#updateBadge" } do %>
+    <div class="flex items-center gap-2">
+      <div class="relative flex-1">
+        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+        <%= search_field_tag :q, params[:q], placeholder: local_assigns[:placeholder] || "Buscar...", autocomplete: "off",
+              class: "w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-stone-300 bg-white focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500",
+              data: { action: "input->search#submit" } %>
+      </div>
+      <button type="button" data-action="click->drawer#open" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 transition-colors">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+        Filtros
+        <span data-search-target="badge" class="hidden inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs rounded-full bg-slate-600 text-white"></span>
+      </button>
+    </div>
+
+    <div data-drawer-target="overlay" class="fixed inset-0 z-40 bg-stone-900/30 transition-opacity duration-300 invisible opacity-0 pointer-events-none" data-action="click->drawer#closeOverlay"></div>
+    <div data-drawer-target="panel" class="fixed top-0 right-0 z-50 h-full w-full sm:w-96 max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-out translate-x-full border-l border-stone-200 flex flex-col">
+      <div class="flex items-center justify-between px-4 py-4 border-b border-stone-200">
+        <h4 class="text-base font-semibold text-stone-800">Filtros</h4>
+        <button type="button" data-action="click->drawer#close" class="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors" aria-label="Fechar">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        <%= yield %>
+      </div>
+      <div class="flex items-center gap-2 px-4 py-4 border-t border-stone-200">
+        <%= link_to "Limpar", url_for(action: :index), class: "flex-1 text-center px-4 py-2 text-sm font-medium rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-50", data: { turbo_frame: "_top" } %>
+        <button type="submit" class="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-slate-600 hover:bg-slate-700 text-white">Aplicar</button>
+      </div>
+    </div>
+  <% end %>
+</div>

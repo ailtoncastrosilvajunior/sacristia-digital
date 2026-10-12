@@ -1,0 +1,94 @@
+<% content_for :title, "Escala mensal – #{@competencia.label}" %>
+<% mes_nome = I18n.t("date.month_names")[@competencia.mes].to_s.upcase %>
+<% mes_params = { competencia_mensal_id: @competencia.id } %>
+<style>
+  @page { size: A4 portrait; margin: 8mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; background: #e5e7eb; }
+  .toolbar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; padding: 10px; background: #0f172a; color: #fff; font-size: 14px; }
+  .toolbar a, .toolbar button { font: inherit; color: #fff; background: #1e40af; border: 0; border-radius: 8px; padding: 8px 14px; text-decoration: none; cursor: pointer; }
+  .toolbar a.sec { background: #334155; }
+  .toolbar .dica { flex-basis: 100%; text-align: center; font-size: 12px; opacity: .8; }
+  .folha { width: 194mm; margin: 12px auto; background: #fff; padding: 0; font-size: <%= @fonte_pt %>pt; line-height: 1.25; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; break-inside: avoid; }
+  .titulo td { background: #0b2545; color: #fff; padding: 5px 8px; }
+  .titulo .t1 { font-size: 1.7em; font-weight: 800; letter-spacing: .02em; }
+  .titulo .t2 { font-size: .75em; background: #1d4e7a; }
+  .titulo .mes { background: #bfdbfe; color: #0b2545; text-align: center; font-weight: 800; font-size: 1.5em; width: 22%; }
+  .titulo .ano { background: #e0f2fe; color: #0b2545; text-align: center; font-weight: 800; font-size: 1.3em; }
+  th { background: #0b2545; color: #fff; padding: 4px 4px; font-size: .9em; border: 1px solid #0b2545; }
+  td.c { border: 1px solid #cbd5e1; padding: 2px 5px; vertical-align: middle; }
+  td.dia { text-align: center; font-weight: 800; font-size: 1.5em; background: #fff; }
+  td.sem { text-align: center; font-weight: 700; font-size: .85em; }
+  td.hora { text-align: center; font-weight: 700; white-space: nowrap; }
+  td.cel { font-weight: 600; }
+  td.extra { text-align: center; font-style: italic; color: #1d4ed8; font-weight: 600; }
+  tr.fds td.c { background: #eff6ff; }
+  tr.fds td.dia, tr.fds td.sem { color: #1e3a8a; }
+  tr.sep-dia td.c { border-top: 2px solid #0b2545; }
+  .adoracao { font-weight: 700; }
+  .meu { background: #bbf7d0; font-weight: 800; padding: 0 2px; border-radius: 2px; }
+  .rodape { margin-top: 4px; font-size: .7em; color: #475569; text-align: right; }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none; }
+    .folha { margin: 0; width: auto; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+
+<div class="toolbar">
+  <button type="button" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+  <%= link_to "← Voltar", ministro_escala_mensal_path(mes_params), class: "sec" %>
+  <% if params[:tamanho] == "grande" %>
+    <%= link_to "Caber em 1 página", ministro_escala_mensal_imprimir_path(mes_params), class: "sec" %>
+  <% else %>
+    <%= link_to "Fonte maior (pode usar 2 páginas)", ministro_escala_mensal_imprimir_path(mes_params.merge(tamanho: "grande")), class: "sec" %>
+  <% end %>
+  <span class="dica">Na janela de impressão escolha "Salvar como PDF", papel A4, retrato, e desative "Cabeçalhos e rodapés".</span>
+</div>
+
+<div class="folha">
+  <table>
+    <colgroup>
+      <col style="width:6%"><col style="width:11%"><col style="width:8%"><col style="width:23%"><col style="width:36%"><col style="width:16%">
+    </colgroup>
+    <thead>
+      <tr class="titulo">
+        <td colspan="5" class="t1">ESCALA MENSAL • MESC</td>
+        <td class="mes"><%= mes_nome %></td>
+      </tr>
+      <tr class="titulo">
+        <td colspan="5" class="t2">MINISTÉRIO EXTRAORDINÁRIO DA SAGRADA COMUNHÃO</td>
+        <td class="ano"><%= @competencia.ano %></td>
+      </tr>
+      <tr><th>Dia</th><th>Dia da semana</th><th>Hora</th><th>Celebrante</th><th>MESC</th><th>Escala Extra</th></tr>
+    </thead>
+    <tbody>
+      <% @dias.each do |dia| %>
+        <% fds = dia.data.saturday? || dia.data.sunday? %>
+        <% dia.eventos.each_with_index do |ev, i| %>
+          <tr class="<%= 'fds' if fds %> <%= 'sep-dia' if i.zero? %>">
+            <% if i.zero? %>
+              <td class="c dia" rowspan="<%= dia.eventos.size %>"><%= dia.data.day %></td>
+              <td class="c sem" rowspan="<%= dia.eventos.size %>"><%= escala_dia_semana(dia.data) %></td>
+            <% end %>
+            <td class="c hora"><%= ev.horario.strftime("%-H:%M") %></td>
+            <td class="c cel"><%= escala_celebrante(ev) %></td>
+            <td class="c">
+              <% ministros = escala_ministros_do_evento(ev, @meu_id) %>
+              <% ministros.each_with_index do |m, k| %><%= " | " if k.positive? %><span class="<%= 'meu' if m[:meu] %>"><%= m[:nome] %></span><% if m[:adoracao] %><span class="adoracao">(Adoração)</span><% end %><% end %>
+            </td>
+            <% if i.zero? && !dia.plantao_continuacao %>
+              <td class="c extra" rowspan="<%= dia.plantao_rowspan %>"><%= dia.plantao ? escala_plantao_texto(dia.plantao) : "" %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+  <p class="rodape">Sacristia Digital · gerado em <%= l(Time.current, format: "%d/%m/%Y %H:%M") %></p>
+</div>

@@ -1,0 +1,89 @@
+<% content_for :title, "Solicitar cadastro — Sacristia Digital" %>
+<% campo = "w-full px-4 py-3 rounded-xl border border-stone-200/90 bg-stone-50/40 text-stone-900 placeholder:text-stone-400 text-[15px] shadow-inner shadow-stone-900/5 focus:outline-none focus:ring-2 focus:ring-sky-500/25 focus:border-sky-400/80 focus:bg-white transition-all" %>
+<% rotulo = "block text-xs font-semibold uppercase tracking-wider text-stone-500" %>
+
+<div class="relative min-h-screen flex flex-col items-center justify-center px-4 py-12 overflow-hidden">
+  <div class="absolute inset-0 bg-slate-950" aria-hidden="true"></div>
+  <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-blue-950/40 to-slate-950" aria-hidden="true"></div>
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[min(100%,42rem)] h-64 bg-sky-500/15 blur-[100px] rounded-full pointer-events-none" aria-hidden="true"></div>
+
+  <div class="relative z-10 w-full max-w-[460px]">
+    <div class="text-center mb-8">
+      <p class="text-[11px] font-semibold tracking-[0.22em] uppercase text-sky-300/70">Ministros · MESC</p>
+      <h1 class="mt-3 text-3xl font-bold text-white tracking-tight">Solicitar cadastro</h1>
+      <p class="mt-2 text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
+        Preencha seus dados e escolha uma senha. Após a aprovação da coordenação, você já poderá entrar.
+      </p>
+    </div>
+
+    <div class="rounded-3xl bg-white/[0.97] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.45)] ring-1 ring-white/60 border border-white/80 px-6 py-8 sm:px-8">
+      <% if @solicitacao.errors.any? %>
+        <div class="mb-5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-900">
+          <ul class="list-disc pl-4 space-y-0.5">
+            <% @solicitacao.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= form_with model: @solicitacao, url: pre_cadastros_path, class: "space-y-4" do |f| %>
+        <%# Honeypot: escondido de pessoas, robôs costumam preencher %>
+        <div class="absolute -left-[9999px]" aria-hidden="true">
+          <%= text_field_tag :website, nil, tabindex: -1, autocomplete: "off" %>
+        </div>
+
+        <div class="space-y-1.5">
+          <%= f.label :nome_completo, "Nome completo", class: rotulo %>
+          <%= f.text_field :nome_completo, required: true, autofocus: true, autocomplete: "name", class: campo %>
+        </div>
+
+        <div class="space-y-1.5">
+          <%= f.label :nome, "Nome curto para uso na escala", class: rotulo %>
+          <%= f.text_field :nome, required: true, maxlength: 40, autocomplete: "nickname", class: campo, placeholder: "Como você é conhecido(a). Ex.: Zé Carlos" %>
+          <p class="text-xs text-stone-400">É o nome que aparecerá nas escalas.</p>
+        </div>
+
+        <div class="space-y-1.5">
+          <%= f.label :email, "E-mail", class: rotulo %>
+          <%= f.email_field :email, required: true, autocomplete: "email", class: campo, placeholder: "nome@exemplo.com" %>
+        </div>
+
+        <div class="space-y-1.5">
+          <%= f.label :email_confirmation, "Confirme o e-mail", class: rotulo %>
+          <%= f.email_field :email_confirmation, required: true, autocomplete: "off", class: campo %>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1.5">
+            <%= f.label :telefone, "Telefone / WhatsApp", class: rotulo %>
+            <%= f.telephone_field :telefone, autocomplete: "tel", class: campo, placeholder: "(00) 00000-0000" %>
+          </div>
+          <div class="space-y-1.5">
+            <%= f.label :sexo, "Sexo", class: rotulo %>
+            <%= f.select :sexo, Ministro::SEXOS, { include_blank: "Selecione" }, class: campo %>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <%= f.label :password, "Senha", class: rotulo %>
+          <%= f.password_field :password, required: true, minlength: SolicitacaoCadastro::SENHA_MINIMA,
+              autocomplete: "new-password", class: campo %>
+          <p class="text-xs text-stone-400">Mínimo de <%= SolicitacaoCadastro::SENHA_MINIMA %> caracteres.</p>
+        </div>
+
+        <div class="space-y-1.5">
+          <%= f.label :password_confirmation, "Confirme a senha", class: rotulo %>
+          <%= f.password_field :password_confirmation, required: true, autocomplete: "new-password", class: campo %>
+        </div>
+
+        <div class="pt-2">
+          <%= f.submit "Enviar solicitação",
+              class: "w-full cursor-pointer rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 px-4 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-sky-900/25 hover:from-sky-500 hover:to-blue-500 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400" %>
+        </div>
+      <% end %>
+
+      <div class="mt-6 pt-5 border-t border-stone-100 text-center">
+        <%= link_to "Já tem conta? Entrar", new_user_session_path, class: "text-sm font-medium text-sky-700 hover:text-sky-900" %>
+      </div>
+    </div>
+  </div>
+</div>

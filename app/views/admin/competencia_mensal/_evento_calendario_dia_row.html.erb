@@ -1,7 +1,7 @@
 <%# locals: ev, filtros %>
 <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
 <div id="<%= dom_id(ev, :dia_lista_row) %>">
-  <%= link_to admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, class: "flex items-start gap-4 px-4 py-3 hover:bg-stone-50 transition-colors group" do %>
+  <%= link_to admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_drawer" }, class: "flex items-start gap-4 px-4 py-3 hover:bg-stone-50 transition-colors group" do %>
   <div class="flex-shrink-0 w-16 text-sm font-medium text-stone-600 pt-0.5"><%= l(ev.horario, format: :time) %></div>
   <div class="flex-1 min-w-0 space-y-2">
     <div class="font-medium text-stone-800"><%= ev.tipo_servico.nome %></div>
@@ -11,6 +11,5 @@
       <%= render "admin/evento_escala/ministros_com_coordenador", evento: ev, variant: :chips %>
     </div>
   </div>
-  <div class="h-3 w-1 rounded shrink-0" style="background-color: <%= cor %>"></div>
   <% end %>
 </div>

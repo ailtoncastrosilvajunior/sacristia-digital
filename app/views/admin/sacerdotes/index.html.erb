@@ -8,9 +8,14 @@
         class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
   </div>
 
-  <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+  <%= render layout: "admin/shared/list_toolbar", locals: { placeholder: "Buscar por nome, email ou telefone..." } do %>
+    <%= filtro_select :status, "Status", [["Ativo", "ativo"], ["Inativo", "inativo"]] %>
+    <%= filtro_select :forma_esportula, "Forma de espórtula", [["Por missa", "por_missa"], ["Por período", "por_periodo"]], todos: "Todas" %>
+  <% end %>
+
+  <%= render layout: "admin/shared/list_frame", locals: { collection: @sacerdotes } do %>
     <table class="min-w-full divide-y divide-stone-200">
-      <thead class="bg-stone-50">
+      <thead class="bg-stone-50 sticky top-0 z-10">
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Nome</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Email</th>
@@ -56,12 +61,12 @@
 
     <% if @sacerdotes.empty? %>
       <div class="px-6 py-12 text-center text-stone-500">
-        Nenhum sacerdote cadastrado. <%= link_to "Cadastrar o primeiro", new_admin_sacerdote_path, class: "text-slate-600 hover:text-slate-800" %>
+        <% if lista_filtrada?(:status, :forma_esportula) %>
+          Nenhum sacerdote encontrado com os filtros informados.
+        <% else %>
+          Nenhum sacerdote cadastrado. <%= link_to "Cadastrar o primeiro", new_admin_sacerdote_path, class: "text-slate-600 hover:text-slate-800" %>
+        <% end %>
       </div>
     <% end %>
-  </div>
-
-  <div class="flex justify-center">
-    <%= paginate @sacerdotes %>
-  </div>
+  <% end %>
 </div>

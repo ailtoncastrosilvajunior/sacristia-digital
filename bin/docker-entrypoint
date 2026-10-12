@@ -6,24 +6,37 @@ set -e
 
 echo "==> Sacristia Digital - Iniciando..."
 
-# Aguardar banco de dados
-if [ -n "$DATABASE_HOST" ]; then
+# libpq: PGSSLMODE tem precedência sobre sslmode na URL/database.yml.
+# Padrão disable: contorna "SSL error: dh key too small" (OpenSSL 3 + PostgreSQL antigo na DO).
+# Para exigir SSL: defina DATABASE_SSLMODE=require (ou PGSSLMODE) no painel, com cluster atualizado.
+export PGSSLMODE="${DATABASE_SSLMODE:-${PGSSLMODE:-disable}}"
+
+# Aguardar PostgreSQL
+if [ -n "${DATABASE_URL:-}" ]; then
+  echo "==> Aguardando PostgreSQL (DATABASE_URL)..."
+  until pg_isready -d "$DATABASE_URL" -q 2>/dev/null; do
+    sleep 2
+  done
+  echo "==> PostgreSQL disponível!"
+elif [ -n "${DATABASE_HOST:-}" ]; then
   echo "==> Aguardando PostgreSQL em $DATABASE_HOST..."
-  while ! pg_isready -h "$DATABASE_HOST" -U "$DATABASE_USERNAME" 2>/dev/null; do
+  while ! pg_isready -h "$DATABASE_HOST" -U "${DATABASE_USERNAME:-postgres}" -q 2>/dev/null; do
     sleep 2
   done
   echo "==> PostgreSQL disponível!"
 fi
 
-# Executar migrações
 echo "==> Executando migrações..."
-bundle exec rails db:migrate 2>/dev/null || bundle exec rails db:create db:migrate
+if [ "$RAILS_ENV" = "production" ]; then
+  # Banco gerenciado: não rodar db:create (sem permissão / nome fixo tipo defaultdb)
+  bundle exec rails db:migrate
+else
+  bundle exec rails db:migrate 2>/dev/null || bundle exec rails db:create db:migrate
+fi
 
-# Build Tailwind CSS (necessário com volume mount em desenvolvimento)
 echo "==> Compilando Tailwind CSS..."
 bundle exec rails tailwindcss:build 2>/dev/null || true
 
-# Executar seeds em desenvolvimento (opcional)
 if [ "$RAILS_ENV" = "development" ] && [ "${RUN_SEEDS:-false}" = "true" ]; then
   echo "==> Executando seeds..."
   bundle exec rails db:seed

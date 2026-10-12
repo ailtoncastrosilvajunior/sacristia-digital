@@ -2,7 +2,7 @@
 <% ts = ev.tipo_servico %>
 <% cor_borda = ts.cor_etiqueta.presence || "#94a3b8" %>
 <% lista_acoes_tabela = "inline-flex w-full min-h-[2.5rem] items-center justify-center gap-1 px-1.5 text-[10px] sm:text-xs font-semibold rounded-xl text-center" %>
-<tr id="<%= dom_id(ev, :lista_tabela) %>" class="group transition-all duration-200 odd:bg-white even:bg-slate-50/50 hover:bg-gradient-to-r hover:from-sky-50/90 hover:to-indigo-50/40 hover:shadow-md hover:shadow-sky-900/5">
+<tr id="<%= dom_id(ev, :lista_tabela) %>" class="group transition-all duration-200 odd:bg-white even:bg-slate-50/50 hover:bg-gradient-to-r hover:from-sky-50/90 hover:to-blue-50/40 hover:shadow-md hover:shadow-sky-900/5">
   <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-stone-700 border-l-[3px] border-solid" style="border-left-color: <%= cor_borda %>"><%= I18n.t("date.abbr_day_names")[ev.data.wday] %></td>
   <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm text-stone-800 tabular-nums font-medium whitespace-nowrap"><%= l(ev.data) %></td>
   <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm text-stone-600 tabular-nums"><%= l(ev.horario, format: :time) %></td>
