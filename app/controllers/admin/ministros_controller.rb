@@ -50,7 +50,8 @@ module Admin
     end
 
     def ministro_params
-      params.require(:ministro).permit(:nome, :nome_completo, :email, :telefone, :sexo, :ativo, :observacoes)
+      params.require(:ministro).permit(:nome, :nome_completo, :email, :telefone, :sexo, :ativo, :observacoes,
+                                       :nascimento_dia, :nascimento_mes, :nascimento_ano, :exibir_ano_nascimento)
     end
   end
 end

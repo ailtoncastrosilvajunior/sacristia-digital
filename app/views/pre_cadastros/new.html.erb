@@ -63,6 +63,21 @@
           </div>
         </div>
 
+        <fieldset class="space-y-2">
+          <legend class="<%= rotulo %>">Data de nascimento</legend>
+          <div class="grid grid-cols-3 gap-3">
+            <%= f.number_field :nascimento_dia, in: 1..31, required: true, class: campo, placeholder: "Dia", "aria-label": "Dia de nascimento" %>
+            <%= f.select :nascimento_mes, (1..12).map { |m| [I18n.l(Date.new(2000, m, 1), format: "%B").capitalize, m] },
+                         { include_blank: "Mês" }, required: true, class: campo, "aria-label": "Mês de nascimento" %>
+            <%= f.number_field :nascimento_ano, in: NascimentoParcial::ANO_MINIMO..Date.current.year, class: campo, placeholder: "Ano", "aria-label": "Ano de nascimento (opcional)" %>
+          </div>
+          <label class="flex items-start gap-2 text-sm text-stone-600">
+            <%= f.check_box :exibir_ano_nascimento, class: "mt-0.5 rounded border-stone-300" %>
+            <span>Autorizo divulgar o ano de nascimento</span>
+          </label>
+          <p class="text-xs text-stone-400">Dia e mês são usados para parabenizar os aniversariantes. O ano é opcional e só será divulgado se você autorizar.</p>
+        </fieldset>
+
         <div class="space-y-1.5">
           <%= f.label :password, "Senha", class: rotulo %>
           <%= f.password_field :password, required: true, minlength: SolicitacaoCadastro::SENHA_MINIMA,

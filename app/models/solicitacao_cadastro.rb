@@ -5,6 +5,8 @@ class SolicitacaoCadastro < ApplicationRecord
   STATUSES = %w[pendente aprovada rejeitada].freeze
   SENHA_MINIMA = 8
 
+  include NascimentoParcial
+
   belongs_to :ministro, optional: true
   belongs_to :avaliado_por, class_name: "User", optional: true
 
@@ -18,6 +20,7 @@ class SolicitacaoCadastro < ApplicationRecord
   validates :email, confirmation: true, on: :create
   validates :email_confirmation, presence: true, on: :create
   validates :sexo, inclusion: { in: Ministro::SEXOS }, allow_blank: true
+  validates :nascimento_dia, :nascimento_mes, presence: true, on: :create
   validates :status, inclusion: { in: STATUSES }
   validates :password, presence: true, length: { minimum: SENHA_MINIMA, maximum: 128 },
                        confirmation: true, on: :create
@@ -46,7 +49,10 @@ class SolicitacaoCadastro < ApplicationRecord
     transaction do
       ministro = ministro_existente || Ministro.new(ativo: true)
       ministro.assign_attributes(nome: nome, nome_completo: nome_completo, email: email, telefone: telefone.presence || ministro.telefone,
-                                 sexo: sexo.presence || ministro.sexo)
+                                 sexo: sexo.presence || ministro.sexo,
+                                 nascimento_dia: nascimento_dia, nascimento_mes: nascimento_mes,
+                                 nascimento_ano: nascimento_ano.presence || ministro.nascimento_ano,
+                                 exibir_ano_nascimento: nascimento_ano.present? ? exibir_ano_nascimento : ministro.exibir_ano_nascimento)
       ministro.save!
 
       user = User.new(email: email, nome: nome, perfis: %w[ministro], ministro: ministro,

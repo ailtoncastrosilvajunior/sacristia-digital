@@ -20,6 +20,14 @@
       <p class="text-sm text-stone-600 break-all">
         <%= @ministro.email %><% if @ministro.telefone.present? %> · <span class="tabular-nums"><%= @ministro.telefone %></span><% end %>
       </p>
+      <% if @ministro.nascimento_completo %>
+        <p class="text-sm text-stone-600">
+          🎂 <%= @ministro.nascimento_completo %>
+          <% if @ministro.nascimento_ano.present? %>
+            <span class="text-xs text-stone-500">(ano <%= @ministro.exibir_ano_nascimento? ? "divulgável" : "reservado" %>)</span>
+          <% end %>
+        </p>
+      <% end %>
     </div>
     <div class="flex items-center gap-1.5 shrink-0">
       <%= link_to "Novo", new_admin_ministro_path, class: "px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors" %>

@@ -14,6 +14,7 @@
       <div><dt class="text-xs uppercase tracking-wider text-stone-500">E-mail</dt><dd class="break-all text-stone-900"><%= @solicitacao.email %></dd></div>
       <div><dt class="text-xs uppercase tracking-wider text-stone-500">Telefone</dt><dd class="text-stone-900"><%= @solicitacao.telefone.presence || "—" %></dd></div>
       <div><dt class="text-xs uppercase tracking-wider text-stone-500">Sexo</dt><dd class="text-stone-900"><%= @solicitacao.sexo.presence || "—" %></dd></div>
+      <div><dt class="text-xs uppercase tracking-wider text-stone-500">Nascimento</dt><dd class="text-stone-900"><%= @solicitacao.nascimento_completo || "—" %><% if @solicitacao.nascimento_ano.present? %> <span class="text-xs text-stone-500">(ano <%= @solicitacao.exibir_ano_nascimento? ? "pode" : "não pode" %> ser divulgado)</span><% end %></dd></div>
       <% if @solicitacao.ministro %>
         <div><dt class="text-xs uppercase tracking-wider text-stone-500">Ministro</dt>
           <dd><%= link_to @solicitacao.ministro.nome, admin_ministro_path(@solicitacao.ministro), class: "text-sky-700 hover:underline" %></dd></div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_12_130001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_170001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -127,12 +127,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_130001) do
     t.boolean "ativo", default: true, null: false
     t.datetime "created_at", null: false
     t.string "email", null: false
+    t.boolean "exibir_ano_nascimento", default: false, null: false
+    t.integer "nascimento_ano"
+    t.integer "nascimento_dia"
+    t.integer "nascimento_mes"
     t.string "nome", null: false
     t.string "nome_completo"
     t.text "observacoes"
     t.string "sexo"
     t.string "telefone"
     t.datetime "updated_at", null: false
+    t.index ["nascimento_mes", "nascimento_dia"], name: "index_ministros_on_nascimento_mes_and_nascimento_dia"
   end
 
   create_table "oferta_apoios", force: :cascade do |t|
@@ -197,8 +202,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_12_130001) do
     t.datetime "created_at", null: false
     t.string "email", null: false
     t.string "encrypted_password"
+    t.boolean "exibir_ano_nascimento", default: false, null: false
     t.bigint "ministro_id"
     t.text "motivo_rejeicao"
+    t.integer "nascimento_ano"
+    t.integer "nascimento_dia"
+    t.integer "nascimento_mes"
     t.string "nome", null: false
     t.string "nome_completo"
     t.string "sexo"

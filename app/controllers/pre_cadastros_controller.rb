@@ -30,6 +30,7 @@ class PreCadastrosController < ApplicationController
 
   def solicitacao_params
     params.require(:solicitacao_cadastro)
-          .permit(:nome_completo, :nome, :email, :email_confirmation, :telefone, :sexo, :password, :password_confirmation)
+          .permit(:nome_completo, :nome, :email, :email_confirmation, :telefone, :sexo, :nascimento_dia, :nascimento_mes,
+                  :nascimento_ano, :exibir_ano_nascimento, :password, :password_confirmation)
   end
 end
