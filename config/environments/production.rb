@@ -4,6 +4,10 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   config.enable_reloading = false
+  # App Platform (container): logs em STDOUT para aparecerem em "Runtime Logs".
+  config.logger = ActiveSupport::TaggedLogging.logger($stdout)
+  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info").to_sym
+  config.log_tags = [:request_id]
   config.eager_load = true
   config.consider_all_requests_local = false
   # DigitalOcean App Platform / container único: servir public/assets após precompile.

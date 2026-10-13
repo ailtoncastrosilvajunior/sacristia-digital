@@ -1,115 +1,91 @@
-<div class="space-y-6">
-  <div>
-    <%= link_to "← Eventos Extra", admin_eventos_extra_index_path, class: "text-sm text-stone-500 hover:text-stone-700 mb-3 inline-block" %>
+<% ev = @evento %>
+<% status_cls = case ev.status
+                when 'concluido' then 'bg-sky-100 text-sky-800 border-sky-300'
+                when 'confirmado' then 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                when 'cancelado' then 'bg-red-100 text-red-800 border-red-300'
+                else 'bg-amber-100 text-amber-800 border-amber-300'
+                end %>
+<% campo_cls = "rounded-lg border border-stone-100 bg-stone-50/50 px-3 py-2" %>
+<% rotulo_cls = "text-[10px] font-medium uppercase tracking-wide text-stone-500" %>
+<% valor_cls = "mt-0.5 text-sm text-stone-900 font-medium" %>
 
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div class="min-w-0">
-        <p class="text-xs font-medium uppercase tracking-wide text-stone-400">Evento extra</p>
-        <h1 class="mt-1 text-2xl font-semibold text-stone-900 tracking-tight"><%= @evento.tipo_servico.nome %></h1>
-        <p class="mt-1 text-stone-600"><%= @evento.competencia_mensal.label %></p>
-      </div>
-      <div class="flex flex-wrap items-center gap-2 shrink-0">
-        <%= link_to new_admin_eventos_extra_path(data: @evento.data, competencia_mensal_id: @evento.competencia_mensal_id),
-            class: "inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm shadow-emerald-900/10" do %>
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          Novo evento
-        <% end %>
-        <%= link_to "Editar", edit_admin_eventos_extra_path(@evento),
-            class: "inline-flex items-center justify-center px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors" %>
-        <%= button_to "Excluir", admin_eventos_extra_path(@evento), method: :delete, data: { turbo_confirm: "Tem certeza que deseja excluir este evento?" },
-            class: "inline-flex items-center justify-center px-3 py-2 border border-red-200 text-red-700 hover:bg-red-50 text-sm font-medium rounded-lg transition-colors bg-white cursor-pointer" %>
-      </div>
+<div class="space-y-3 max-w-5xl">
+  <%= link_to "← Eventos Extra", admin_eventos_extra_index_path, class: "text-xs text-stone-500 hover:text-stone-700 inline-block" %>
+
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div class="min-w-0 flex flex-wrap items-center gap-x-3 gap-y-1">
+      <h1 class="text-xl font-semibold text-stone-900 tracking-tight"><%= ev.tipo_servico.nome %></h1>
+      <span class="inline-flex px-2.5 py-0.5 text-[11px] font-semibold rounded-full border <%= status_cls %>">
+        <%= I18n.t("activerecord.attributes.evento_escala.status_values.#{ev.status}", default: ev.status.humanize) %>
+      </span>
+      <span class="text-sm text-stone-500"><%= ev.competencia_mensal.label %></span>
+    </div>
+    <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+      <%= link_to new_admin_eventos_extra_path(data: ev.data, competencia_mensal_id: ev.competencia_mensal_id),
+          class: "inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition-colors" do %>
+        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Novo evento
+      <% end %>
+      <%= link_to "Editar", edit_admin_eventos_extra_path(ev),
+          class: "inline-flex items-center px-2.5 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded-lg transition-colors" %>
+      <%= button_to "Excluir", admin_eventos_extra_path(ev), method: :delete, form: { class: "inline" }, data: { turbo_confirm: "Tem certeza que deseja excluir este evento?" },
+          class: "inline-flex items-center px-2.5 py-1.5 border border-red-200 text-red-700 hover:bg-red-50 text-xs font-medium rounded-lg transition-colors bg-white cursor-pointer" %>
     </div>
   </div>
 
-  <div class="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-slate-50 via-white to-stone-50/80 p-6 sm:p-8 shadow-sm ring-1 ring-stone-100/80">
-    <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <p class="text-3xl sm:text-4xl font-semibold tabular-nums text-stone-900"><%= l(@evento.data, format: :long) %></p>
-        <p class="text-lg text-stone-500 font-medium"><%= l(@evento.horario, format: :time) %></p>
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-4 space-y-3">
+    <div class="flex flex-wrap items-baseline gap-x-3">
+      <p class="text-lg font-semibold tabular-nums text-stone-900"><%= l(ev.data, format: :long) %></p>
+      <p class="text-sm text-stone-500 font-medium"><%= l(ev.horario, format: :time) %></p>
+    </div>
+
+    <dl class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div class="<%= campo_cls %>">
+        <dt class="<%= rotulo_cls %>">Local</dt>
+        <dd class="<%= valor_cls %>"><%= ev.local.presence || "—" %></dd>
       </div>
-      <div>
-        <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border
-          <%= case @evento.status
-              when 'concluido' then 'bg-sky-100 text-sky-800 border-sky-300'
-              when 'confirmado' then 'bg-emerald-100 text-emerald-800 border-emerald-300'
-              when 'cancelado' then 'bg-red-100 text-red-800 border-red-300'
-              else 'bg-amber-100 text-amber-800 border-amber-300'
-              end %>">
-          <%= I18n.t("activerecord.attributes.evento_escala.status_values.#{@evento.status}", default: @evento.status.humanize) %>
-        </span>
+      <div class="<%= campo_cls %>">
+        <dt class="<%= rotulo_cls %>">Sacerdote</dt>
+        <dd class="<%= valor_cls %>"><%= ev.sacerdote&.nome || "—" %></dd>
+      </div>
+      <div class="<%= campo_cls %>">
+        <dt class="<%= rotulo_cls %>">Ministros</dt>
+        <dd class="<%= valor_cls %> tabular-nums"><%= ev.quantidade_ministros %></dd>
+      </div>
+      <% if ev.valor_esportula.present? && ev.valor_esportula > 0 %>
+        <div class="<%= campo_cls %>">
+          <dt class="<%= rotulo_cls %>">Espórtula</dt>
+          <dd class="<%= valor_cls %> tabular-nums"><%= number_to_currency(ev.valor_esportula, unit: "R$ ", separator: ",", delimiter: ".") %></dd>
+        </div>
+      <% end %>
+      <div class="<%= campo_cls %> col-span-2 sm:col-span-4">
+        <dt class="<%= rotulo_cls %>">Plantão</dt>
+        <dd class="<%= valor_cls %>"><%= ev.plantao_periodo ? "#{ev.plantao_periodo.rotulo}: #{ev.plantao_periodo.nomes_ministros}" : "—" %></dd>
+      </div>
+    </dl>
+
+    <div class="rounded-lg border border-stone-100 px-3 py-2">
+      <p class="<%= rotulo_cls %> mb-1.5">Ministros escalados</p>
+      <div class="text-sm text-stone-900">
+        <%= render "admin/evento_escala/ministros_com_coordenador", evento: ev, variant: :chips %>
       </div>
     </div>
-  </div>
 
-  <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden divide-y divide-stone-100">
-    <section class="p-6 sm:p-8">
-      <h2 class="text-sm font-semibold text-stone-900 mb-4">Serviço e local</h2>
-      <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
-          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Tipo de serviço</dt>
-          <dd class="mt-1 text-stone-900 font-medium"><%= @evento.tipo_servico.nome %></dd>
-        </div>
-        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
-          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Local</dt>
-          <dd class="mt-1 text-stone-900 font-medium"><%= @evento.local.presence || "—" %></dd>
-        </div>
-        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
-          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Competência</dt>
-          <dd class="mt-1 text-stone-900 font-medium"><%= @evento.competencia_mensal.label %></dd>
-        </div>
-      </dl>
-    </section>
-
-    <section class="p-6 sm:p-8">
-      <h2 class="text-sm font-semibold text-stone-900 mb-4">Equipe e escala</h2>
-      <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
-          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Sacerdote</dt>
-          <dd class="mt-1 text-stone-900 font-medium"><%= @evento.sacerdote&.nome || "—" %></dd>
-        </div>
-        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
-          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Plantão</dt>
-          <dd class="mt-1 text-stone-900 font-medium"><%= @evento.plantao_periodo ? "#{@evento.plantao_periodo.rotulo}: #{@evento.plantao_periodo.nomes_ministros}" : "—" %></dd>
-        </div>
-        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
-          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Quantidade de ministros</dt>
-          <dd class="mt-1 text-stone-900 font-medium tabular-nums"><%= @evento.quantidade_ministros %></dd>
-        </div>
-        <% if @evento.valor_esportula.present? && @evento.valor_esportula > 0 %>
-          <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3 sm:col-span-2 lg:col-span-1">
-            <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Valor espórtula</dt>
-            <dd class="mt-1 text-stone-900 font-medium tabular-nums"><%= number_to_currency(@evento.valor_esportula, unit: "R$ ", separator: ",", delimiter: ".") %></dd>
+    <% if ev.descricao.present? || ev.observacoes.present? %>
+      <div class="grid gap-2 sm:grid-cols-2">
+        <% if ev.descricao.present? %>
+          <div class="rounded-lg border border-stone-100 px-3 py-2">
+            <p class="<%= rotulo_cls %> mb-1">Descrição</p>
+            <div class="text-stone-800 text-sm leading-snug [&_p]:m-0"><%= simple_format(ev.descricao) %></div>
           </div>
         <% end %>
-      </dl>
-
-      <div class="mt-6 rounded-xl border border-stone-100 bg-white px-4 py-4">
-        <p class="text-xs font-medium uppercase tracking-wide text-stone-500 mb-3">Ministros escalados</p>
-        <div class="text-stone-900">
-          <%= render "admin/evento_escala/ministros_com_coordenador", evento: @evento, variant: :chips %>
-        </div>
+        <% if ev.observacoes.present? %>
+          <div class="rounded-lg border border-stone-100 px-3 py-2">
+            <p class="<%= rotulo_cls %> mb-1">Observações internas</p>
+            <div class="text-stone-800 text-sm leading-snug [&_p]:m-0"><%= simple_format(ev.observacoes) %></div>
+          </div>
+        <% end %>
       </div>
-    </section>
-
-    <% if @evento.descricao.present? || @evento.observacoes.present? %>
-      <section class="p-6 sm:p-8">
-        <h2 class="text-sm font-semibold text-stone-900 mb-4">Observações</h2>
-        <div class="space-y-5">
-          <% if @evento.descricao.present? %>
-            <div>
-              <h3 class="text-xs font-medium uppercase tracking-wide text-stone-500 mb-2">Descrição</h3>
-              <div class="text-stone-800 text-sm leading-relaxed"><%= simple_format(@evento.descricao) %></div>
-            </div>
-          <% end %>
-          <% if @evento.observacoes.present? %>
-            <div>
-              <h3 class="text-xs font-medium uppercase tracking-wide text-stone-500 mb-2">Observações internas</h3>
-              <div class="text-stone-800 text-sm leading-relaxed"><%= simple_format(@evento.observacoes) %></div>
-            </div>
-          <% end %>
-        </div>
-      </section>
     <% end %>
   </div>
 </div>
