@@ -12,7 +12,10 @@ Rails.application.configure do
     ENV.fetch("RAILS_SERVE_STATIC_FILES", "true")
   )
   config.action_controller.perform_caching = true
-  config.cache_store = :solid_cache_store
+  # Container único no App Platform: cache em memória. O solid_cache_store exigiria a tabela
+  # solid_cache_entries e um banco de cache configurado em database.yml (não existem aqui);
+  # sem isso o rate_limit do pré-cadastro e o cache da liturgia dão erro 500.
+  config.cache_store = :memory_store, { size: 32.megabytes }
 
   # Imagens (ex.: santo do dia). Disco local: monte um volume persistente em /app/storage
   # ou troque por S3/Spaces em config/storage.yml.
