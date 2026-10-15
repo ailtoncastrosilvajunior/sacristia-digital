@@ -28,7 +28,9 @@
       <%= form_with model: @solicitacao, url: pre_cadastros_path, class: "space-y-4" do |f| %>
         <%# Honeypot: escondido de pessoas, robôs costumam preencher %>
         <div class="absolute -left-[9999px]" aria-hidden="true">
-          <%= text_field_tag :website, nil, tabindex: -1, autocomplete: "off" %>
+          <%# Nome genérico "website" é preenchido pelo autofill de iOS/Android; usar nome sem significado. %>
+          <%= text_field_tag :campo_armadilha, nil, id: "campo_armadilha", tabindex: -1, autocomplete: "off",
+                             data: { "lpignore": "true", "1p-ignore": "true" } %>
         </div>
 
         <div class="space-y-1.5">

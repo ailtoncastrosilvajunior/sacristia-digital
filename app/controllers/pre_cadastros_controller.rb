@@ -13,7 +13,7 @@ class PreCadastrosController < ApplicationController
 
   def create
     # Honeypot: campo invisível que só robôs preenchem.
-    return redirect_to(pre_cadastro_enviado_path) if params[:website].present?
+    return redirect_to(pre_cadastro_enviado_path) if params[:campo_armadilha].present? || params[:website].present?
 
     @solicitacao = SolicitacaoCadastro.new(solicitacao_params)
     if @solicitacao.save
