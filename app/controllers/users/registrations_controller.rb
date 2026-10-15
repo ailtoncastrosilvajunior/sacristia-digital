@@ -12,6 +12,11 @@ module Users
     end
 
 
+    # O e-mail é o login e fica sincronizado com o cadastro do ministro: só o admin altera.
+    def account_update_params
+      super.except(:email)
+    end
+
     def after_update_path_for(_resource)
       root_path
     end

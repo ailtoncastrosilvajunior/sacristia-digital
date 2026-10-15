@@ -11,7 +11,21 @@ module Admin
       @ministros = scope.ordenados_por_nome
     end
 
+    COMPETENCIAS_VISIVEIS = 3
+
     def show
+      # Uma única query (+ preloads) para todos os serviços do ministro; agrupa por competência em memória.
+      eventos = @ministro.evento_escalas
+                         .includes(:competencia_mensal, :tipo_servico, :sacerdote, escala_ministros: :ministro)
+                         .por_data.to_a
+      por_competencia = eventos.group_by(&:competencia_mensal)
+      @competencias_servicos = por_competencia.keys.sort_by { |c| [-c.ano, -c.mes] }
+      @servicos_por_competencia = por_competencia
+      hoje = Date.current
+      @competencia_ativa = @competencias_servicos.first(COMPETENCIAS_VISIVEIS)
+                                                 .find { |c| c.ano == hoje.year && c.mes == hoje.month } ||
+                           @competencias_servicos.first
+      @competencias_visiveis = COMPETENCIAS_VISIVEIS
     end
 
     def new
