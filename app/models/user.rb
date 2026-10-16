@@ -8,14 +8,14 @@ class User < ApplicationRecord
   belongs_to :ministro, optional: true
   belongs_to :sacerdote, optional: true
 
-  PERFIS_VALIDOS = %w[admin coordenador ministro sacerdote].freeze
+  PERFIS_VALIDOS = %w[admin coordenador ministro sacerdote escala_extra].freeze
 
   before_validation :normalizar_perfis
   before_validation :sincronizar_vinculos_perfis
 
   validate :perfis_devem_ser_validos
   validate :pelo_menos_um_perfil
-  validates :nome, presence: true, if: -> { admin? || coordenador? }
+  validates :nome, presence: true, if: -> { admin? || coordenador? || escala_extra? }
   validates :ministro, presence: true, if: -> { ministro? }
   validates :sacerdote, presence: true, if: -> { sacerdote? }
 
@@ -23,6 +23,7 @@ class User < ApplicationRecord
   scope :admins, -> { com_perfil("admin") }
   scope :coordenadores, -> { com_perfil("coordenador") }
   scope :ministros, -> { com_perfil("ministro") }
+  scope :escala_extra, -> { com_perfil("escala_extra") }
 
   def admin?
     perfis.include?("admin")
@@ -40,6 +41,10 @@ class User < ApplicationRecord
     perfis.include?("sacerdote")
   end
 
+  def escala_extra?
+    perfis.include?("escala_extra")
+  end
+
   def perfis_labels
     perfis.map { |p| I18n.t("activerecord.attributes.user.perfis_labels.#{p}", default: p.humanize) }
   end
@@ -50,6 +55,10 @@ class User < ApplicationRecord
 
   def pode_gerenciar_escalas?
     admin? || coordenador?
+  end
+
+  def pode_gerenciar_eventos_extra?
+    admin? || escala_extra?
   end
 
   def pode_ver_propria_agenda?
@@ -68,6 +77,7 @@ class User < ApplicationRecord
     return :coordenador if coordenador?
     return :ministro if pode_acessar_dashboard_ministro?
     return :sacerdote if sacerdote?
+    return :escala_extra if escala_extra?
 
     :admin
   end

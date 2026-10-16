@@ -57,6 +57,12 @@
               Painel coordenador
             <% end %>
           <% end %>
+          <% if current_user.escala_extra? %>
+            <%= link_to escala_extra_root_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-violet-800 bg-violet-50 border border-violet-200/80 hover:bg-violet-100" do %>
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Escala extra
+            <% end %>
+          <% end %>
           <%= link_to edit_user_registration_path, class: "inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-stone-600 hover:bg-stone-100 border border-transparent hover:border-stone-200" do %>
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
             Conta e senha
@@ -77,6 +83,9 @@
             <% end %>
             <% if current_user.coordenador? %>
               <%= link_to "Painel coordenador", coordenador_root_path, class: "block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50" %>
+            <% end %>
+            <% if current_user.escala_extra? %>
+              <%= link_to "Escala extra", escala_extra_root_path, class: "block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50" %>
             <% end %>
             <%= link_to "Conta e senha", edit_user_registration_path, class: "block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50" %>
             <%= button_to "Sair", destroy_user_session_path, method: :delete, form: { data: { turbo: false }, class: "w-full text-left" }, class: "w-full px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50" %>

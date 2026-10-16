@@ -22,7 +22,7 @@
      (ev.cancelado? ? "Cancelado" : nil)
    ].compact.join("\n") %>
 <div id="<%= dom_id(ev, :cal_chip) %>" class="block w-full mb-1">
-  <%= link_to admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_drawer" }, title: tip,
+  <%= link_to evento_drawer_path(ev, filtros), data: { turbo_frame: "evento_drawer" }, title: tip,
         class: "block rounded-md border bg-white hover:shadow-sm transition-all px-1.5 py-1 cursor-pointer #{'opacity-50' if ev.cancelado?}",
         style: "border-color: #{cor}80; background-color: #{cor}0d;" do %>
     <span class="flex items-center justify-between gap-1">

@@ -120,24 +120,27 @@
             <% end %>
           </p>
         <% else %>
-          <ul class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <% colegas.each do |row| %>
-              <% nome_m = row.ministro&.nome.to_s %>
-              <% iniciais = nome_m.split(/\s+/).reject(&:blank?).take(2).map { |w| w[0] }.join.upcase.presence || "?" %>
-              <li class="flex items-center gap-3 rounded-2xl bg-stone-50 ring-1 ring-stone-200/70 px-3 py-2.5">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-100 to-sky-200 text-xs font-bold text-sky-900 ring-2 ring-white shadow-sm">
-                  <%= iniciais %>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="font-semibold text-stone-900 truncate"><%= row.ministro&.nome || "—" %></p>
-                  <p class="text-xs text-stone-500 truncate"><%= papel_em_texto.call(row) %></p>
-                </div>
-                <% if row.coordenador? %><span class="shrink-0 text-amber-500" title="Coordenador">★</span><% end %>
-              </li>
+          <div class="mt-3 flex flex-wrap gap-1.5">
+            <% escala_ministros_do_evento(ev, mid).each do |m| %>
+              <%= render "painel_ministro/escala_mensal/ministro_badge", nome: m[:nome], meu: m[:meu], adoracao: m[:adoracao] %>
             <% end %>
-          </ul>
+          </div>
         <% end %>
       </div>
+
+      <% if ev.descricao.present? %>
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-stone-500">Descrição</p>
+          <p class="mt-1 text-stone-700 leading-relaxed whitespace-pre-line"><%= ev.descricao %></p>
+        </div>
+      <% end %>
+
+      <% if ev.observacoes.present? %>
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-stone-500">Observações</p>
+          <p class="mt-1 text-stone-700 leading-relaxed whitespace-pre-line"><%= ev.observacoes %></p>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>

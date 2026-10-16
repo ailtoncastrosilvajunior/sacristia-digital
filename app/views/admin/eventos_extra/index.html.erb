@@ -1,6 +1,6 @@
 <% filtros = params.permit(:q, :status, :tipo_servico_id, :aba, :vista_calendario, :data_ref).to_unsafe_h.compact_blank %>
 <% filtros_busca = filtros.except(:aba, :vista_calendario, :data_ref) %>
-<% base_path = ->(extra = {}) { admin_eventos_extra_index_path(filtros.merge(extra)) } %>
+<% base_path = ->(extra = {}) { eventos_extra_index_path(filtros.merge(extra)) } %>
 <% eventos_por_dia = @eventos_lista.group_by(&:data) %>
 <div class="space-y-4 sm:space-y-6" data-controller="modal drawer">
   <div id="evento-modal-backdrop" data-modal-target="backdrop" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/50 p-4" data-action="click->modal#closeBackground">
@@ -22,13 +22,13 @@
       <h1 class="text-2xl font-semibold text-stone-800">Eventos Extra</h1>
       <p class="text-stone-500 mt-1">Missas e celebrações fora do calendário padrão</p>
     </div>
-    <%= link_to "Novo evento", new_admin_eventos_extra_path(data: (@data_ref if @vista_calendario == "dia")),
+    <%= link_to "Novo evento", new_evento_extra_path(data: (@data_ref if @vista_calendario == "dia")),
         class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
   </div>
 
   <%# Busca + filtros (recarrega a página mantendo aba e período) %>
   <div data-controller="drawer">
-    <%= form_with url: admin_eventos_extra_index_path, method: :get, local: true, data: { action: "submit->drawer#close" } do %>
+    <%= form_with url: eventos_extra_index_path, method: :get, local: true, data: { action: "submit->drawer#close" } do %>
       <%= hidden_field_tag :aba, @aba %>
       <%= hidden_field_tag :vista_calendario, @vista_calendario %>
       <%= hidden_field_tag :data_ref, @data_ref %>
@@ -60,7 +60,7 @@
           <%= filtro_select :tipo_servico_id, "Tipo de serviço", TipoServico.order(:nome).map { |t| [t.nome, t.id] } %>
         </div>
         <div class="flex items-center gap-2 px-4 py-4 border-t border-stone-200">
-          <%= link_to "Limpar", admin_eventos_extra_index_path(aba: @aba, vista_calendario: @vista_calendario, data_ref: @data_ref), class: "flex-1 text-center px-4 py-2 text-sm font-medium rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-50" %>
+          <%= link_to "Limpar", eventos_extra_index_path(aba: @aba, vista_calendario: @vista_calendario, data_ref: @data_ref), class: "flex-1 text-center px-4 py-2 text-sm font-medium rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-50" %>
           <button type="submit" class="flex-1 px-4 py-2 text-sm font-medium rounded-lg bg-slate-600 hover:bg-slate-700 text-white">Aplicar</button>
         </div>
       </div>
@@ -123,7 +123,7 @@
       </div>
 
       <% if @eventos_total.zero? && !lista_filtrada?(:status, :tipo_servico_id) %>
-        <p class="text-stone-500 text-sm py-4">Nenhum evento extra cadastrado. <%= link_to "Cadastrar o primeiro", new_admin_eventos_extra_path, class: "text-slate-600 hover:text-slate-800 underline" %></p>
+        <p class="text-stone-500 text-sm py-4">Nenhum evento extra cadastrado. <%= link_to "Cadastrar o primeiro", new_evento_extra_path, class: "text-slate-600 hover:text-slate-800 underline" %></p>
       <% elsif @aba == "calendario" %>
         <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3 sm:mb-4 text-xs text-stone-600">
           <% @eventos_lista.map(&:tipo_servico).uniq(&:id).sort_by(&:nome).each do |ts| %>

@@ -11,6 +11,8 @@ class DashboardController < ApplicationController
       redirect_to ministro_root_path
     when :sacerdote
       redirect_to sacerdote_root_path
+    when :escala_extra
+      redirect_to escala_extra_root_path
     else
       redirect_to admin_root_path
     end

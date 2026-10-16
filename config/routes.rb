@@ -61,6 +61,14 @@ Rails.application.routes.draw do
     root "dashboard#index"
   end
 
+  # Agendadores da escala extra: acesso restrito ao CRUD de eventos extra
+  namespace :escala_extra, path: "escala-extra" do
+    root "eventos_extra#index"
+    resources :eventos_extra, path: "eventos-extra" do
+      member { get :drawer }
+    end
+  end
+
   namespace :coordenador do
     root "dashboard#index"
     resources :ministros, only: [:index, :show]
