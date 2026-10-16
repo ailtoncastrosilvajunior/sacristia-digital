@@ -25,8 +25,8 @@
               <%= (user.nome.presence || user.email).to_s.strip.first.to_s.upcase %>
             </div>
             <div class="min-w-0 flex-1 sm:flex-none sm:w-72">
-              <%= link_to user.email, admin_user_path(user), class: "block truncate text-sm text-slate-700 hover:text-slate-900 font-semibold" %>
-              <p class="truncate text-xs text-stone-500 leading-tight"><%= user.nome.presence || "—" %></p>
+              <%= link_to (user.nome.presence || user.email), admin_user_path(user), class: "block truncate text-sm text-slate-700 hover:text-slate-900 font-semibold" %>
+              <p class="truncate text-xs text-stone-500 leading-tight"><%= user.email %></p>
             </div>
             <div class="order-last sm:order-none basis-full sm:basis-auto sm:flex-1 min-w-0 flex flex-wrap gap-1">
               <% user.perfis.each do |perfil| %>
