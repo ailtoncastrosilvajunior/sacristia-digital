@@ -53,6 +53,7 @@ Rails.application.routes.draw do
       end
     end
     resources :registros_esportula, path: "esportulas"
+    get "escala-mensal/imprimir", to: "escala_mensal#imprimir", as: :escala_mensal_imprimir
     get "relatorios", to: "relatorios#index"
   end
 

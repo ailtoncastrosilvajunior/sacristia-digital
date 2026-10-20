@@ -1,8 +1,20 @@
 <% content_for :title, "Escala mensal – #{@competencia.label}" %>
 <% mes_nome = I18n.t("date.month_names")[@competencia.mes].to_s.upcase %>
 <% mes_params = { competencia_mensal_id: @competencia.id } %>
+<script>
+  // Rodapé de página (@page margin boxes): Chrome/Edge 131+. Nos demais, fica o rodapé no fim da tabela.
+  (function () {
+    var m = navigator.userAgent.match(/Chrom(?:e|ium)\/(\d+)/);
+    if (m && parseInt(m[1], 10) >= 131) document.documentElement.classList.add("rodape-de-pagina");
+  })();
+</script>
 <style>
-  @page { size: A4 portrait; margin: 8mm; }
+  @page {
+    size: A4 portrait;
+    margin: 8mm 8mm 14mm 8mm;
+    @bottom-center { content: "Sacristia Digital - gerado em <%= l(Time.current, format: "%d/%m/%Y %H:%M") %>"; font: 8pt Arial, Helvetica, sans-serif; color: #475569; }
+    @bottom-right { content: "Página " counter(page) "/" counter(pages); font: 8pt Arial, Helvetica, sans-serif; color: #475569; }
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; background: #e5e7eb; }
@@ -26,27 +38,30 @@
   td.hora { text-align: center; font-weight: 700; white-space: nowrap; }
   td.cel { font-weight: 600; }
   td.extra { text-align: center; font-style: italic; color: #1d4ed8; font-weight: 600; }
+  td.extra .dias-plantao { display: block; margin-bottom: 2px; font-size: .8em; font-style: normal; font-weight: 700; color: #475569; }
   tr.fds td.c { background: #eff6ff; }
   tr.fds td.dia, tr.fds td.sem { color: #1e3a8a; }
   tr.sep-dia td.c { border-top: 2px solid #0b2545; }
   .adoracao { font-weight: 700; }
   .meu { background: #bbf7d0; font-weight: 800; padding: 0 2px; border-radius: 2px; }
-  .rodape { margin-top: 4px; font-size: .7em; color: #475569; text-align: right; }
+  .rodape { margin-top: 6px; font-size: .8em; color: #475569; text-align: center; }
   @media print {
     body { background: #fff; }
     .toolbar { display: none; }
     .folha { margin: 0; width: auto; }
+    /* Navegadores com rodapé de página (Chrome/Edge 131+) já imprimem o rodapé em todas as páginas. */
+    html.rodape-de-pagina .rodape { display: none; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
 
 <div class="toolbar">
   <button type="button" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
-  <%= link_to "← Voltar", ministro_escala_mensal_path(mes_params), class: "sec" %>
+  <%= link_to "← Voltar", escala_imprimir_voltar_path(@competencia), class: "sec" %>
   <% if params[:tamanho] == "grande" %>
-    <%= link_to "Caber em 1 página", ministro_escala_mensal_imprimir_path(mes_params), class: "sec" %>
+    <%= link_to "Caber em 1 página", escala_imprimir_path(mes_params), class: "sec" %>
   <% else %>
-    <%= link_to "Fonte maior (pode usar 2 páginas)", ministro_escala_mensal_imprimir_path(mes_params.merge(tamanho: "grande")), class: "sec" %>
+    <%= link_to "Fonte maior (pode usar 2 páginas)", escala_imprimir_path(mes_params.merge(tamanho: "grande")), class: "sec" %>
   <% end %>
   <span class="dica">Na janela de impressão escolha "Salvar como PDF", papel A4, retrato, e desative "Cabeçalhos e rodapés".</span>
 </div>
@@ -83,12 +98,12 @@
               <% ministros.each_with_index do |m, k| %><%= " | " if k.positive? %><span class="<%= 'meu' if m[:meu] %>"><%= m[:nome] %></span><% if m[:adoracao] %><span class="adoracao">(Adoração)</span><% end %><% end %>
             </td>
             <% if i.zero? && !dia.plantao_continuacao %>
-              <td class="c extra" rowspan="<%= dia.plantao_rowspan %>"><%= dia.plantao ? escala_plantao_texto(dia.plantao) : "" %></td>
+              <td class="c extra" rowspan="<%= dia.plantao_rowspan %>"><% if dia.plantao %><span class="dias-plantao"><%= escala_plantao_dias_texto(dia.plantao) %></span><%= escala_plantao_texto(dia.plantao) %><% end %></td>
             <% end %>
           </tr>
         <% end %>
       <% end %>
     </tbody>
   </table>
-  <p class="rodape">Sacristia Digital · gerado em <%= l(Time.current, format: "%d/%m/%Y %H:%M") %></p>
+  <p class="rodape">Sacristia Digital - gerado em <%= l(Time.current, format: "%d/%m/%Y %H:%M") %></p>
 </div>

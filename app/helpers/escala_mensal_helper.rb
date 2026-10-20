@@ -15,8 +15,32 @@ module EscalaMensalHelper
     escala_ministros_do_evento(evento).map { |m| m[:adoracao] ? "#{m[:nome]}(Adoração)" : m[:nome] }.join(" | ")
   end
 
+  # "Dias 1 a 2" / "Dia 5": período do plantão repetido na coluna Escala Extra do relatório.
+  def escala_plantao_dias_texto(plantao)
+    return "Dia #{plantao.dia_inicio}" if plantao.dia_inicio == plantao.dia_fim
+
+    "Dias #{plantao.dia_inicio} a #{plantao.dia_fim}"
+  end
+
   def escala_plantao_texto(plantao)
     plantao.ministros.map(&:nome).join(" | ")
+  end
+
+  # Paths do relatório impresso conforme a área (admin ou painel do ministro): o mesmo relatório serve aos dois.
+  def escala_imprimir_path(params = {})
+    if controller_path.start_with?("admin")
+      admin_escala_mensal_imprimir_path(params)
+    else
+      ministro_escala_mensal_imprimir_path(params)
+    end
+  end
+
+  def escala_imprimir_voltar_path(competencia)
+    if controller_path.start_with?("admin")
+      admin_competencia_mensal_path(competencia)
+    else
+      ministro_escala_mensal_path(competencia_mensal_id: competencia.id)
+    end
   end
 
   def escala_celebrante(evento)
