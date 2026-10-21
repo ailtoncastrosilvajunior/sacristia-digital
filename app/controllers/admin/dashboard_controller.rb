@@ -88,7 +88,10 @@ module Admin
         pendentes: pendentes.size,
         pagos: pagos.size,
         valor_pendente: pendentes.sum(&:valor),
-        valor_pago: pagos.sum(&:valor)
+        valor_pago: pagos.sum(&:valor),
+        # Espórtula prevista nos eventos da competência (exceto cancelados), independente dos registros lançados.
+        valor_previsto: @eventos.sum { |e| e.valor_esportula.to_d },
+        eventos_com_valor: @eventos.count { |e| e.valor_esportula.to_d.positive? }
       }
       @esportulas_recentes = registros.first(8)
     end

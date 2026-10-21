@@ -1,0 +1,14 @@
+<%# Aviso para competência de mês futuro (liberada, mas ainda não em vigor). Uso: render "admin/shared/aviso_competencia_futura", competencia: comp %>
+<% if competencia&.futura? %>
+  <% dias_faltam = (competencia.periodo - Date.current).to_i %>
+  <div role="alert" class="mb-5 flex items-start gap-3 rounded-2xl border-2 border-amber-400 bg-amber-50 px-4 py-3 sm:px-5 sm:py-4 text-amber-950 shadow-sm">
+    <svg class="w-7 h-7 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+    <div>
+      <p class="text-base sm:text-lg font-extrabold uppercase tracking-wide">Esta escala ainda não está valendo</p>
+      <p class="mt-0.5 text-sm sm:text-base">
+        Hoje é <strong><%= l(Date.current) %></strong>. Começa a valer em <strong><%= l(competencia.periodo) %></strong>
+        (<%= dias_faltam == 1 ? "falta 1 dia" : "faltam #{dias_faltam} dias" %>).
+      </p>
+    </div>
+  </div>
+<% end %>

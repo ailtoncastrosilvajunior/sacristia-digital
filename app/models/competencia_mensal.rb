@@ -26,6 +26,11 @@ class CompetenciaMensal < ApplicationRecord
     I18n.l(periodo, format: :month_year)
   end
 
+  # Competência de mês futuro: pode estar liberada, mas ainda não está em vigor.
+  def futura?(hoje = Date.current)
+    periodo > hoje.beginning_of_month
+  end
+
   def label_curto
     abbr = I18n.t("date.abbr_month_names")[mes]
     "#{abbr}/#{format('%02d', ano % 100)}"

@@ -124,6 +124,18 @@ pt-BR:
         forma_esportula: Forma de Espórtula
         valor_esportula_padrao: Valor Espórtula Padrão
         ativo: Ativo
+  number:
+    format:
+      separator: ","
+      delimiter: "."
+      precision: 2
+    currency:
+      format:
+        unit: "R$"
+        format: "%u %n"
+        separator: ","
+        delimiter: "."
+        precision: 2
   date:
     formats:
       default: "%d/%m/%Y"

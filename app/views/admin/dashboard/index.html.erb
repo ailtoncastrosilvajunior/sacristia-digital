@@ -40,6 +40,7 @@
   <% else %>
     <% s = @stats %>
     <% comp = @competencia %>
+    <%= render "admin/shared/aviso_competencia_futura", competencia: comp %>
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-xl font-semibold text-stone-900"><%= comp.label %></h2>
@@ -48,7 +49,7 @@
             <%= comp.escala_gerada? ? "Escala gerada" : "Escala pendente" %>
           </span>
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border <%= comp.escala_liberada? ? "bg-sky-50 text-sky-800 border-sky-200" : "bg-stone-100 text-stone-600 border-stone-200" %>">
-            <%= comp.escala_liberada? ? "Liberada aos ministros" : "Restrita" %>
+            <%= comp.escala_liberada? ? (comp.futura? ? "Liberada — prévia, ainda não vale" : "Liberada aos ministros") : "Restrita" %>
           </span>
         </div>
       </div>
@@ -270,26 +271,31 @@
           <% end %>
         </div>
       </div>
-      <div class="px-4 py-3 sm:px-5 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-        <div class="rounded-xl bg-white/90 border border-sky-100 px-3 py-2 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-sky-700/80">Registros</p>
-          <p class="text-2xl font-bold tabular-nums text-stone-900"><%= es[:total] %></p>
-          <p class="text-[11px] text-stone-500"><%= es[:pendentes] %> pend. · <%= es[:pagos] %> pagos</p>
+      <div class="px-4 py-2 sm:px-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 sm:gap-2">
+        <div class="rounded-xl bg-white/90 border border-emerald-100 px-2.5 py-1.5 shadow-sm">
+          <p class="text-[10px] font-bold uppercase tracking-wider truncate text-emerald-800/90">Previsto nos eventos</p>
+          <p class="text-base font-bold leading-tight tabular-nums text-emerald-900"><%= number_to_currency(es[:valor_previsto]) %></p>
+          <p class="text-[10px] text-stone-500 truncate">Soma de <%= es[:eventos_com_valor] %> <%= es[:eventos_com_valor] == 1 ? "evento" : "eventos" %> com valor</p>
         </div>
-        <div class="rounded-xl bg-white/90 border border-indigo-100 px-3 py-2 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-indigo-800/90">A pagar</p>
-          <p class="text-lg sm:text-xl font-bold tabular-nums text-indigo-900"><%= number_to_currency(es[:valor_pendente]) %></p>
-          <p class="text-[11px] text-stone-500">Soma status pendente</p>
+        <div class="rounded-xl bg-white/90 border border-sky-100 px-2.5 py-1.5 shadow-sm">
+          <p class="text-[10px] font-bold uppercase tracking-wider truncate text-sky-700/80">Registros</p>
+          <p class="text-base font-bold leading-tight tabular-nums text-stone-900"><%= es[:total] %></p>
+          <p class="text-[10px] text-stone-500 truncate"><%= es[:pendentes] %> pend. · <%= es[:pagos] %> pagos</p>
         </div>
-        <div class="rounded-xl bg-white/90 border border-sky-100 px-3 py-2 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-sky-800/90">Quitado</p>
-          <p class="text-lg sm:text-xl font-bold tabular-nums text-sky-800"><%= number_to_currency(es[:valor_pago]) %></p>
-          <p class="text-[11px] text-stone-500">Soma status pago</p>
+        <div class="rounded-xl bg-white/90 border border-indigo-100 px-2.5 py-1.5 shadow-sm">
+          <p class="text-[10px] font-bold uppercase tracking-wider truncate text-indigo-800/90">A pagar</p>
+          <p class="text-base font-bold leading-tight tabular-nums text-indigo-900"><%= number_to_currency(es[:valor_pendente]) %></p>
+          <p class="text-[10px] text-stone-500 truncate">Soma status pendente</p>
         </div>
-        <div class="rounded-xl bg-white/90 border border-stone-200 px-3 py-2 shadow-sm">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">No mês</p>
-          <p class="text-lg sm:text-xl font-bold tabular-nums text-stone-900"><%= number_to_currency(es[:valor_pendente] + es[:valor_pago]) %></p>
-          <p class="text-[11px] text-stone-500">Total movimentado</p>
+        <div class="rounded-xl bg-white/90 border border-sky-100 px-2.5 py-1.5 shadow-sm">
+          <p class="text-[10px] font-bold uppercase tracking-wider truncate text-sky-800/90">Quitado</p>
+          <p class="text-base font-bold leading-tight tabular-nums text-sky-800"><%= number_to_currency(es[:valor_pago]) %></p>
+          <p class="text-[10px] text-stone-500 truncate">Soma status pago</p>
+        </div>
+        <div class="rounded-xl bg-white/90 border border-stone-200 px-2.5 py-1.5 shadow-sm">
+          <p class="text-[10px] font-bold uppercase tracking-wider truncate text-stone-500">No mês</p>
+          <p class="text-base font-bold leading-tight tabular-nums text-stone-900"><%= number_to_currency(es[:valor_pendente] + es[:valor_pago]) %></p>
+          <p class="text-[10px] text-stone-500 truncate">Total movimentado</p>
         </div>
       </div>
       <% if @esportulas_recentes.any? %>
