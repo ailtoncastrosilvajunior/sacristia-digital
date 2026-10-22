@@ -1,0 +1,13 @@
+<%# locals: eventos %>
+<% eventos.group_by(&:data).each_with_index do |(dia, evs_dia), group_idx| %>
+  <% if group_idx.positive? %>
+    <tr aria-hidden="true" class="pointer-events-none">
+      <td colspan="6" class="h-0 p-0 border-0">
+        <div class="h-2.5 bg-gradient-to-b from-stone-200/90 to-stone-100 border-y border-stone-300/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]"></div>
+      </td>
+    </tr>
+  <% end %>
+  <% evs_dia.each_with_index do |ev, idx| %>
+    <%= render "admin/registros_esportula/competencia/evento_row", ev: ev, dia: dia, evs_dia: evs_dia, idx: idx, group_idx: group_idx %>
+  <% end %>
+<% end %>

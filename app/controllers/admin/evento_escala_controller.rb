@@ -2,6 +2,7 @@
 
 module Admin
   class EventoEscalaController < Admin::BaseController
+    include Admin::ReturnToRedirect
     before_action :set_evento_completo, only: [:show]
     before_action :set_evento, only: [:edit, :update, :destroy, :escalar_ministros, :update_escalar_ministros]
     before_action :set_competencia, only: [:new, :create]
@@ -44,6 +45,7 @@ module Admin
     end
 
     def edit
+      @return_to = safe_return_to_path
       if turbo_frame_request?
         render partial: "form_modal", layout: false
       end
@@ -52,8 +54,13 @@ module Admin
     def update
       if @evento.update(evento_params)
         atualizar_coordenador(@evento)
-        redirect_to admin_competencia_mensal_path(@evento.competencia_mensal, filter_params), notice: "Evento atualizado com sucesso."
+        RegistroEsportula.sync_from_evento!(@evento)
+        redirect_with_return_to(
+          default: admin_competencia_mensal_path(@evento.competencia_mensal, filter_params),
+          notice: "Evento atualizado com sucesso."
+        )
       else
+        @return_to = safe_return_to_path
         if turbo_frame_request?
           render partial: "form_modal", layout: false, status: :unprocessable_entity
         else

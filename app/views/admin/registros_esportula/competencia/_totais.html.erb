@@ -1,0 +1,44 @@
+<%# locals: competencia, resumo_totais %>
+<% t = resumo_totais %>
+<% pct_global = esportula_pct_global(t) %>
+<% metric_cell = "flex min-w-[33.333%] sm:min-w-0 sm:flex-1 basis-1/3 sm:basis-auto flex-col justify-between px-2 py-1.5 min-h-[2.75rem]" %>
+<div id="esportulas_competencia_totais" class="relative overflow-hidden rounded-xl shadow-md shadow-slate-900/10 ring-1 ring-slate-900/10">
+  <div class="relative flex items-stretch">
+    <div class="flex shrink-0 items-center justify-center px-1.5 py-1.5 w-12 sm:w-14 bg-gradient-to-br from-slate-900 via-slate-800 to-sky-950 text-white border-r border-white/10" title="<%= competencia.label %> — <%= pct_global %>% quitado">
+      <div class="relative flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center">
+        <svg class="absolute inset-0 -rotate-90 h-full w-full" viewBox="0 0 36 36" aria-hidden="true">
+          <circle cx="18" cy="18" r="15.5" fill="none" class="stroke-white/15" stroke-width="3"></circle>
+          <circle cx="18" cy="18" r="15.5" fill="none" class="stroke-sky-400" stroke-width="3" stroke-linecap="round"
+            stroke-dasharray="<%= pct_global %>, 100" pathLength="100"></circle>
+        </svg>
+        <span class="relative text-sm font-black tabular-nums leading-none"><%= pct_global %><span class="text-[9px] font-bold text-sky-200/90">%</span></span>
+      </div>
+    </div>
+    <div class="flex flex-1 min-w-0 flex-wrap sm:flex-nowrap divide-y sm:divide-y-0 sm:divide-x divide-slate-200/80 bg-gradient-to-b from-white to-slate-50/80">
+      <div class="<%= metric_cell %> bg-emerald-50/50">
+        <span class="text-[9px] font-bold uppercase tracking-wide text-emerald-800/85 text-left leading-none">Previsto</span>
+        <span class="text-sm font-black tabular-nums text-emerald-950 text-right leading-none truncate"><%= number_to_currency(t[:previsto], precision: 0) %></span>
+      </div>
+      <div class="<%= metric_cell %> bg-sky-50/50">
+        <span class="text-[9px] font-bold uppercase tracking-wide text-sky-800/85 text-left leading-none">Realizado</span>
+        <span class="text-sm font-black tabular-nums text-sky-950 text-right leading-none truncate"><%= number_to_currency(t[:realizado], precision: 0) %></span>
+      </div>
+      <div class="<%= metric_cell %> bg-indigo-50/50">
+        <span class="text-[9px] font-bold uppercase tracking-wide text-indigo-800/85 text-left leading-none">Saldo</span>
+        <span class="text-sm font-black tabular-nums text-indigo-950 text-right leading-none truncate"><%= number_to_currency(t[:saldo], precision: 0) %></span>
+      </div>
+      <div class="<%= metric_cell %>">
+        <span class="text-[9px] font-bold uppercase tracking-wide text-stone-500 text-left leading-none">Eventos</span>
+        <span class="text-sm font-black tabular-nums text-stone-900 text-right leading-none"><%= t[:total_servicos] %></span>
+      </div>
+      <div class="<%= metric_cell %>">
+        <span class="text-[9px] font-bold uppercase tracking-wide text-stone-500 text-left leading-none">Missas</span>
+        <span class="text-sm font-black tabular-nums text-stone-900 text-right leading-none"><%= t[:missas] %></span>
+      </div>
+      <div class="<%= metric_cell %>">
+        <span class="text-[9px] font-bold uppercase tracking-wide text-stone-500 text-left leading-none">Confissões</span>
+        <span class="text-sm font-black tabular-nums text-stone-900 text-right leading-none"><%= t[:confissoes] %></span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -12,6 +12,35 @@ module Admin
       @registros = scope.order(created_at: :desc).page(params[:page])
     end
 
+    def competencia
+      @competencias = CompetenciaMensal.ordenados.limit(48)
+      @competencia = resolve_competencia_para_esportulas
+      return if @competencia.blank?
+
+      load_esportulas_competencia_dados(@competencia)
+    end
+
+    def toggle_evento_pago
+      evento = EventoEscala.find(params[:evento_escala_id])
+      pago = params[:pago].to_s == "1"
+      RegistroEsportula.sync_pago_from_evento!(evento, pago: pago)
+      preparar_resposta_toggle_evento!(evento)
+
+      respond_to do |format|
+        format.turbo_stream
+        format.html do
+          redirect_to competencia_admin_registros_esportula_index_path(competencia_mensal_id: evento.competencia_mensal_id),
+            notice: (pago ? "Espórtula marcada como paga." : "Pagamento desmarcado (pendente).")
+        end
+      end
+    rescue ArgumentError => e
+      responder_erro_toggle_evento(evento, e.message)
+    rescue ActiveRecord::RecordInvalid => e
+      responder_erro_toggle_evento(evento, e.record.errors.full_messages.to_sentence)
+    rescue ActiveRecord::RecordNotFound
+      head :not_found
+    end
+
     def show
     end
 
@@ -58,5 +87,46 @@ module Admin
     def registro_params
       params.require(:registro_esportula).permit(:sacerdote_id, :evento_escala_id, :data, :forma_pagamento, :valor, :status, :competencia_ano, :competencia_mes)
     end
+
+    def load_esportulas_competencia_dados(competencia)
+      @eventos = competencia.evento_escalas
+        .nao_cancelados
+        .includes(:tipo_servico, :sacerdote, :registro_esportulas)
+        .order(:data, :horario)
+        .to_a
+      @eventos = @eventos.select { |e| e.valor_esportula.to_d.positive? }
+      @resumo_por_sacerdote, @resumo_totais = EsportulasCompetenciaResumo.call(competencia)
+    end
+
+    def preparar_resposta_toggle_evento!(evento)
+      evento.reload
+      @competencia = evento.competencia_mensal
+      @resumo_por_sacerdote, @resumo_totais = EsportulasCompetenciaResumo.call(@competencia)
+      @resumo_linha = @resumo_por_sacerdote.find { |l| l[:sacerdote].id == evento.sacerdote_id } if evento.sacerdote_id.present?
+    end
+
+    def responder_erro_toggle_evento(evento, mensagem)
+      return head(:not_found) if evento.nil?
+
+      preparar_resposta_toggle_evento!(evento)
+      flash.now[:alert] = mensagem
+      respond_to do |format|
+        format.turbo_stream { render :toggle_evento_pago, status: :unprocessable_entity }
+        format.html do
+          redirect_to competencia_admin_registros_esportula_index_path(competencia_mensal_id: evento.competencia_mensal_id),
+            alert: mensagem
+        end
+      end
+    end
+
+    def resolve_competencia_para_esportulas
+      if params[:competencia_mensal_id].present?
+        return CompetenciaMensal.find_by(id: params[:competencia_mensal_id])
+      end
+
+      CompetenciaMensal.find_by(ano: Date.current.year, mes: Date.current.month) ||
+        CompetenciaMensal.ordenados.first
+    end
+
   end
 end

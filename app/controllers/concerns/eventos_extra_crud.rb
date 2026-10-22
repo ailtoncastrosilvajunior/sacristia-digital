@@ -15,8 +15,14 @@ module EventosExtraCrud
     scope = scope.where(status: params[:status]) if EventoEscala::STATUS.include?(params[:status])
     scope = scope.where(tipo_servico_id: params[:tipo_servico_id]) if params[:tipo_servico_id].present?
 
-    @aba = params[:aba] == "lista" ? "lista" : "calendario"
-    @vista_calendario = %w[semana dia].include?(params[:vista_calendario]) ? params[:vista_calendario] : "mes"
+    @aba = params[:aba] == "notificacao" ? "notificacao" : "calendario"
+    @vista_calendario = if params[:aba] == "lista"
+                          "lista"
+                        elsif %w[semana dia lista].include?(params[:vista_calendario])
+                          params[:vista_calendario]
+                        else
+                          "mes"
+                        end
     @data_ref = (params[:data_ref].presence && (Date.parse(params[:data_ref]) rescue nil)) || Date.current
     @domingo_semana = @data_ref - @data_ref.wday
     @inicio_mes = @data_ref.beginning_of_month
@@ -30,6 +36,10 @@ module EventosExtraCrud
     @eventos_total = scope.count
     @eventos_lista = scope.where(data: @periodo).por_data.to_a
     @eventos_contagem = @eventos_lista.size
+
+    @competencia_visivel = CompetenciaMensal.find_by(ano: @inicio_mes.year, mes: @inicio_mes.month)
+    periodo_plantao = @inicio_mes..@fim_mes
+    @plantoes_cartaz = @competencia_visivel&.plantao_periodos&.includes(:ministros)&.ordenados&.select { |pp| pp.sobrepoe_periodo?(periodo_plantao) } || []
   end
 
   def show

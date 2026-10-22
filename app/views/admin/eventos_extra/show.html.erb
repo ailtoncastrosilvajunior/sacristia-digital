@@ -26,6 +26,13 @@
         <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         Novo evento
       <% end %>
+      <% plantao_cartaz = ev.plantao_periodo || ev.competencia_mensal.plantao_para_dia(ev.data) %>
+      <% if plantao_cartaz %>
+        <%= link_to plantao_extra_cartaz_path(plantao_cartaz), target: "_blank", rel: "noopener",
+            class: "inline-flex items-center gap-1 px-2.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-medium rounded-lg transition-colors" do %>
+          Notificação
+        <% end %>
+      <% end %>
       <%= link_to "Editar", edit_evento_extra_path(ev),
           class: "inline-flex items-center px-2.5 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded-lg transition-colors" %>
       <%= button_to "Excluir", evento_extra_path(ev), method: :delete, form: { class: "inline" }, data: { turbo_confirm: "Tem certeza que deseja excluir este evento?" },

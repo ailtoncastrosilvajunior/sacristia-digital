@@ -1,0 +1,101 @@
+<% content_for :title, "Espórtulas — #{@competencia&.label || 'Competência'}" %>
+
+<div class="space-y-5">
+  <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+    <div>
+      <%= link_to "← Dashboard", admin_root_path(competencia_mensal_id: @competencia&.id), class: "text-sm text-stone-500 hover:text-stone-700 mb-2 inline-block" %>
+      <h1 class="text-2xl font-semibold text-stone-900 tracking-tight">
+        Espórtulas<% if @competencia %> · <span class="text-sky-800"><%= @competencia.label %></span><% end %>
+      </h1>
+    </div>
+    <div class="flex flex-wrap items-end gap-2 shrink-0">
+      <% if @competencia %>
+        <%= form_with url: competencia_admin_registros_esportula_index_path, method: :get, local: true, class: "min-w-[12rem]" do %>
+          <label for="competencia_mensal_id" class="block text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1">Competência</label>
+          <%= select_tag :competencia_mensal_id,
+                options_from_collection_for_select(@competencias, :id, :label, @competencia.id),
+                id: "competencia_mensal_id",
+                class: "w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500",
+                onchange: "this.form.requestSubmit()" %>
+        <% end %>
+        <%= link_to new_admin_registros_esportula_path(competencia_ano: @competencia.ano, competencia_mes: @competencia.mes),
+            class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50 transition-colors" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Lançamento avulso
+        <% end %>
+        <%= link_to admin_registros_esportula_index_path,
+            class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-800 text-white text-sm font-semibold hover:bg-stone-700 transition-colors" do %>
+          Todos os registros
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @competencia.nil? %>
+    <div class="rounded-2xl border border-dashed border-stone-300 bg-white p-12 text-center">
+      <p class="text-stone-600">Nenhuma competência cadastrada.</p>
+    </div>
+  <% else %>
+    <%= render "admin/registros_esportula/competencia/totais", competencia: @competencia, resumo_totais: @resumo_totais %>
+
+    <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,36rem)_minmax(0,1fr)] gap-4 xl:gap-5 items-start">
+      <%# Lista de eventos — agrupada por dia %>
+      <div class="rounded-2xl border border-stone-200/90 bg-white shadow-md shadow-stone-900/5 overflow-hidden min-w-0 ring-1 ring-stone-100">
+        <div class="px-4 py-2.5 border-b border-stone-100 bg-gradient-to-b from-white to-stone-50/90 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-sm font-semibold text-stone-900"><%= @competencia.label %> — eventos</h2>
+            <p class="text-[11px] text-stone-500"><%= @eventos.size %> com espórtula · agrupados por dia</p>
+          </div>
+        </div>
+        <% if @eventos.any? %>
+          <div class="overflow-x-hidden overflow-y-auto max-h-[min(72vh,680px)]">
+            <table class="w-full table-fixed text-xs">
+              <colgroup>
+                <col class="w-10" />
+                <col class="w-12" />
+                <col class="w-[26%]" />
+                <col class="w-[32%]" />
+                <col class="w-12" />
+                <col class="w-8" />
+              </colgroup>
+              <thead class="sticky top-0 z-20 bg-stone-100/95 backdrop-blur-sm border-b border-stone-200">
+                <tr class="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  <th class="px-1.5 py-1.5 text-center">Dia</th>
+                  <th class="px-1.5 py-1.5 text-left">Hora</th>
+                  <th class="px-1.5 py-1.5 text-left">Sacerdote</th>
+                  <th class="px-1.5 py-1.5 text-left">Serviço</th>
+                  <th class="px-1.5 py-1.5 text-right">R$</th>
+                  <th class="px-1 py-1.5 text-center">✓</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= render "admin/registros_esportula/competencia/eventos_tbody", eventos: @eventos %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="px-6 py-12 text-center text-stone-500 text-sm">
+            Nenhum evento com valor de espórtula nesta competência.
+            <%= link_to "Abrir calendário", admin_competencia_mensal_path(@competencia, aba: "calendario"), class: "text-sky-700 font-semibold hover:text-sky-900" %>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Resumo por sacerdote — largura fixa, só scroll vertical %>
+      <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden xl:sticky xl:top-4 ring-1 ring-slate-100 min-w-0 w-full max-w-full">
+        <div class="px-3 py-2 border-b border-slate-200/80 bg-gradient-to-br from-slate-800 via-slate-800 to-sky-900 text-white">
+          <p class="text-[9px] font-semibold uppercase tracking-widest text-sky-300/90">Análise</p>
+          <h2 class="text-sm font-semibold tracking-tight leading-tight">Resumo · <%= @competencia.label_curto %></h2>
+          <p class="text-[11px] text-slate-400 mt-0.5"><%= @resumo_por_sacerdote.size %> sacerdotes na competência</p>
+        </div>
+        <% if @resumo_por_sacerdote.any? %>
+          <div class="overflow-x-auto overflow-y-auto max-h-[min(72vh,680px)]">
+            <%= render "admin/registros_esportula/competencia/resumo_table", resumo_por_sacerdote: @resumo_por_sacerdote, resumo_totais: @resumo_totais %>
+          </div>
+        <% else %>
+          <p class="px-4 py-10 text-center text-sm text-stone-500">Sem dados para resumir.</p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

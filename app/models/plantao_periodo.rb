@@ -34,6 +34,18 @@ class PlantaoPeriodo < ApplicationRecord
     ministros.map(&:nome).join(" | ")
   end
 
+  # Algum dia do bloco cai dentro do intervalo de datas (ex.: mês/semana visível na agenda).
+  def sobrepoe_periodo?(periodo)
+    return false if periodo.blank?
+
+    range_dias.any? do |dia|
+      data = Date.new(competencia_mensal.ano, competencia_mensal.mes, dia)
+      periodo.cover?(data)
+    rescue ArgumentError
+      false
+    end
+  end
+
   # Copia o bloco (dias + ministros) para outra competência.
   def copiar_para!(competencia)
     novo = competencia.plantao_periodos.create!(dia_inicio: dia_inicio, dia_fim: dia_fim)

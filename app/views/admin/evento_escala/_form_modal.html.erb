@@ -10,6 +10,7 @@
       <p class="text-stone-500 text-sm mb-4"><%= @evento.tipo_servico.nome %> - <%= l(@evento.data) %> <%= l(@evento.horario, format: :time) %></p>
 
       <%= form_with model: @evento, url: admin_evento_escala_path(@evento), method: :patch, data: { turbo_frame: "_top" }, html: { class: "space-y-5" } do |f| %>
+        <%= render "admin/shared/return_to_hidden", return_to: @return_to %>
         <%= hidden_field_tag :tipo_servico_id, params[:tipo_servico_id] if params[:tipo_servico_id].present? %>
         <%= hidden_field_tag :sacerdote_id, params[:sacerdote_id] if params[:sacerdote_id].present? %>
         <%= hidden_field_tag :ministro_id, params[:ministro_id] if params[:ministro_id].present? %>

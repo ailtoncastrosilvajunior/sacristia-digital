@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= content_for(:title) || "Cartaz escala extra" %></title>
+    <%= csrf_meta_tags %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <%= yield :head %>
+  </head>
+  <body class="cartaz-body">
+    <div class="cartaz-toolbar no-export">
+      <%= yield :toolbar %>
+    </div>
+    <div id="cartaz-export-root">
+      <%= yield %>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
+    <script>
+      (function () {
+        var btn = document.getElementById("cartaz-baixar-png");
+        if (!btn || typeof html2canvas === "undefined") return;
+        btn.addEventListener("click", function () {
+          var node = document.getElementById("cartaz-poster-export");
+          if (!node) return;
+          btn.disabled = true;
+          btn.textContent = "Gerando…";
+          html2canvas(node, {
+            scale: 2.5,
+            useCORS: true,
+            backgroundColor: null,
+            logging: false,
+            width: node.offsetWidth,
+            height: node.offsetHeight,
+            windowWidth: node.scrollWidth,
+            windowHeight: node.scrollHeight
+          }).then(function (canvas) {
+            var link = document.createElement("a");
+            link.download = btn.dataset.filename || "escala-extra.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+          }).finally(function () {
+            btn.disabled = false;
+            btn.textContent = "Baixar PNG";
+          });
+        });
+
+        var copyBtn = document.getElementById("cartaz-copiar-link");
+        if (copyBtn) {
+          copyBtn.addEventListener("click", function () {
+            var url = window.location.href;
+            var done = function () {
+              copyBtn.textContent = "Link copiado!";
+              setTimeout(function () { copyBtn.textContent = "Copiar link"; }, 2000);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(url).then(done);
+            } else {
+              done();
+            }
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

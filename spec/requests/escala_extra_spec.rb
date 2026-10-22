@@ -37,6 +37,15 @@ RSpec.describe "Perfil escala_extra", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
+    it "abre o cartaz WhatsApp do plantão" do
+      competencia = CompetenciaMensal.para_mes(Date.current.year, Date.current.month)
+      plantao = competencia.plantao_periodos.create!(dia_inicio: 1, dia_fim: 2)
+      get escala_extra_plantao_cartaz_path(plantao)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("ESCALA")
+      expect(response.body).to include("Baixar PNG")
+    end
+
     it "é barrado em admin, coordenador e ministro sem loop de redirect" do
       [admin_root_path, admin_users_path, coordenador_root_path, ministro_root_path].each do |path|
         get path

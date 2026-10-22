@@ -1,0 +1,75 @@
+<%# locals: ev, dia, evs_dia, idx, group_idx %>
+<% pago = ev.esportula_paga? %>
+<% sem_sacerdote = ev.sacerdote_id.blank? %>
+<% tipo_nome = ev.tipo_servico.nome.to_s %>
+<% flags = esportula_tipo_flags(tipo_nome) %>
+<% turno_cls = esportula_turno_class(ev.horario) %>
+<tr id="<%= dom_id(ev, :esportula_row) %>"
+    data-controller="esportula-pago-row"
+    class="border-b border-stone-100/90 <%= idx.zero? && group_idx.positive? ? 'border-t-2 border-t-stone-300/80' : '' %> <%= pago ? 'bg-emerald-50/35' : 'hover:bg-stone-50/70' %> group">
+  <% if idx.zero? %>
+    <td rowspan="<%= evs_dia.size %>" class="align-top border-r-2 border-stone-200 bg-gradient-to-b from-stone-100 to-stone-50 px-1 py-2 text-center w-11 shadow-[inset_-1px_0_0_rgba(255,255,255,0.8)]">
+      <div class="sticky top-9 flex flex-col items-center gap-0.5 rounded-lg mx-0.5 py-1 ring-1 ring-stone-200/80 bg-white/70">
+        <span class="text-base font-bold tabular-nums leading-none text-stone-900"><%= dia.day.to_s.rjust(2, "0") %></span>
+        <span class="text-[9px] font-bold uppercase tracking-wide text-stone-500 leading-tight"><%= l(dia, format: "%a") %></span>
+        <span id="esportula_dia_stats_<%= dia.iso8601 %>" class="mt-1 block w-[calc(100%-4px)] border-t border-dashed border-stone-300 pt-1 text-[9px] tabular-nums text-stone-500 leading-snug">
+          <%= render "admin/registros_esportula/competencia/dia_stats_inner", dia: dia, evs_dia: evs_dia %>
+        </span>
+      </div>
+    </td>
+  <% end %>
+  <td class="px-2 py-1.5 whitespace-nowrap">
+    <span class="inline-flex tabular-nums font-semibold px-1.5 py-0.5 rounded-md ring-1 <%= turno_cls %>"><%= l(ev.horario, format: :time) %></span>
+  </td>
+  <td class="px-2 py-1.5 min-w-0">
+    <% if ev.sacerdote %>
+      <span class="font-medium text-stone-800 leading-snug"><%= ev.sacerdote.nome %></span>
+    <% else %>
+      <span class="text-amber-700 font-medium">—</span>
+    <% end %>
+  </td>
+  <td class="px-2 py-1.5 min-w-0">
+    <div class="flex items-start gap-1 min-w-0">
+      <%= link_to edit_evento_from_esportulas_path(ev), class: "inline-flex flex-col min-w-0 flex-1 group/edit", title: "Editar evento (sacerdote, espórtula…)" do %>
+        <span class="inline-flex items-center gap-1 font-semibold truncate <%= flags[:missa] ? 'text-sky-700 group-hover/edit:text-sky-900' : flags[:confissao] ? 'text-amber-800 group-hover/edit:text-amber-950' : 'text-stone-800 group-hover/edit:text-stone-950' %>">
+          <% if flags[:missa] %>
+            <span class="h-1.5 w-1.5 rounded-full bg-sky-500 shrink-0"></span>
+          <% elsif flags[:confissao] %>
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0"></span>
+          <% end %>
+          <%= tipo_nome %>
+        </span>
+        <% if ev.descricao.present? %>
+          <span class="text-[10px] text-stone-500 truncate max-w-[10rem]"><%= ev.descricao %></span>
+        <% end %>
+      <% end %>
+      <%= link_to edit_evento_from_esportulas_path(ev), class: "shrink-0 p-0.5 rounded text-stone-400 hover:text-sky-700 hover:bg-sky-50", title: "Editar evento" do %>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+      <% end %>
+    </div>
+  </td>
+  <td class="px-1.5 py-1.5 text-right whitespace-nowrap tabular-nums font-bold text-stone-900">
+    <%= number_to_currency(ev.valor_esportula, precision: 0, unit: "") %>
+  </td>
+  <td class="px-1 py-1.5 text-center">
+    <% if sem_sacerdote %>
+      <span class="inline-block h-4 w-4 rounded border border-dashed border-stone-300" title="Sem sacerdote"></span>
+    <% else %>
+      <%= form_with url: toggle_evento_pago_admin_registros_esportula_index_path, method: :patch,
+            class: "inline-flex justify-center",
+            data: { action: "turbo:submit-end->esportula-pago-row#revertOnError" } do %>
+        <%= hidden_field_tag :evento_escala_id, ev.id %>
+        <%= hidden_field_tag :competencia_mensal_id, ev.competencia_mensal_id %>
+        <%= hidden_field_tag :pago, "0" %>
+        <label class="inline-flex cursor-pointer">
+          <%= check_box_tag :pago, "1", pago,
+              data: {
+                esportula_pago_row_target: "checkbox",
+                action: "change->esportula-pago-row#syncFromCheckbox"
+              },
+              class: "h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-2 focus:ring-sky-500/25 focus:ring-offset-0" %>
+        </label>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

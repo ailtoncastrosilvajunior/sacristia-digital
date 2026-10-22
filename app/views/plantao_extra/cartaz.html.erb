@@ -1,0 +1,345 @@
+<% content_for :title, "Escala extra · #{@plantao.rotulo}" %>
+<% filename = "escala-extra-#{@competencia.ano}-#{format('%02d', @competencia.mes)}-dias-#{@plantao.dia_inicio}-#{@plantao.dia_fim}.png" %>
+
+<% content_for :toolbar do %>
+  <div class="cartaz-toolbar-inner">
+    <% if escala_extra_context? %>
+      <%= link_to "← Eventos extra", escala_extra_eventos_extra_index_path, class: "cartaz-toolbar-link" %>
+    <% else %>
+      <%= link_to "← Plantão", admin_competencia_mensal_plantao_periodos_path(@competencia), class: "cartaz-toolbar-link" %>
+    <% end %>
+    <button type="button" id="cartaz-baixar-png" class="cartaz-toolbar-btn" data-filename="<%= filename %>">Baixar PNG</button>
+    <button type="button" id="cartaz-copiar-link" class="cartaz-toolbar-btn cartaz-toolbar-btn--ghost">Copiar link</button>
+    <span class="cartaz-toolbar-hint">Baixe o PNG ou copie o link para abrir no celular e salvar a imagem.</span>
+  </div>
+<% end %>
+
+<% content_for :head do %>
+  <style>
+    :root {
+      --navy: #0c2340;
+      --navy-deep: #071526;
+      --gold: #c9a227;
+      --gold-light: #e8d48a;
+      --cream: #f7f9fc;
+      --ink: #1a2b42;
+      --muted: #5a6b7d;
+    }
+    * { box-sizing: border-box; }
+    .cartaz-body {
+      margin: 0;
+      min-height: 100vh;
+      background: #1e293b;
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 0 2rem;
+    }
+    .cartaz-toolbar {
+      width: 100%;
+      max-width: 540px;
+      padding: 0 1rem 1rem;
+    }
+    .cartaz-toolbar-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.75rem;
+      background: rgba(255,255,255,0.95);
+      border-radius: 12px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.875rem;
+    }
+    .cartaz-toolbar-link { color: var(--navy); font-weight: 600; text-decoration: none; }
+    .cartaz-toolbar-link:hover { text-decoration: underline; }
+    .cartaz-toolbar-btn {
+      border: none;
+      background: var(--navy);
+      color: #fff;
+      font-weight: 700;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .cartaz-toolbar-btn:disabled { opacity: 0.6; cursor: wait; }
+    .cartaz-toolbar-btn--ghost { background: #fff; color: var(--navy); border: 2px solid var(--navy); }
+    .cartaz-toolbar-hint { color: var(--muted); font-size: 0.75rem; flex: 1 1 100%; }
+
+    #cartaz-export-root { width: 100%; display: flex; justify-content: center; padding: 0 0.5rem; }
+
+    .cartaz-poster {
+      width: 450px;
+      max-width: 100%;
+      background: linear-gradient(180deg, var(--cream) 0%, #fff 32%, #eef2f8 100%);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.35);
+      color: var(--ink);
+      border: 1px solid rgba(201,162,39,0.35);
+    }
+
+    .cartaz-header {
+      background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy) 55%, #143052 100%);
+      padding: 1.25rem 1.1rem 1rem;
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 0.75rem;
+      align-items: start;
+    }
+    .cartaz-logo {
+      width: 72px;
+      height: auto;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+    }
+    .cartaz-brand-kicker {
+      font-size: 1.35rem;
+      letter-spacing: 0.06em;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+      line-height: 1;
+    }
+    .cartaz-brand-title {
+      margin: 0.1rem 0 0;
+      font-size: 1.85rem;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--gold-light);
+    }
+    .cartaz-brand-sub {
+      margin: 0.35rem 0 0;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .cartaz-plantao-bar {
+      margin: 0 1rem;
+      margin-top: -0.65rem;
+      background: linear-gradient(90deg, #b8922a, var(--gold), #e0c56a, var(--gold), #b8922a);
+      border-radius: 6px;
+      padding: 0.55rem 0.75rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(201,162,39,0.45);
+    }
+    .cartaz-plantao-nomes {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: 0.02em;
+    }
+
+    .cartaz-periodo {
+      margin: 0.85rem 1rem 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--navy);
+      text-transform: uppercase;
+    }
+    .cartaz-periodo svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--gold); }
+
+    .cartaz-dias { padding: 0 0.85rem 1rem; display: flex; flex-direction: column; gap: 0.85rem; }
+
+    .cartaz-dia {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 0;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #d8e0ea;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(12,35,64,0.06);
+    }
+    .cartaz-dia-tab {
+      background: linear-gradient(180deg, var(--navy) 0%, #0a1e38 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 0.25rem;
+      text-align: center;
+    }
+    .cartaz-dia-num {
+      font-size: 1.75rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--gold-light);
+    }
+    .cartaz-dia-mes {
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-top: 0.15rem;
+      opacity: 0.9;
+    }
+    .cartaz-dia-semana {
+      font-size: 0.5rem;
+      font-weight: 600;
+      margin-top: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.75;
+      line-height: 1.2;
+    }
+    .cartaz-dia-corpo { padding: 0.65rem 0.7rem 0.7rem; display: flex; flex-direction: column; gap: 0.65rem; }
+
+    .cartaz-evento { border-bottom: 1px solid #e8edf3; padding-bottom: 0.65rem; }
+    .cartaz-evento:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .cartaz-evento-titulo {
+      margin: 0 0 0.45rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+    .cartaz-evento-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.5rem;
+      align-items: center;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .cartaz-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: #f0f4f9;
+      border-radius: 999px;
+      padding: 0.2rem 0.45rem;
+    }
+    .cartaz-pill svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--navy); }
+    .cartaz-pill--hora { color: var(--navy); font-weight: 800; background: #e8eef8; }
+
+    .cartaz-vazio {
+      margin: 2rem 1.5rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .cartaz-footer {
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,212,138,0.22) 0%, transparent 55%),
+        linear-gradient(180deg, #0a1628 0%, var(--navy-deep) 100%);
+      padding: 1.1rem 1rem 1.25rem;
+      text-align: center;
+      position: relative;
+    }
+    .cartaz-footer::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .cartaz-footer-cross {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 0.5rem;
+      opacity: 0.95;
+    }
+    .cartaz-footer-motto {
+      margin: 0;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      color: #fff;
+    }
+    .cartaz-footer-sub {
+      margin: 0.35rem 0 0;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--gold-light);
+    }
+  </style>
+<% end %>
+
+<article id="cartaz-poster-export" class="cartaz-poster" aria-label="Cartaz escala extra">
+  <header class="cartaz-header">
+    <%= image_tag "icone-ostensorio-mariano.png", alt: "", class: "cartaz-logo", width: 72, height: 72 %>
+    <div>
+      <p class="cartaz-brand-kicker">MESC</p>
+      <h1 class="cartaz-brand-title">ESCALA EXTRA</h1>
+      <p class="cartaz-brand-sub">Sacristia Digital · Comunidade Face de Cristo</p>
+    </div>
+  </header>
+
+  <div class="cartaz-plantao-bar">
+    <p class="cartaz-plantao-nomes"><%= @cartaz.nomes_plantao %></p>
+  </div>
+
+  <p class="cartaz-periodo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    <%= @cartaz.periodo_rotulo %>
+  </p>
+
+  <% if @cartaz.vazio? %>
+    <p class="cartaz-vazio">
+      Nenhum evento extra cadastrado neste período.<br>
+      Cadastre os eventos e atualize esta página.
+    </p>
+  <% else %>
+    <div class="cartaz-dias">
+      <% @cartaz.dias.each do |dia| %>
+        <% mes_abbr = I18n.t("date.abbr_month_names")[dia.data.month].upcase %>
+        <section class="cartaz-dia">
+          <div class="cartaz-dia-tab">
+            <span class="cartaz-dia-num"><%= dia.data.day %></span>
+            <span class="cartaz-dia-mes"><%= mes_abbr %></span>
+            <span class="cartaz-dia-semana"><%= l(dia.data, format: "%A") %></span>
+          </div>
+          <div class="cartaz-dia-corpo">
+            <% dia.eventos.each do |ev| %>
+              <% resp = evento_cartaz_responsavel(ev) %>
+              <div class="cartaz-evento">
+                <h2 class="cartaz-evento-titulo"><%= evento_cartaz_titulo(ev) %></h2>
+                <div class="cartaz-evento-meta">
+                  <span class="cartaz-pill cartaz-pill--hora">
+                    <%= cartaz_icone_svg(evento_cartaz_icone(ev)) %>
+                    <%= ev.horario.strftime("%Hh%M") %>
+                  </span>
+                  <% if ev.local.present? %>
+                    <span class="cartaz-pill">
+                      <%= cartaz_icone_svg(:local) %>
+                      <%= ev.local %>
+                    </span>
+                  <% end %>
+                  <% if resp %>
+                    <span class="cartaz-pill">
+                      <%= cartaz_icone_svg(:pessoa) %>
+                      <%= resp[:nome] %><% if resp[:telefone].present? %> · <%= resp[:telefone] %><% end %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+    </div>
+  <% end %>
+
+  <footer class="cartaz-footer">
+    <svg class="cartaz-footer-cross" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 2v20M5 9h14" stroke="#e8d48a" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <p class="cartaz-footer-motto">— SERVIR É AMOR EM AÇÃO —</p>
+    <p class="cartaz-footer-sub">FACE DE CRISTO RESPLANDECEI EM NÓS</p>
+  </footer>
+</article>

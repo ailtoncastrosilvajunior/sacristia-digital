@@ -3,10 +3,13 @@
 module Admin
   # Plantão extra por competência: blocos de dias + ministros.
   class PlantaoPeriodosController < Admin::BaseController
+    include PlantaoExtraCartazRender
+
     before_action :set_competencia
-    before_action :set_plantao, only: %i[edit update destroy]
+    before_action :set_plantao, only: %i[edit update destroy cartaz]
 
     def index
+      @aba = params[:aba] == "notificacao" ? "notificacao" : "calendario"
       @plantao_periodos = @competencia.plantao_periodos.includes(:ministros).ordenados
       @dias_sem_plantao = dias_sem_plantao(@plantao_periodos)
       @competencia_anterior = @competencia.competencia_anterior
@@ -41,6 +44,10 @@ module Admin
     def destroy
       @plantao.destroy
       redirect_to admin_competencia_mensal_plantao_periodos_path(@competencia), notice: "Bloco de plantão removido."
+    end
+
+    def cartaz
+      render_plantao_extra_cartaz
     end
 
     # Copia dias e ministros da competência anterior.
@@ -80,6 +87,10 @@ module Admin
     def proximo_dia_livre
       cobertos = @competencia.plantao_periodos.flat_map(&:range_dias)
       (1..@competencia.periodo_fim.day).find { |d| !cobertos.include?(d) } || 1
+    end
+
+    def plantao_periodo_for_cartaz
+      @plantao
     end
   end
 end

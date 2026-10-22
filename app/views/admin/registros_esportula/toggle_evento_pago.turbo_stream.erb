@@ -1,0 +1,13 @@
+<%= turbo_stream.replace "esportulas_competencia_totais",
+      partial: "admin/registros_esportula/competencia/totais",
+      locals: { competencia: @competencia, resumo_totais: @resumo_totais } %>
+
+<% if @resumo_linha.present? %>
+  <%= turbo_stream.replace dom_id(@resumo_linha[:sacerdote], :esportula_resumo),
+        partial: "admin/registros_esportula/competencia/resumo_row",
+        locals: { linha: @resumo_linha } %>
+<% end %>
+
+<%= turbo_stream.replace "esportulas_competencia_resumo_foot",
+      partial: "admin/registros_esportula/competencia/resumo_foot",
+      locals: { resumo_totais: @resumo_totais } %>

@@ -1,0 +1,4 @@
+<% path = local_assigns[:return_to].presence || params[:return_to].presence %>
+<% if path.to_s.start_with?("/admin/") && !path.to_s.start_with?("//") %>
+  <%= hidden_field_tag :return_to, path %>
+<% end %>

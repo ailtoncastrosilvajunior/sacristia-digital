@@ -1,90 +1,123 @@
-<div class="space-y-6">
+<% base_path = ->(extra = {}) { admin_competencia_mensal_plantao_periodos_path(@competencia, extra) } %>
+<div class="space-y-4 sm:space-y-5">
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <%= link_to "← #{@competencia.label}", admin_competencia_mensal_path(@competencia), class: "text-sm text-stone-500 hover:text-stone-700 mb-2 block" %>
       <h1 class="text-2xl font-semibold text-stone-800">Plantão extra · <%= @competencia.label %></h1>
       <p class="text-stone-500 mt-1">Ministros de plantão em cada bloco de dias da competência</p>
     </div>
-    <div class="flex items-center gap-2">
-      <% if @plantao_periodos.empty? && @competencia_anterior&.plantao_periodos&.exists? %>
-        <%= button_to "Copiar de #{@competencia_anterior.label}", copiar_anterior_admin_competencia_mensal_plantao_periodos_path(@competencia),
-              method: :post, data: { turbo_confirm: "Copiar blocos e ministros da competência anterior?" },
-              class: "px-4 py-2 border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 font-medium rounded-lg transition-colors cursor-pointer" %>
-      <% end %>
-      <%= link_to "Novo bloco", new_admin_competencia_mensal_plantao_periodo_path(@competencia),
-            class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
-    </div>
+    <% if @aba == "calendario" %>
+      <div class="flex items-center gap-2">
+        <% if @plantao_periodos.empty? && @competencia_anterior&.plantao_periodos&.exists? %>
+          <%= button_to "Copiar de #{@competencia_anterior.label}", copiar_anterior_admin_competencia_mensal_plantao_periodos_path(@competencia),
+                method: :post, data: { turbo_confirm: "Copiar blocos e ministros da competência anterior?" },
+                class: "px-4 py-2 border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 font-medium rounded-lg transition-colors cursor-pointer" %>
+        <% end %>
+        <%= link_to "Novo bloco", new_admin_competencia_mensal_plantao_periodo_path(@competencia),
+              class: "px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors" %>
+      </div>
+    <% end %>
   </div>
 
-  <% if @plantao_periodos.any? && @dias_sem_plantao.any? %>
-    <div class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-900">
-      Dias sem plantão definido: <%= @dias_sem_plantao.join(", ") %>
-    </div>
-  <% end %>
+  <%= render "shared/abas_calendario_notificacao", base_path: base_path, aba_ativa: @aba, badge_count: @plantao_periodos.size, aria_label: "Plantão extra" %>
 
-  <% if @plantao_periodos.empty? %>
-    <p class="text-sm text-stone-500">Nenhum bloco definido. Clique em um dia do calendário para começar<%= " ou copie da competência anterior" if @competencia_anterior&.plantao_periodos&.exists? %>.</p>
-  <% end %>
+  <% if @aba == "notificacao" %>
+    <div class="rounded-2xl border border-stone-200/90 bg-white shadow-sm ring-1 ring-stone-100 overflow-hidden">
+      <div class="p-4 sm:p-5 space-y-4">
+        <div class="pb-3 border-b border-stone-100">
+          <h2 class="text-base font-semibold text-stone-900">Notificações · <%= @competencia.label %></h2>
+          <p class="text-xs text-stone-500 mt-0.5">Cartaz por plantão — PNG para o WhatsApp dos ministros.</p>
+        </div>
 
-  <%# Calendário do mês: clique em um dia para editar o bloco ou criar um novo %>
-  <% cores = [
-       { bg: "bg-sky-50 hover:bg-sky-100", borda: "border-l-sky-500", chip: "bg-sky-600 text-white", texto: "text-sky-900" },
-       { bg: "bg-emerald-50 hover:bg-emerald-100", borda: "border-l-emerald-500", chip: "bg-emerald-600 text-white", texto: "text-emerald-900" },
-       { bg: "bg-sky-50 hover:bg-sky-100", borda: "border-l-sky-500", chip: "bg-sky-600 text-white", texto: "text-sky-900" },
-       { bg: "bg-amber-50 hover:bg-amber-100", borda: "border-l-amber-500", chip: "bg-amber-600 text-white", texto: "text-amber-900" },
-       { bg: "bg-rose-50 hover:bg-rose-100", borda: "border-l-rose-500", chip: "bg-rose-600 text-white", texto: "text-rose-900" },
-       { bg: "bg-teal-50 hover:bg-teal-100", borda: "border-l-teal-500", chip: "bg-teal-600 text-white", texto: "text-teal-900" }
-     ] %>
-  <% por_dia = {} %>
-  <% @plantao_periodos.each_with_index { |pp, i| pp.range_dias.each { |d| por_dia[d] = [pp, i] } } %>
-  <% inicio = @competencia.periodo %>
-  <% ultimo_dia = @competencia.periodo_fim.day %>
-  <% tem_blocos = @plantao_periodos.any? %>
-  <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-    <div class="min-w-[640px] rounded-xl border border-stone-200 overflow-hidden bg-white shadow-sm">
-      <div class="grid grid-cols-7 bg-slate-800 text-white">
-        <% I18n.t("date.day_names").each do |nome| %>
-          <div class="px-2 py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider"><%= nome %></div>
+        <% if @plantao_periodos.any? %>
+          <%= render "shared/plantoes_cartaz_links", plantoes: @plantao_periodos, competencia: @competencia, compact: true, ocultar_gerenciar: true %>
+        <% else %>
+          <div class="rounded-xl border border-dashed border-stone-300 bg-stone-50 px-6 py-10 text-center">
+            <p class="text-sm font-medium text-stone-700">Nenhum bloco de plantão nesta competência.</p>
+            <p class="text-sm text-stone-500 mt-2 max-w-md mx-auto">
+              Defina os blocos na aba Calendário para gerar cartazes com os eventos extra do mês.
+            </p>
+            <%= link_to "Ir para o calendário", base_path.call(aba: "calendario"), class: "inline-flex mt-4 px-4 py-2 text-sm font-semibold rounded-lg bg-slate-600 hover:bg-slate-700 text-white transition-colors" %>
+          </div>
         <% end %>
+
+        <div class="rounded-lg bg-stone-50 border border-stone-200 px-3 py-2.5 text-xs text-stone-600">
+          <span class="font-semibold text-stone-800">Dica:</span>
+          em <strong>Notificação</strong> → <strong>Baixar PNG</strong> ou <strong>Copiar link</strong>. Confira eventos extra antes de enviar ao grupo.
+        </div>
       </div>
-      <div class="grid grid-cols-7">
-        <% inicio.wday.times do %>
-          <div class="min-h-[104px] border-b border-r border-stone-200 bg-stone-100/60"></div>
-        <% end %>
-        <% (1..ultimo_dia).each do |dia| %>
-          <% data = Date.new(inicio.year, inicio.month, dia) %>
-          <% pp, idx = por_dia[dia] %>
-          <% cor = pp ? cores[idx % cores.size] : nil %>
-          <% inicio_bloco = pp && (dia == pp.dia_inicio || data.sunday?) %>
-          <% destino = pp ? edit_admin_competencia_mensal_plantao_periodo_path(@competencia, pp) : new_admin_competencia_mensal_plantao_periodo_path(@competencia, dia_inicio: dia) %>
-          <% classes = pp ? "#{cor[:bg]} border-l-4 #{cor[:borda]}" : (tem_blocos ? "bg-amber-50/40 hover:bg-amber-50 border-l-4 border-l-transparent" : "bg-white hover:bg-stone-50 border-l-4 border-l-transparent") %>
-          <%= link_to destino, title: (pp ? "Editar #{pp.rotulo}" : "Definir plantão a partir do dia #{dia}"),
-                class: "group block min-h-[104px] p-1.5 border-b border-r border-stone-200 transition-colors #{classes}" do %>
-            <div class="flex items-center justify-between mb-1">
-              <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs font-bold tabular-nums <%= data == Date.current ? 'bg-sky-600 text-white' : 'text-stone-700' %>"><%= dia %></span>
-              <% if inicio_bloco %>
-                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide <%= cor[:chip] %>"><%= pp.dia_inicio == pp.dia_fim ? "Dia #{pp.dia_inicio}" : "#{pp.dia_inicio}–#{pp.dia_fim}" %></span>
+    </div>
+  <% else %>
+    <% if @plantao_periodos.any? && @dias_sem_plantao.any? %>
+      <div class="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-900">
+        Dias sem plantão definido: <%= @dias_sem_plantao.join(", ") %>
+      </div>
+    <% end %>
+
+    <% if @plantao_periodos.empty? %>
+      <p class="text-sm text-stone-500">Nenhum bloco definido. Clique em um dia do calendário para começar<%= " ou copie da competência anterior" if @competencia_anterior&.plantao_periodos&.exists? %>.</p>
+    <% end %>
+
+    <%# Calendário do mês: clique em um dia para editar o bloco ou criar um novo %>
+    <% cores = [
+         { bg: "bg-sky-50 hover:bg-sky-100", borda: "border-l-sky-500", chip: "bg-sky-600 text-white", texto: "text-sky-900" },
+         { bg: "bg-emerald-50 hover:bg-emerald-100", borda: "border-l-emerald-500", chip: "bg-emerald-600 text-white", texto: "text-emerald-900" },
+         { bg: "bg-sky-50 hover:bg-sky-100", borda: "border-l-sky-500", chip: "bg-sky-600 text-white", texto: "text-sky-900" },
+         { bg: "bg-amber-50 hover:bg-amber-100", borda: "border-l-amber-500", chip: "bg-amber-600 text-white", texto: "text-amber-900" },
+         { bg: "bg-rose-50 hover:bg-rose-100", borda: "border-l-rose-500", chip: "bg-rose-600 text-white", texto: "text-rose-900" },
+         { bg: "bg-teal-50 hover:bg-teal-100", borda: "border-l-teal-500", chip: "bg-teal-600 text-white", texto: "text-teal-900" }
+       ] %>
+    <% por_dia = {} %>
+    <% @plantao_periodos.each_with_index { |pp, i| pp.range_dias.each { |d| por_dia[d] = [pp, i] } } %>
+    <% inicio = @competencia.periodo %>
+    <% ultimo_dia = @competencia.periodo_fim.day %>
+    <% tem_blocos = @plantao_periodos.any? %>
+    <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+      <div class="min-w-[640px] rounded-xl border border-stone-200 overflow-hidden bg-white shadow-sm">
+        <div class="grid grid-cols-7 bg-slate-800 text-white">
+          <% I18n.t("date.day_names").each do |nome| %>
+            <div class="px-2 py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider"><%= nome %></div>
+          <% end %>
+        </div>
+        <div class="grid grid-cols-7">
+          <% inicio.wday.times do %>
+            <div class="min-h-[104px] border-b border-r border-stone-200 bg-stone-100/60"></div>
+          <% end %>
+          <% (1..ultimo_dia).each do |dia| %>
+            <% data = Date.new(inicio.year, inicio.month, dia) %>
+            <% pp, idx = por_dia[dia] %>
+            <% cor = pp ? cores[idx % cores.size] : nil %>
+            <% inicio_bloco = pp && (dia == pp.dia_inicio || data.sunday?) %>
+            <% destino = pp ? edit_admin_competencia_mensal_plantao_periodo_path(@competencia, pp) : new_admin_competencia_mensal_plantao_periodo_path(@competencia, dia_inicio: dia) %>
+            <% classes = pp ? "#{cor[:bg]} border-l-4 #{cor[:borda]}" : (tem_blocos ? "bg-amber-50/40 hover:bg-amber-50 border-l-4 border-l-transparent" : "bg-white hover:bg-stone-50 border-l-4 border-l-transparent") %>
+            <%= link_to destino, title: (pp ? "Editar #{pp.rotulo}" : "Definir plantão a partir do dia #{dia}"),
+                  class: "group block min-h-[104px] p-1.5 border-b border-r border-stone-200 transition-colors #{classes}" do %>
+              <div class="flex items-center justify-between mb-1">
+                <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs font-bold tabular-nums <%= data == Date.current ? 'bg-sky-600 text-white' : 'text-stone-700' %>"><%= dia %></span>
+                <% if inicio_bloco %>
+                  <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide <%= cor[:chip] %>"><%= pp.dia_inicio == pp.dia_fim ? "Dia #{pp.dia_inicio}" : "#{pp.dia_inicio}–#{pp.dia_fim}" %></span>
+                <% end %>
+              </div>
+              <% if pp %>
+                <% pp.ministros.each do |m| %>
+                  <span class="block truncate text-[11px] sm:text-xs font-medium leading-snug <%= cor[:texto] %>"><%= m.nome %></span>
+                <% end %>
+                <% if pp.ministros.empty? %>
+                  <span class="block text-[11px] italic text-stone-400">sem ministros</span>
+                <% end %>
+              <% elsif tem_blocos %>
+                <span class="block text-[11px] font-medium text-amber-700/80">sem plantão</span>
+              <% else %>
+                <span class="hidden group-hover:block text-[11px] text-stone-400">+ definir plantão</span>
               <% end %>
-            </div>
-            <% if pp %>
-              <% pp.ministros.each do |m| %>
-                <span class="block truncate text-[11px] sm:text-xs font-medium leading-snug <%= cor[:texto] %>"><%= m.nome %></span>
-              <% end %>
-              <% if pp.ministros.empty? %>
-                <span class="block text-[11px] italic text-stone-400">sem ministros</span>
-              <% end %>
-            <% elsif tem_blocos %>
-              <span class="block text-[11px] font-medium text-amber-700/80">sem plantão</span>
-            <% else %>
-              <span class="hidden group-hover:block text-[11px] text-stone-400">+ definir plantão</span>
             <% end %>
           <% end %>
-        <% end %>
-        <% restante = (7 - ((inicio.wday + ultimo_dia) % 7)) % 7 %>
-        <% restante.times do %>
-          <div class="min-h-[104px] border-b border-r border-stone-200 bg-stone-100/60"></div>
-        <% end %>
+          <% restante = (7 - ((inicio.wday + ultimo_dia) % 7)) % 7 %>
+          <% restante.times do %>
+            <div class="min-h-[104px] border-b border-r border-stone-200 bg-stone-100/60"></div>
+          <% end %>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 </div>

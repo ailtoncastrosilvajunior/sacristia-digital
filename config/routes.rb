@@ -34,6 +34,7 @@ Rails.application.routes.draw do
       end
       resources :plantao_periodos, path: "plantao", except: [:show] do
         collection { post :copiar_anterior }
+        member { get :cartaz }
       end
     end
     resources :evento_escala, path: "eventos-escala", only: [:show, :new, :create, :edit, :update, :destroy] do
@@ -52,7 +53,12 @@ Rails.application.routes.draw do
         delete :remover_imagem
       end
     end
-    resources :registros_esportula, path: "esportulas"
+    resources :registros_esportula, path: "esportulas" do
+      collection do
+        get :competencia
+        patch :toggle_evento_pago
+      end
+    end
     get "escala-mensal/imprimir", to: "escala_mensal#imprimir", as: :escala_mensal_imprimir
     get "relatorios", to: "relatorios#index"
   end
@@ -65,6 +71,7 @@ Rails.application.routes.draw do
   # Agendadores da escala extra: acesso restrito ao CRUD de eventos extra
   namespace :escala_extra, path: "escala-extra" do
     root "eventos_extra#index"
+    get "plantao/:id/cartaz", to: "plantao_cartaz#show", as: :plantao_cartaz
     resources :eventos_extra, path: "eventos-extra" do
       member { get :drawer }
     end

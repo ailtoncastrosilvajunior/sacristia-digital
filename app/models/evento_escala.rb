@@ -57,6 +57,14 @@ class EventoEscala < ApplicationRecord
     status == "cancelado"
   end
 
+  def registro_esportula_vinculado
+    registro_esportulas.first
+  end
+
+  def esportula_paga?
+    registro_esportula_vinculado&.status == "pago"
+  end
+
   # Eventos com 0 ministros (ex.: confissão) não entram na escala de ministros.
   def requer_ministros?
     quantidade_ministros.positive? || escala_ministros.any?
