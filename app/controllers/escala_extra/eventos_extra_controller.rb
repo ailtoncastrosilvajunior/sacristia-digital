@@ -11,7 +11,7 @@ module EscalaExtra
 
     # Detalhes do evento no drawer lateral (turbo-frame evento_drawer).
     def drawer
-      @evento = EventoEscala.extras.includes(:tipo_servico, :sacerdote, escala_ministros: :ministro).find(params[:id])
+      @evento = EventoEscala.extras.includes(:tipo_servico, :sacerdote, { plantao_periodo: :ministros }, :competencia_mensal, escala_ministros: :ministro).find(params[:id])
       render partial: "admin/evento_escala/show_drawer", layout: false
     end
 

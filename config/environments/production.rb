@@ -21,9 +21,9 @@ Rails.application.configure do
   # sem isso o rate_limit do pré-cadastro e o cache da liturgia dão erro 500.
   config.cache_store = :memory_store, { size: 32.megabytes }
 
-  # Imagens (ex.: santo do dia). Disco local: monte um volume persistente em /app/storage
-  # ou troque por S3/Spaces em config/storage.yml.
-  config.active_storage.service = :local
+  # Imagens (ex.: santo do dia) → DigitalOcean Spaces (config/storage.yml).
+  # App Platform: defina ACTIVE_STORAGE_SERVICE=digitalocean_spaces e as variáveis DO_SPACES_*.
+  config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "digitalocean_spaces").to_sym
   config.action_mailer.perform_caching = false
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost") }
   config.i18n.fallbacks = true

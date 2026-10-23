@@ -39,6 +39,10 @@ class LiturgiaDia < ApplicationRecord
     divergencias.present?
   end
 
+  def pode_validar?
+    leituras.present? && santo_nome.present?
+  end
+
   def validar!(user)
     update!(status: "validada", validado_por: user, validado_em: Time.current)
   end

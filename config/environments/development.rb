@@ -19,7 +19,8 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
-  config.active_storage.service = :local
+  # Local por padrão; com ACTIVE_STORAGE_SERVICE=digitalocean_spaces no .env usa o bucket (docker-compose).
+  config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "local").to_sym
   config.active_job.queue_adapter = :async
   config.action_cable.disable_request_forgery_protection = true
 

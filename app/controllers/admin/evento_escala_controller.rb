@@ -127,7 +127,7 @@ module Admin
     # Carrega tudo o que o drawer/ficha exibe em 1 consulta + 1 por associação (sem N+1).
     def set_evento_completo
       @evento = EventoEscala
-        .includes(:tipo_servico, :sacerdote, :plantao_periodo, :competencia_mensal, escala_ministros: :ministro)
+        .includes(:tipo_servico, :sacerdote, { plantao_periodo: :ministros }, :competencia_mensal, escala_ministros: :ministro)
         .find(params[:id])
     end
 

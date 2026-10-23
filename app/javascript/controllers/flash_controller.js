@@ -1,9 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Mensagem flash (notice/alert) com botão para fechar.
-// Fecha sozinha após `delay` ms (padrão: 60s).
+// Fecha sozinha após `delay` ms (padrão: 30s).
 export default class extends Controller {
-  static values = { delay: { type: Number, default: 60000 } }
+  static values = { delay: { type: Number, default: 30000 } }
 
   connect() {
     this.timer = setTimeout(() => this.close(), this.delayValue)

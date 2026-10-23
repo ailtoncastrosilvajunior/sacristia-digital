@@ -5,18 +5,27 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["lista", "data", "secao"]
   static classes = ["ativo"]
+  static values = { initialDate: String }
 
   connect() {
+    if (this.hasInitialDateValue) {
+      requestAnimationFrame(() => this.irParaData(this.initialDateValue))
+    }
     this.marcar()
   }
 
   ir(event) {
     event.preventDefault()
-    const alvo = this.secaoTargets.find((s) => s.dataset.data === event.currentTarget.dataset.data)
+    this.irParaData(event.currentTarget.dataset.data, true)
+  }
+
+  irParaData(isoDate, smooth = false) {
+    const alvo = this.secaoTargets.find((s) => s.dataset.data === isoDate)
     if (!alvo) return
     const lista = this.listaTarget
     const top = alvo.getBoundingClientRect().top - lista.getBoundingClientRect().top + lista.scrollTop - 8
-    lista.scrollTo({ top, behavior: "smooth" })
+    lista.scrollTo({ top, behavior: smooth ? "smooth" : "auto" })
+    this.marcar()
   }
 
   marcar() {

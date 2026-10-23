@@ -7,6 +7,11 @@ module EventosExtraPathsHelper
     controller_path.start_with?("escala_extra")
   end
 
+  # Eventos extra recebem ministros do plantão; escala manual só na competência ordinária.
+  def mostrar_escalar_ministros?(evento)
+    !escala_extra_context? && !evento.extra?
+  end
+
   def eventos_extra_index_path(*args)
     escala_extra_context? ? escala_extra_eventos_extra_index_path(*args) : admin_eventos_extra_index_path(*args)
   end

@@ -16,6 +16,22 @@ module Liturgia
       seguir_redirect(resposta, uri, limite_redirects) || resposta_ok!(resposta, url)
     end
 
+    def get_binary(url, limite_redirects: 3)
+      uri = URI.parse(url)
+      req = Net::HTTP::Get.new(uri)
+      req["User-Agent"] = USER_AGENT
+      resposta = request(uri, req)
+      if resposta.is_a?(Net::HTTPRedirection)
+        raise Erro, "Redirecionamentos demais" if limite_redirects <= 0
+
+        return get_binary(URI.join(uri, resposta["location"]).to_s, limite_redirects: limite_redirects - 1)
+      end
+      raise Erro, "HTTP #{resposta.code} em #{url}" unless resposta.is_a?(Net::HTTPSuccess)
+
+      tipo = resposta["Content-Type"].to_s.split(";").first.strip
+      [resposta.body.to_s.b, tipo]
+    end
+
     def post_form(url, dados)
       uri = URI.parse(url)
       req = Net::HTTP::Post.new(uri)

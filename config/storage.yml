@@ -26,7 +26,7 @@ local:
 <% spaces_secret_access_key = ENV["DO_SPACES_SECRET_ACCESS_KEY"].presence || ENV["AWS_SECRET_ACCESS_KEY"].presence %>
 <% spaces_secret_access_key = spaces_secret_access_key&.strip %>
 digitalocean_spaces:
-  service: S3
+  service: DigitaloceanSpaces
   access_key_id: <%= spaces_access_key_id %>
   secret_access_key: <%= spaces_secret_access_key %>
   region: <%= spaces_sdk_region %>
@@ -34,6 +34,7 @@ digitalocean_spaces:
   endpoint: <%= spaces_endpoint %>
   force_path_style: <%= spaces_force_path_style %>
   # aws-sdk-s3 ≥1.178: checksums por defeito em PutObject — Spaces pode falhar; ver rails/rails#54374.
+  # Chaves no bucket seguem o padrão do Active Storage (hash). Use bucket dedicado ou subpasta manual se precisar.
   request_checksum_calculation: "when_required"
   response_checksum_validation: "when_required"
 

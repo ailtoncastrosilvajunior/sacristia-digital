@@ -16,13 +16,9 @@ module EventosExtraCrud
     scope = scope.where(tipo_servico_id: params[:tipo_servico_id]) if params[:tipo_servico_id].present?
 
     @aba = params[:aba] == "notificacao" ? "notificacao" : "calendario"
-    @vista_calendario = if params[:aba] == "lista"
-                          "lista"
-                        elsif %w[semana dia lista].include?(params[:vista_calendario])
-                          params[:vista_calendario]
-                        else
-                          "mes"
-                        end
+    vista = params[:vista_calendario].presence
+    vista = "dia" if vista == "lista" || params[:aba] == "lista"
+    @vista_calendario = %w[semana dia].include?(vista) ? vista : "mes"
     @data_ref = (params[:data_ref].presence && (Date.parse(params[:data_ref]) rescue nil)) || Date.current
     @domingo_semana = @data_ref - @data_ref.wday
     @inicio_mes = @data_ref.beginning_of_month
@@ -30,7 +26,6 @@ module EventosExtraCrud
 
     @periodo = case @vista_calendario
                when "semana" then @domingo_semana..(@domingo_semana + 6)
-               when "dia" then @data_ref..@data_ref
                else @inicio_mes..@fim_mes
                end
     @eventos_total = scope.count

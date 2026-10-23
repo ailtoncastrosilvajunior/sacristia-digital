@@ -6,6 +6,7 @@ module PainelMinistro
     def index
       @mes = parse_mes(params[:mes])
       @dias = LiturgiaDia.validadas
+                         .with_attached_imagem_santo
                          .where(data: @mes.beginning_of_month..@mes.end_of_month)
                          .order(:data)
                          .index_by(&:data)

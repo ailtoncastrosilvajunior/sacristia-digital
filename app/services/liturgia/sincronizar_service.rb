@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "stringio"
+
 module Liturgia
   # Busca a liturgia do dia na fonte principal (Canção Nova), confere com uma segunda
   # fonte e grava como RASCUNHO. Nada chega ao ministro sem validação do administrador.
@@ -47,6 +49,7 @@ module Liturgia
         validado_por: nil,
         validado_em: nil
       )
+      aplicar_santo(registro)
       registro.save!
       Resposta.new(liturgia_dia: registro, status: novo ? :criada : :atualizada)
     rescue Erro, ActiveRecord::RecordInvalid => e
@@ -59,6 +62,30 @@ module Liturgia
       UpApiClient.buscar(@data)
     rescue Erro
       nil
+    end
+
+    def aplicar_santo(registro)
+      santo = SantoCancaoNovaClient.buscar(@data)
+      registro.santo_nome = santo.nome
+      registro.santo_descricao = santo.descricao if santo.descricao.present?
+      anexar_imagem_santo(registro, santo.imagem_url) if santo.imagem_url.present?
+    rescue Erro => e
+      Rails.logger.warn("[Liturgia] Santo do dia #{@data}: #{e.message}")
+    end
+
+    def anexar_imagem_santo(registro, url)
+      corpo, tipo = Http.get_binary(url)
+      ext = File.extname(URI.parse(url).path).delete_prefix(".").downcase
+      ext = "jpg" if ext.blank?
+      tipo = tipo.presence || (ext == "jpg" ? "image/jpeg" : "image/#{ext}")
+
+      registro.imagem_santo.attach(
+        io: StringIO.new(corpo),
+        filename: "santo-#{@data.iso8601}.#{ext}",
+        content_type: tipo
+      )
+    rescue Erro => e
+      Rails.logger.warn("[Liturgia] Imagem do santo #{@data}: #{e.message}")
     end
 
     def normalizar_cor(cor)

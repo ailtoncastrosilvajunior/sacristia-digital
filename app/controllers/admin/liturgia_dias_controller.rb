@@ -72,6 +72,8 @@ module Admin
     def validar
       if @liturgia_dia.leituras.blank?
         redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: "Não há leituras para validar."
+      elsif @liturgia_dia.santo_nome.blank?
+        redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: "Informe o nome do santo do dia antes de validar (imagem é opcional)."
       else
         @liturgia_dia.validar!(current_user)
         redirect_to admin_liturgia_dias_path(mes: @liturgia_dia.data.strftime("%Y-%m")), notice: "Liturgia de #{I18n.l(@liturgia_dia.data)} validada e liberada aos ministros."
@@ -91,7 +93,7 @@ module Admin
     private
 
     def set_liturgia_dia
-      @liturgia_dia = LiturgiaDia.find(params[:id])
+      @liturgia_dia = LiturgiaDia.with_attached_imagem_santo.find(params[:id])
     end
 
     def parse_mes(raw)

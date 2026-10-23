@@ -1,83 +1,164 @@
-<div class="space-y-6 max-w-4xl">
-  <div>
-    <%= link_to "← Voltar", admin_liturgia_dia_path(@liturgia_dia), class: "text-sm text-slate-500 hover:text-slate-800" %>
-    <h1 class="text-2xl font-semibold text-stone-800 mt-1">Editar liturgia de <%= l(@liturgia_dia.data) %></h1>
-    <p class="text-stone-500 text-sm mt-1">Ao salvar, a liturgia volta para <strong>rascunho</strong> e precisa ser validada de novo.</p>
-  </div>
+<% campo = "w-full px-4 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-800 placeholder:text-stone-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/25 focus:border-sky-600" %>
+<% area = "#{campo} resize-y min-h-[5rem]" %>
+<% area_leitura = "#{campo} resize-y min-h-[18rem] sm:min-h-[22rem] font-serif text-[15px] leading-[1.65] tracking-[0.01em]" %>
+<% leituras = @liturgia_dia.leituras_ordenadas %>
+<% tab_btn = "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40" %>
+
+<div class="pb-24 max-w-4xl">
+  <header class="mb-6">
+    <%= link_to "← Voltar à revisão", admin_liturgia_dia_path(@liturgia_dia), class: "text-sm text-slate-500 hover:text-slate-800" %>
+    <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-semibold text-stone-800">Editar liturgia</h1>
+        <p class="mt-1 text-stone-600 capitalize"><%= l(@liturgia_dia.data, format: "%A, %d de %B de %Y") %></p>
+      </div>
+      <div class="flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 shadow-sm">
+        <span class="inline-block h-4 w-4 shrink-0 rounded-full ring-2 ring-white shadow" style="background-color: <%= @liturgia_dia.cor_css %>"></span>
+        <span class="text-sm text-stone-600">Cor: <strong class="text-stone-900"><%= @liturgia_dia.cor.presence || "—" %></strong></span>
+      </div>
+    </div>
+    <p class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+      Navegue pelas abas à vontade. Ao <strong>salvar</strong>, a liturgia volta para rascunho e precisa ser validada de novo.
+    </p>
+  </header>
 
   <%= form_with model: @liturgia_dia, url: admin_liturgia_dia_path(@liturgia_dia), method: :patch, class: "space-y-6" do |f| %>
     <% if @liturgia_dia.errors.any? %>
-      <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-        <ul class="list-disc pl-5"><% @liturgia_dia.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
+      <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        <p class="font-semibold mb-1"><%= pluralize(@liturgia_dia.errors.count, "erro") %> ao salvar</p>
+        <ul class="list-disc pl-5 space-y-0.5"><% @liturgia_dia.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
       </div>
     <% end %>
 
-    <section class="bg-white rounded-xl border border-stone-200 p-4 grid sm:grid-cols-2 gap-4">
-      <div class="sm:col-span-2">
-        <%= f.label :titulo, "Título da celebração", class: "block text-sm font-medium text-stone-700 mb-1" %>
-        <%= f.text_field :titulo, class: "w-full rounded-lg border-stone-300" %>
+    <div data-controller="tabs" data-tabs-active-value="celebracao" class="rounded-2xl border border-stone-200 bg-white shadow-sm overflow-hidden">
+      <div class="border-b border-stone-100 bg-stone-50/80 px-3 py-3 sm:px-4">
+        <div role="tablist" aria-label="Seções da liturgia" class="flex flex-wrap gap-2">
+          <button type="button" role="tab" id="tab-celebracao" data-tabs-target="tab" data-tabs-tab-value="celebracao" data-action="tabs#select"
+                  aria-controls="panel-celebracao" class="<%= tab_btn %> bg-slate-800 text-white shadow-sm">
+            Celebração
+          </button>
+          <button type="button" role="tab" id="tab-santo" data-tabs-target="tab" data-tabs-tab-value="santo" data-action="tabs#select"
+                  aria-controls="panel-santo" class="<%= tab_btn %> bg-white text-stone-700 border border-stone-200 hover:bg-stone-50">
+            Santo do dia
+            <% if @liturgia_dia.santo_nome.blank? %>
+              <span class="inline-block h-2 w-2 rounded-full bg-amber-500" title="Nome pendente"></span>
+            <% end %>
+          </button>
+          <button type="button" role="tab" id="tab-leituras" data-tabs-target="tab" data-tabs-tab-value="leituras" data-action="tabs#select"
+                  aria-controls="panel-leituras" class="<%= tab_btn %> bg-white text-stone-700 border border-stone-200 hover:bg-stone-50">
+            Leituras
+            <% if leituras.any? %><span class="text-xs font-normal opacity-80 tabular-nums">(<%= leituras.size %>)</span><% end %>
+          </button>
+          <button type="button" role="tab" id="tab-observacoes" data-tabs-target="tab" data-tabs-tab-value="observacoes" data-action="tabs#select"
+                  aria-controls="panel-observacoes" class="<%= tab_btn %> bg-white text-stone-700 border border-stone-200 hover:bg-stone-50">
+            Observações
+          </button>
+        </div>
       </div>
-      <div>
-        <%= f.label :cor, "Cor litúrgica", class: "block text-sm font-medium text-stone-700 mb-1" %>
-        <%= f.select :cor, LiturgiaDia::CORES, { include_blank: true }, class: "w-full rounded-lg border-stone-300" %>
-      </div>
-    </section>
 
-    <section class="bg-white rounded-xl border border-stone-200 p-4 space-y-4">
-      <h2 class="font-semibold text-stone-800">Santo do dia</h2>
-      <div>
-        <%= f.label :santo_nome, "Nome (ex.: São Daniel Comboni, bispo — memória)", class: "block text-sm font-medium text-stone-700 mb-1" %>
-        <%= f.text_field :santo_nome, class: "w-full rounded-lg border-stone-300" %>
+      <%# —— Celebração —— %>
+      <div role="tabpanel" id="panel-celebracao" data-tabs-target="panel" data-tabs-panel-value="celebracao" aria-labelledby="tab-celebracao" class="p-4 sm:p-6 space-y-4">
+        <p class="text-sm text-stone-500">Título e cor litúrgica exibidos aos ministros junto com as leituras.</p>
+        <div>
+          <%= f.label :titulo, "Título da celebração", class: "block text-sm font-medium text-stone-700 mb-1.5" %>
+          <%= f.text_field :titulo, class: campo %>
+        </div>
+        <div class="max-w-xs">
+          <%= f.label :cor, "Cor litúrgica", class: "block text-sm font-medium text-stone-700 mb-1.5" %>
+          <%= f.select :cor, LiturgiaDia::CORES, { include_blank: "Selecione…" }, class: campo %>
+        </div>
       </div>
-      <div>
-        <%= f.label :santo_descricao, "Breve descrição (opcional)", class: "block text-sm font-medium text-stone-700 mb-1" %>
-        <%= f.text_area :santo_descricao, rows: 3, class: "w-full rounded-lg border-stone-300" %>
-      </div>
-      <div>
-        <%= f.label :imagem_santo, "Imagem (opcional — se não houver, não é exibida)", class: "block text-sm font-medium text-stone-700 mb-1" %>
-        <% if @liturgia_dia.imagem_santo.attached? && @liturgia_dia.imagem_santo.persisted? %>
-          <div class="flex items-center gap-3 mb-2">
-            <%= image_tag url_for(@liturgia_dia.imagem_santo), class: "w-20 h-20 rounded-lg object-cover border border-stone-200" %>
-            <%= link_to "Remover imagem", remover_imagem_admin_liturgia_dia_path(@liturgia_dia), data: { turbo_method: :delete, turbo_confirm: "Remover a imagem?" }, class: "text-sm text-red-600 hover:underline" %>
+
+      <%# —— Santo —— %>
+      <div role="tabpanel" id="panel-santo" data-tabs-target="panel" data-tabs-panel-value="santo" aria-labelledby="tab-santo" hidden class="p-4 sm:p-6">
+        <div class="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-start">
+          <div class="flex flex-col items-center gap-3 sm:sticky sm:top-4">
+            <% if @liturgia_dia.imagem_santo.attached? %>
+              <%= image_tag url_for(@liturgia_dia.imagem_santo), class: "h-32 w-32 rounded-2xl object-cover ring-4 ring-stone-100 shadow-md border border-stone-200", alt: @liturgia_dia.santo_nome %>
+              <%= link_to "Remover imagem", remover_imagem_admin_liturgia_dia_path(@liturgia_dia),
+                    data: { turbo_method: :delete, turbo_confirm: "Remover a imagem do santo?" },
+                    class: "text-xs font-medium text-red-600 hover:text-red-800 hover:underline" %>
+            <% else %>
+              <div class="flex h-32 w-32 items-center justify-center rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50 text-center px-2">
+                <span class="text-xs text-stone-400">Sem imagem<br><span class="text-[10px]">(opcional)</span></span>
+              </div>
+            <% end %>
+            <label class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-sm hover:bg-stone-50 transition-colors w-full max-w-[8rem]">
+              <%= f.file_field :imagem_santo, accept: "image/jpeg,image/png,image/webp", class: "sr-only" %>
+              <span><%= @liturgia_dia.imagem_santo.attached? ? "Trocar" : "Enviar" %></span>
+            </label>
+            <p class="text-[11px] text-stone-400 text-center">JPG, PNG ou WebP · 5 MB</p>
           </div>
-        <% end %>
-        <%= f.file_field :imagem_santo, accept: "image/*", class: "block text-sm" %>
-        <p class="text-xs text-stone-400 mt-1">JPG, PNG ou WebP, até 5 MB.</p>
-      </div>
-    </section>
-
-    <section class="space-y-4">
-      <h2 class="font-semibold text-stone-800">Leituras</h2>
-      <% @liturgia_dia.leituras_ordenadas.each_with_index do |l, i| %>
-        <div class="bg-white rounded-xl border border-stone-200 p-4 space-y-3">
-          <%= hidden_field_tag "leituras[#{i}][tipo]", l["tipo"] %>
-          <%= hidden_field_tag "leituras[#{i}][rotulo]", l["rotulo"] %>
-          <div class="grid sm:grid-cols-3 gap-3">
+          <div class="space-y-4 min-w-0">
+            <div class="<%= @liturgia_dia.santo_nome.blank? ? 'rounded-xl border border-amber-200 bg-amber-50/50 p-4' : '' %>">
+              <p class="text-sm text-stone-600 mb-3"><strong>Nome</strong> é obrigatório para validar; imagem e descrição são opcionais.</p>
+              <%= f.label :santo_nome, "Nome do santo ou memória", class: "block text-sm font-medium text-stone-700 mb-1.5" %>
+              <%= f.text_field :santo_nome, class: campo, placeholder: "Ex.: São João Paulo II, papa" %>
+            </div>
             <div>
-              <label class="block text-xs font-medium text-stone-500 mb-1">Tipo</label>
-              <p class="text-sm font-semibold text-stone-800 py-2"><%= @liturgia_dia.rotulo_leitura(l) %></p>
+              <%= f.label :santo_descricao, "Breve descrição", class: "block text-sm font-medium text-stone-700 mb-1.5" %>
+              <%= f.text_area :santo_descricao, rows: 5, class: area, placeholder: "Opcional — trecho curto para o ministro" %>
             </div>
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-stone-500 mb-1">Referência</label>
-              <%= text_field_tag "leituras[#{i}][referencia]", l["referencia"], class: "w-full rounded-lg border-stone-300" %>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-stone-500 mb-1">Texto</label>
-            <%= text_area_tag "leituras[#{i}][texto]", l["texto"], rows: 10, class: "w-full rounded-lg border-stone-300 text-sm leading-relaxed" %>
           </div>
         </div>
-      <% end %>
-    </section>
+      </div>
 
-    <section class="bg-white rounded-xl border border-stone-200 p-4">
-      <%= f.label :observacoes, "Observações internas (não aparecem ao ministro)", class: "block text-sm font-medium text-stone-700 mb-1" %>
-      <%= f.text_area :observacoes, rows: 2, class: "w-full rounded-lg border-stone-300" %>
-    </section>
+      <%# —— Leituras —— %>
+      <div role="tabpanel" id="panel-leituras" data-tabs-target="panel" data-tabs-panel-value="leituras" aria-labelledby="tab-leituras" hidden class="p-4 sm:p-6">
+        <% if leituras.any? %>
+          <div data-controller="tabs" data-tabs-active-value="leitura-0" data-tabs-style="pill" class="space-y-4">
+            <p class="text-sm text-stone-500">Uma leitura por vez — troque de aba sem perder o que já digitou.</p>
+            <div role="tablist" aria-label="Leituras do dia" class="flex flex-wrap gap-1.5">
+              <% leituras.each_with_index do |l, i| %>
+                <button type="button" role="tab" id="tab-leitura-<%= i %>" data-tabs-target="tab" data-tabs-tab-value="leitura-<%= i %>" data-action="tabs#select"
+                        aria-controls="panel-leitura-<%= i %>"
+                        class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 <%= i.zero? ? 'bg-slate-800 text-white shadow-sm' : 'bg-stone-100 text-stone-700 hover:bg-stone-200' %>">
+                  <%= @liturgia_dia.rotulo_leitura(l) %>
+                </button>
+              <% end %>
+            </div>
 
-    <div class="flex items-center gap-3">
-      <%= f.submit "Salvar", class: "px-5 py-2 rounded-lg bg-slate-700 text-white font-medium hover:bg-slate-800 cursor-pointer" %>
-      <%= link_to "Cancelar", admin_liturgia_dia_path(@liturgia_dia), class: "text-sm text-stone-600 hover:underline" %>
+            <% leituras.each_with_index do |l, i| %>
+              <div role="tabpanel" id="panel-leitura-<%= i %>" data-tabs-target="panel" data-tabs-panel-value="leitura-<%= i %>" aria-labelledby="tab-leitura-<%= i %>" <%= "hidden" unless i.zero? %> class="rounded-xl border border-stone-200 bg-stone-50/40 p-4 sm:p-5 space-y-4">
+                <%= hidden_field_tag "leituras[#{i}][tipo]", l["tipo"] %>
+                <%= hidden_field_tag "leituras[#{i}][rotulo]", l["rotulo"] %>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-sm font-semibold text-stone-800"><%= @liturgia_dia.rotulo_leitura(l) %></span>
+                  <span class="text-xs text-stone-400 tabular-nums"><%= i + 1 %> de <%= leituras.size %></span>
+                </div>
+                <div>
+                  <label for="leituras_<%= i %>_referencia" class="block text-sm font-medium text-stone-700 mb-1.5">Referência</label>
+                  <%= text_field_tag "leituras[#{i}][referencia]", l["referencia"], id: "leituras_#{i}_referencia", class: campo %>
+                </div>
+                <div>
+                  <label for="leituras_<%= i %>_texto" class="block text-sm font-medium text-stone-700 mb-1.5">Texto</label>
+                  <%= text_area_tag "leituras[#{i}][texto]", l["texto"], id: "leituras_#{i}_texto", rows: 16, class: area_leitura, spellcheck: "true" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="rounded-xl border border-dashed border-stone-300 bg-stone-50 px-6 py-10 text-center text-sm text-stone-500">
+            Nenhuma leitura cadastrada. Na tela de revisão, use <strong>Buscar novamente</strong>.
+          </div>
+        <% end %>
+      </div>
+
+      <%# —— Observações —— %>
+      <div role="tabpanel" id="panel-observacoes" data-tabs-target="panel" data-tabs-panel-value="observacoes" aria-labelledby="tab-observacoes" hidden class="p-4 sm:p-6 space-y-3">
+        <p class="text-sm text-stone-500">Anotações só para a coordenação — não aparecem ao ministro.</p>
+        <%= f.text_area :observacoes, rows: 6, class: area, placeholder: "Ex.: conferir salmo com o lecionário impresso…" %>
+      </div>
+    </div>
+
+    <div class="fixed inset-x-0 bottom-0 z-20 border-t border-stone-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+      <div class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <%= link_to "Cancelar", admin_liturgia_dia_path(@liturgia_dia), class: "px-4 py-2.5 text-sm font-medium text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition-colors" %>
+        <div class="flex items-center gap-2">
+          <%= link_to "Ver revisão", admin_liturgia_dia_path(@liturgia_dia), class: "hidden sm:inline-flex px-4 py-2.5 text-sm font-medium rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-50 transition-colors" %>
+          <%= f.submit "Salvar alterações", class: "px-5 py-2.5 rounded-lg bg-slate-700 text-white text-sm font-semibold shadow-sm hover:bg-slate-800 cursor-pointer transition-colors" %>
+        </div>
+      </div>
     </div>
   <% end %>
 </div>

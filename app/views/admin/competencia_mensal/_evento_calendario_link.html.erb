@@ -1,43 +1,16 @@
 <%# locals: ev, filtros %>
 <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
-<% requer = ev.requer_ministros? %>
-<% escalados = ev.escala_ministros.count { |em| em.ministro.present? } %>
-<% meta = ev.quantidade_ministros.to_i %>
-<% cobertura =
-     if !requer then nil
-     elsif escalados.zero? then :vazio
-     elsif meta.positive? && escalados < meta then :parcial
-     else :completo
-     end %>
-<% cobertura_estilo = {
-     vazio: "bg-red-100 text-red-700 ring-red-200",
-     parcial: "bg-amber-100 text-amber-800 ring-amber-200",
-     completo: "bg-emerald-100 text-emerald-800 ring-emerald-200"
-   } %>
-<% cobertura_texto = { vazio: "ninguém escalado", parcial: "equipe incompleta", completo: "equipe completa" } %>
 <% tip = [
      "#{l(ev.horario, format: :time)} — #{ev.tipo_servico.nome}",
-     "Sacerdote: #{ev.sacerdote&.nome || 'não definido'}",
-     (requer ? "Ministros (#{escalados}/#{meta}): #{ev.ministros_nomes_com_coordenador}" : "Não requer ministros"),
      (ev.cancelado? ? "Cancelado" : nil)
    ].compact.join("\n") %>
 <div id="<%= dom_id(ev, :cal_chip) %>" class="block w-full mb-1">
   <%= link_to evento_drawer_path(ev, filtros), data: { turbo_frame: "evento_drawer" }, title: tip,
         class: "block rounded-md border bg-white hover:shadow-sm transition-all px-1.5 py-1 cursor-pointer #{'opacity-50' if ev.cancelado?}",
         style: "border-color: #{cor}80; background-color: #{cor}0d;" do %>
-    <span class="flex items-center justify-between gap-1">
-      <span class="flex items-baseline gap-1 min-w-0">
-        <span class="text-[11px] sm:text-xs font-bold tabular-nums text-stone-800 <%= 'line-through' if ev.cancelado? %>"><%= l(ev.horario, format: :time) %></span>
-        <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wide truncate" style="color: <%= cor %>;"><%= ev.tipo_servico.nome %></span>
-      </span>
-      <% if cobertura %>
-        <span class="shrink-0 inline-flex items-center gap-0.5 px-1 rounded text-[9px] font-bold tabular-nums ring-1 <%= cobertura_estilo[cobertura] %>" title="<%= cobertura_texto[cobertura] %>">
-          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg><%= escalados %><%= "/#{meta}" if meta.positive? %>
-        </span>
-      <% end %>
-    </span>
-    <span class="block truncate text-[10px] sm:text-[11px] leading-tight mt-0.5 <%= ev.sacerdote ? 'text-stone-600' : 'text-red-500 italic' %>">
-      <%= ev.sacerdote&.nome || "Sem sacerdote" %>
+    <span class="flex items-baseline gap-1 min-w-0">
+      <span class="text-[11px] sm:text-xs font-bold tabular-nums text-stone-800 shrink-0 <%= 'line-through' if ev.cancelado? %>"><%= l(ev.horario, format: :time) %></span>
+      <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wide truncate <%= 'line-through' if ev.cancelado? %>" style="color: <%= cor %>;"><%= ev.tipo_servico.nome %></span>
     </span>
   <% end %>
 </div>

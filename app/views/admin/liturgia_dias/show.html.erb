@@ -11,16 +11,19 @@
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <%= link_to "Editar", edit_admin_liturgia_dia_path(@liturgia_dia), class: "px-3 py-2 rounded-lg border border-stone-300 text-sm text-stone-700 hover:bg-stone-50" %>
-      <%= button_to "Buscar novamente", sincronizar_admin_liturgia_dia_path(@liturgia_dia), method: :post,
-            data: { turbo_confirm: "Substituir as leituras atuais pelas da fonte? Edições manuais serão perdidas." },
+        <%= button_to "Buscar novamente", sincronizar_admin_liturgia_dia_path(@liturgia_dia), method: :post,
+            data: { turbo_confirm: "Substituir leituras, nome do santo e imagem pelos dados da Canção Nova? Edições manuais serão perdidas." },
             class: "px-3 py-2 rounded-lg border border-stone-300 text-sm text-stone-700 hover:bg-stone-50 cursor-pointer" %>
       <% if @liturgia_dia.validada? %>
         <%= button_to "Retirar dos ministros", reabrir_admin_liturgia_dia_path(@liturgia_dia), method: :post,
               class: "px-3 py-2 rounded-lg bg-amber-100 text-amber-900 text-sm hover:bg-amber-200 cursor-pointer" %>
-      <% else %>
+      <% elsif @liturgia_dia.pode_validar? %>
         <%= button_to "Validar e liberar", validar_admin_liturgia_dia_path(@liturgia_dia), method: :post,
-              data: { turbo_confirm: "Confirma que conferiu as leituras? Elas ficarão visíveis para todos os ministros." },
+              data: { turbo_confirm: "Confirma que conferiu as leituras e o nome do santo do dia? Tudo ficará visível para os ministros." },
               class: "px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 cursor-pointer" %>
+      <% else %>
+        <% bloqueio_validar = @liturgia_dia.leituras.blank? ? "Não há leituras para validar" : "Informe o nome do santo do dia" %>
+        <span class="px-4 py-2 rounded-lg bg-stone-200 text-stone-500 text-sm font-medium cursor-not-allowed" title="<%= bloqueio_validar %>">Validar e liberar</span>
       <% end %>
     </div>
   </div>
@@ -32,29 +35,38 @@
     </div>
   <% else %>
     <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-      Rascunho: ainda <strong>não</strong> aparece para os ministros. Confira cada leitura com o lecionário antes de validar.
+      Rascunho: ainda <strong>não</strong> aparece para os ministros. Confira as leituras (comparação automática entre fontes abaixo), informe o <strong>nome do santo</strong> (obrigatório; imagem opcional) e valide.
     </div>
   <% end %>
 
   <% if @liturgia_dia.divergente? %>
     <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
-      <p class="font-semibold mb-1">Pontos de atenção na conferência entre fontes</p>
+      <p class="font-semibold mb-1">Pontos de atenção na conferência entre fontes (leituras)</p>
       <ul class="list-disc pl-5 space-y-0.5">
         <% @liturgia_dia.divergencias.each do |d| %><li><%= d %></li><% end %>
       </ul>
     </div>
   <% elsif @liturgia_dia.fonte_conferencia.present? %>
-    <div class="rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-emerald-800">As duas fontes concordam (referências e textos).</div>
+    <div class="rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-emerald-800">As duas fontes concordam nas leituras (referências e textos). O santo não é comparado automaticamente.</div>
   <% end %>
 
-  <div class="bg-white rounded-xl border border-stone-200 p-4 flex gap-4">
+  <div class="bg-white rounded-xl border p-4 flex gap-4 <%= @liturgia_dia.santo_nome.blank? && !@liturgia_dia.validada? ? 'border-amber-400 ring-1 ring-amber-200' : 'border-stone-200' %>">
     <% if @liturgia_dia.imagem_santo.attached? %>
       <%= image_tag url_for(@liturgia_dia.imagem_santo), class: "w-24 h-24 rounded-lg object-cover border border-stone-200", alt: @liturgia_dia.santo_nome %>
+    <% else %>
+      <div class="w-24 h-24 rounded-lg border border-dashed border-stone-300 bg-stone-50 flex items-center justify-center shrink-0">
+        <span class="text-[10px] text-center text-stone-400 px-1">Sem imagem</span>
+      </div>
     <% end %>
-    <div>
-      <p class="text-xs uppercase tracking-wider text-stone-500">Santo / memória do dia</p>
-      <p class="font-semibold text-stone-800"><%= @liturgia_dia.santo_nome.presence || "Não informado" %></p>
+    <div class="min-w-0 flex-1">
+      <p class="text-xs uppercase tracking-wider text-stone-500">Santo do dia — conferência manual</p>
+      <% if @liturgia_dia.santo_nome.blank? && !@liturgia_dia.validada? %>
+        <p class="font-semibold text-amber-800">Nome não informado — obrigatório para validar</p>
+      <% else %>
+        <p class="font-semibold text-stone-800"><%= @liturgia_dia.santo_nome.presence || "Não informado" %></p>
+      <% end %>
       <% if @liturgia_dia.santo_descricao.present? %><p class="text-sm text-stone-600 mt-1 whitespace-pre-line"><%= @liturgia_dia.santo_descricao %></p><% end %>
+      <p class="text-xs text-stone-500 mt-2">Vindo da busca (Canção Nova — Santo do Dia). Ajuste em <%= link_to "Editar", edit_admin_liturgia_dia_path(@liturgia_dia), class: "text-sky-700 hover:underline" %> se necessário.</p>
     </div>
   </div>
 

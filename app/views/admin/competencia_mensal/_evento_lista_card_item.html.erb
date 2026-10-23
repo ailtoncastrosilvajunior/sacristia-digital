@@ -56,7 +56,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
         <% end %>
-        <% unless escala_extra_context? %>
+        <% if mostrar_escalar_ministros?(ev) %>
           <%= link_to escalar_ministros_admin_evento_escala_path(ev, filtros), data: { turbo_frame: "evento_modal" }, title: (sem_escala ? "Escalar sacerdote" : "Escalar ministros"), aria: { label: (sem_escala ? "Escalar sacerdote" : "Escalar ministros") }, class: "#{btn_icone} border-sky-400 text-sky-600 hover:bg-sky-50" do %>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
