@@ -1,0 +1,8 @@
+<%# locals: ev — referência leve (hora + tipo), sem competir com plantão %>
+<% cor = ev.tipo_servico.cor_etiqueta.presence || "#94a3b8" %>
+<p class="flex items-center gap-1 min-w-0 truncate text-[10px] leading-snug text-stone-500"
+   title="<%= [l(ev.horario, format: :time), ev.tipo_servico.nome].join(' — ') %>">
+  <span class="h-1.5 w-1.5 shrink-0 rounded-full opacity-80" style="background-color: <%= cor %>;" aria-hidden="true"></span>
+  <span class="tabular-nums font-medium text-stone-600 shrink-0"><%= l(ev.horario, format: :time) %></span>
+  <span class="truncate font-normal"><%= ev.tipo_servico.nome %></span>
+</p>

@@ -13,6 +13,11 @@ module Admin
       @plantao_periodos = @competencia.plantao_periodos.includes(:ministros).ordenados
       @dias_sem_plantao = dias_sem_plantao(@plantao_periodos)
       @competencia_anterior = @competencia.competencia_anterior
+      @eventos_extra_por_dia = @competencia.evento_escalas.extras.nao_cancelados
+                                             .where(data: @competencia.periodo..@competencia.periodo_fim)
+                                             .includes(:tipo_servico)
+                                             .por_data
+                                             .group_by(&:data)
     end
 
     def new

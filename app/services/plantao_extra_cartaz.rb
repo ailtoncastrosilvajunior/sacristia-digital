@@ -22,7 +22,7 @@ class PlantaoExtraCartaz
 
     eventos = @competencia.evento_escalas.extras.nao_cancelados
                           .where(data: intervalo.min..intervalo.max)
-                          .includes(:tipo_servico, :sacerdote, :ministro_coordenador, escala_ministros: :ministro)
+                          .includes(:tipo_servico, :sacerdote)
                           .por_data
                           .to_a
 

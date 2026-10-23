@@ -204,6 +204,13 @@
       line-height: 1.35;
       color: var(--ink);
     }
+    .cartaz-evento-obs {
+      margin: 0 0 0.4rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--muted);
+    }
     .cartaz-evento-meta {
       display: flex;
       flex-wrap: wrap;
@@ -306,9 +313,11 @@
           </div>
           <div class="cartaz-dia-corpo">
             <% dia.eventos.each do |ev| %>
-              <% resp = evento_cartaz_responsavel(ev) %>
               <div class="cartaz-evento">
                 <h2 class="cartaz-evento-titulo"><%= evento_cartaz_titulo(ev) %></h2>
+                <% if ev.observacoes.present? %>
+                  <p class="cartaz-evento-obs"><%= ev.observacoes %></p>
+                <% end %>
                 <div class="cartaz-evento-meta">
                   <span class="cartaz-pill cartaz-pill--hora">
                     <%= cartaz_icone_svg(evento_cartaz_icone(ev)) %>
@@ -318,12 +327,6 @@
                     <span class="cartaz-pill">
                       <%= cartaz_icone_svg(:local) %>
                       <%= ev.local %>
-                    </span>
-                  <% end %>
-                  <% if resp %>
-                    <span class="cartaz-pill">
-                      <%= cartaz_icone_svg(:pessoa) %>
-                      <%= resp[:nome] %><% if resp[:telefone].present? %> · <%= resp[:telefone] %><% end %>
                     </span>
                   <% end %>
                 </div>

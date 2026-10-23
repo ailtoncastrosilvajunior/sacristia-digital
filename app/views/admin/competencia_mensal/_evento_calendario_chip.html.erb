@@ -1,0 +1,10 @@
+<%# locals: ev — chip compacto (hora + tipo), sem link %>
+<% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+<div class="block w-full mb-1 rounded-md border px-1.5 py-1 #{'opacity-50' if ev.cancelado?}"
+     style="border-color: <%= cor %>80; background-color: <%= cor %>0d;"
+     title="<%= [l(ev.horario, format: :time), ev.tipo_servico.nome, (ev.cancelado? ? 'Cancelado' : nil)].compact.join(' — ') %>">
+  <span class="flex items-baseline gap-1 min-w-0">
+    <span class="text-[11px] sm:text-xs font-bold tabular-nums text-stone-800 shrink-0 <%= 'line-through' if ev.cancelado? %>"><%= l(ev.horario, format: :time) %></span>
+    <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wide truncate <%= 'line-through' if ev.cancelado? %>" style="color: <%= cor %>;"><%= ev.tipo_servico.nome %></span>
+  </span>
+</div>

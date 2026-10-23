@@ -2,7 +2,7 @@
 <% return if plantoes.blank? %>
 <% compact = local_assigns.fetch(:compact, false) %>
 
-<section class="<%= compact ? "rounded-xl border border-stone-200 bg-white overflow-hidden" : "rounded-xl border border-stone-200 bg-white shadow-sm overflow-hidden" %>">
+<section class="<%= compact ? "rounded-xl border border-stone-200 bg-white overflow-hidden flex flex-col flex-1 min-h-0" : "rounded-xl border border-stone-200 bg-white shadow-sm overflow-hidden" %>">
   <% if !compact %>
     <div class="px-3 py-2.5 border-b border-stone-100 flex flex-wrap items-center justify-between gap-2 bg-stone-50/60">
       <div class="min-w-0">
@@ -23,29 +23,40 @@
     </div>
   <% end %>
 
+  <% eventos_por_plantao = local_assigns[:eventos_por_plantao] || eventos_extra_por_plantao(plantoes) %>
+  <div class="<%= compact ? "flex-1 min-h-0 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]" : "" %>">
   <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-2">
     <% plantoes.each do |pp| %>
       <% nomes = pp.nomes_ministros.presence || "Sem ministros no plantão" %>
+      <% evs_bloco = eventos_por_plantao[pp.id] %>
       <li class="rounded-lg border border-stone-200/90 bg-white px-2.5 py-2 hover:border-stone-300 hover:shadow-sm transition-colors">
         <div class="flex items-start justify-between gap-2">
           <div class="min-w-0 flex-1">
             <p class="text-[11px] font-bold text-stone-900 tabular-nums leading-tight"><%= pp.rotulo %></p>
-            <p class="text-[10px] text-stone-500 leading-snug mt-0.5 line-clamp-2" title="<%= nomes %>"><%= nomes.gsub(" | ", " · ") %></p>
+            <p class="text-[10px] font-semibold text-stone-600 leading-snug mt-0.5 line-clamp-2" title="<%= nomes %>"><%= nomes.gsub(" | ", " · ") %></p>
           </div>
-          <div class="flex items-center gap-1.5 shrink-0 pt-0.5">
+          <div class="flex items-center gap-1 shrink-0 pt-0.5">
             <% unless escala_extra_context? %>
               <%= link_to "Editar", edit_admin_competencia_mensal_plantao_periodo_path(pp.competencia_mensal, pp),
-                    class: "px-2 py-1 text-[11px] font-medium rounded-md border border-stone-200 text-stone-600 hover:bg-stone-50 leading-tight" %>
+                    class: "px-2 py-1 text-[11px] font-medium rounded-md border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 leading-tight" %>
             <% end %>
             <%= link_to plantao_extra_cartaz_path(pp), target: "_blank", rel: "noopener",
-                  title: "Notificação WhatsApp",
-                  class: "inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-md bg-slate-900 hover:bg-slate-800 text-white transition-colors leading-tight" do %>
-              <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-              Notificação
+                  title: "Notificação WhatsApp — abrir cartaz",
+                  aria: { label: "Notificação WhatsApp" },
+                  class: "inline-flex items-center justify-center w-7 h-7 rounded-md border border-stone-200 bg-white text-stone-500 hover:text-sky-700 hover:border-sky-200 hover:bg-sky-50/80 transition-colors" do %>
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
             <% end %>
           </div>
         </div>
+        <% if evs_bloco.present? %>
+          <div class="mt-1.5 pt-1 border-t border-stone-100 space-y-0.5">
+            <% evs_bloco.each do |ev| %>
+              <%= render "shared/evento_extra_linha", ev: ev %>
+            <% end %>
+          </div>
+        <% end %>
       </li>
     <% end %>
   </ul>
+  </div>
 </section>

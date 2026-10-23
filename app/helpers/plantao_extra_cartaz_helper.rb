@@ -1,6 +1,39 @@
 # frozen_string_literal: true
 
 module PlantaoExtraCartazHelper
+  # { plantao_periodo.id => [EventoEscala, ...] } para listagens de notificação/cartaz.
+  def eventos_extra_por_plantao(plantoes)
+    plantoes = Array(plantoes)
+    return {} if plantoes.empty?
+
+    resultado = {}
+    plantoes.group_by(&:competencia_mensal_id).each_value do |grupo|
+      competencia = grupo.first.competencia_mensal
+      dias = grupo.flat_map(&:range_dias)
+      next if dias.empty?
+
+      min_d, max_d = dias.minmax
+      intervalo = Date.new(competencia.ano, competencia.mes, min_d)..Date.new(competencia.ano, competencia.mes, max_d)
+      eventos = competencia.evento_escalas.extras.nao_cancelados
+                           .where(data: intervalo)
+                           .includes(:tipo_servico)
+                           .por_data
+                           .to_a
+
+      grupo.each do |pp|
+        datas = pp.range_dias.filter_map do |dia|
+          Date.new(competencia.ano, competencia.mes, dia)
+        rescue ArgumentError
+          nil
+        end
+        resultado[pp.id] = eventos.select { |e| datas.include?(e.data) }
+      end
+    rescue ArgumentError
+      next
+    end
+    resultado
+  end
+
   def plantao_extra_cartaz_path(plantao)
     if escala_extra_context?
       escala_extra_plantao_cartaz_path(plantao)
@@ -15,13 +48,6 @@ module PlantaoExtraCartazHelper
     parts << evento.descricao if evento.descricao.present?
     texto = parts.join(" — ")
     texto.presence || evento.tipo_servico&.nome.to_s
-  end
-
-  def evento_cartaz_responsavel(evento)
-    coord = evento.ministro_coordenador
-    return { nome: coord.nome, telefone: coord.telefone } if coord.present?
-
-    evento.ministros.find { |m| m.telefone.present? }&.then { |m| { nome: m.nome, telefone: m.telefone } }
   end
 
   def evento_cartaz_icone(evento)
@@ -45,8 +71,6 @@ module PlantaoExtraCartazHelper
               tag.rect(x: 4, y: 6, width: 16, height: 12, rx: 2) + tag.path(d: "M8 18v3l4-3")
             when :local
               tag.path(d: "M12 21s7-4.5 7-11a7 7 0 10-14 0c0 6.5 7 11 7 11z") + tag.circle(cx: 12, cy: 10, r: 2)
-            when :pessoa
-              tag.circle(cx: 12, cy: 8, r: 3) + tag.path(d: "M6 20c0-3 2.5-5 6-5s6 2 6 5")
             else
               ""
             end
