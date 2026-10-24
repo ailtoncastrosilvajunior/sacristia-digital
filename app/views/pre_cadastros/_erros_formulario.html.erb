@@ -1,0 +1,23 @@
+<%# locals: (focar: false) %>
+<% return unless solicitacao.errors.any? %>
+
+<div id="pre-cadastro-erros"
+     tabindex="-1"
+     <% if local_assigns[:focar] %>data-controller="form-errors-focus"<% end %>
+     class="rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm"
+     role="alert"
+     aria-live="assertive">
+  <p class="font-semibold text-base">
+    A solicitação não foi enviada
+    <% if solicitacao.errors.count == 1 %>
+      — corrija o item abaixo:
+    <% else %>
+      — corrija os <%= solicitacao.errors.count %> itens abaixo:
+    <% end %>
+  </p>
+  <ul class="mt-2 list-disc pl-4 space-y-1">
+    <% solicitacao.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+  </ul>
+</div>

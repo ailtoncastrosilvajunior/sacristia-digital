@@ -24,6 +24,7 @@ class Ministro < ApplicationRecord
 
   # O e-mail do ministro é o login do User vinculado: os dois andam juntos.
   before_validation :normalizar_email
+  before_save :desligar_exibir_ano_sem_dado, if: -> { nascimento_ano.blank? && exibir_ano_nascimento? }
   validate :email_valido_para_user, if: -> { user.present? && email_changed? }
   after_update :sincronizar_email_do_user, if: -> { saved_change_to_email? && user.present? }
 
@@ -53,5 +54,9 @@ class Ministro < ApplicationRecord
 
   def sincronizar_email_do_user
     user.update!(email: email)
+  end
+
+  def desligar_exibir_ano_sem_dado
+    self.exibir_ano_nascimento = false
   end
 end

@@ -4,7 +4,15 @@
 
 set -e
 
-echo "==> Sacristia Digital - Iniciando..."
+export RAILS_ENV="${RAILS_ENV:-production}"
+export RACK_ENV="${RACK_ENV:-production}"
+
+echo "==> Sacristia Digital - Iniciando (RAILS_ENV=$RAILS_ENV)..."
+
+if [ "$RAILS_ENV" = "production" ] && [ -z "${SECRET_KEY_BASE:-}" ]; then
+  echo "ERRO: defina SECRET_KEY_BASE nas variáveis do app (bin/rails secret). Ver README — Deploy."
+  exit 1
+fi
 
 # libpq: PGSSLMODE tem precedência sobre sslmode na URL/database.yml.
 # Padrão disable: contorna "SSL error: dh key too small" (OpenSSL 3 + PostgreSQL antigo na DO).
@@ -27,8 +35,8 @@ elif [ -n "${DATABASE_HOST:-}" ]; then
 fi
 
 echo "==> Executando migrações..."
-if [ "$RAILS_ENV" = "production" ]; then
-  # Banco gerenciado: não rodar db:create (sem permissão / nome fixo tipo defaultdb)
+# Com DATABASE_URL (App Platform / PG gerenciado): só migrate — db:create falha e derruba o container.
+if [ "$RAILS_ENV" = "production" ] || [ -n "${DATABASE_URL:-}" ]; then
   bundle exec rails db:migrate
 else
   bundle exec rails db:migrate 2>/dev/null || bundle exec rails db:create db:migrate

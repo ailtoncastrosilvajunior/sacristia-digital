@@ -26,7 +26,9 @@ class SolicitacaoCadastro < ApplicationRecord
                        confirmation: true, on: :create
   validates :password_confirmation, presence: true, on: :create
   validate :email_disponivel, on: :create
+  validate :ano_obrigatorio_se_autorizar_divulgacao, on: :create
 
+  before_create :garantir_exibir_ano_coerente
   before_create :gerar_hash_senha
 
   scope :pendentes, -> { where(status: "pendente") }
@@ -86,6 +88,24 @@ class SolicitacaoCadastro < ApplicationRecord
     self.email_confirmation = email_confirmation.to_s.strip.downcase if email_confirmation
     self.telefone = telefone.to_s.strip.presence
     self.sexo = sexo.presence
+    descartar_ano_inconsistente_se_nao_divulgavel
+  end
+
+  # Pré-cadastro: quem não autoriza divulgar o ano não deve ser barrado por ano
+  # inconsistente (autofill do celular, 29/02 em ano comum etc.) — guardamos só dia/mês.
+  def descartar_ano_inconsistente_se_nao_divulgavel
+    return if nascimento_ano.blank? || exibir_ano_nascimento?
+    return unless nascimento_informado?
+    return if Date.valid_date?(nascimento_ano, nascimento_mes, nascimento_dia)
+
+    self.nascimento_ano = nil
+  end
+
+  def ano_obrigatorio_se_autorizar_divulgacao
+    return unless exibir_ano_nascimento?
+    return if nascimento_ano.present?
+
+    errors.add(:nascimento_ano, "informe o ano ou desmarque a autorização de divulgação")
   end
 
   # Mensagem genérica de propósito: não revela se o e-mail já está cadastrado.
@@ -103,5 +123,9 @@ class SolicitacaoCadastro < ApplicationRecord
   # Usa o mesmo algoritmo do Devise (inclui pepper/stretches configurados).
   def gerar_hash_senha
     self.encrypted_password = User.new(password: password).encrypted_password
+  end
+
+  def garantir_exibir_ano_coerente
+    self.exibir_ano_nascimento = false if nascimento_ano.blank?
   end
 end

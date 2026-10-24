@@ -8,10 +8,12 @@ module NascimentoParcial
   ANO_MINIMO = 1900
 
   included do
+    before_validation :normalizar_campos_de_nascimento
+
     validates :nascimento_dia, inclusion: { in: 1..31, message: "deve estar entre 1 e 31" }, allow_nil: true
     validates :nascimento_mes, inclusion: { in: 1..12, message: "deve estar entre 1 e 12" }, allow_nil: true
     validates :nascimento_ano, numericality: { only_integer: true, greater_than_or_equal_to: ANO_MINIMO },
-                               allow_nil: true
+                               allow_nil: true, allow_blank: true
     validate :nascimento_ano_nao_futuro
     validate :nascimento_dia_existe_no_mes
   end
@@ -46,6 +48,10 @@ module NascimentoParcial
 
   private
 
+  def normalizar_campos_de_nascimento
+    self.nascimento_ano = nascimento_ano.presence
+  end
+
   def nascimento_ano_nao_futuro
     return if nascimento_ano.blank?
 
@@ -59,6 +65,10 @@ module NascimentoParcial
     ano = nascimento_ano.presence || 2000
     return if Date.valid_date?(ano, nascimento_mes, nascimento_dia)
 
-    errors.add(:nascimento_dia, "não existe neste mês")
+    if nascimento_ano.present? && exibir_ano_nascimento?
+      errors.add(:nascimento_ano, "não confere com o dia e o mês informados")
+    else
+      errors.add(:nascimento_dia, "não existe neste mês")
+    end
   end
 end

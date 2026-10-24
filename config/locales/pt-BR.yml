@@ -150,4 +150,5 @@ pt-BR:
   time:
     formats:
       default: "%d/%m/%Y %H:%M"
+      short: "%d/%m/%Y %H:%M"
       time: "%H:%M"

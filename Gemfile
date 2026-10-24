@@ -16,6 +16,9 @@ gem "tailwindcss-rails"
 gem "tzinfo-data", platforms: %i[mingw mswin x64_mingw jruby]
 gem "bootsnap", require: false
 
+# Active Storage → DigitalOcean Spaces (S3)
+gem "aws-sdk-s3", require: false
+
 # Autenticação
 gem "devise", "~> 4.9"
 

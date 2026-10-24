@@ -60,7 +60,7 @@ module Admin
     private
 
     def set_ministro
-      @ministro = Ministro.find(params[:id])
+      @ministro = Ministro.includes(:user).find(params[:id])
     end
 
     def ministro_params

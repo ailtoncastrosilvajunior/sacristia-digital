@@ -12,18 +12,42 @@ class PreCadastrosController < ApplicationController
   end
 
   def create
-    # Honeypot: campo invisível que só robôs preenchem.
-    return redirect_to(pre_cadastro_enviado_path) if params[:campo_armadilha].present? || params[:website].present?
+    # Honeypot: campo invisível que só robôs preenchem (sem tela de sucesso).
+    if params[:campo_armadilha].to_s.strip.present?
+      return redirect_to(novo_pre_cadastro_path)
+    end
 
     @solicitacao = SolicitacaoCadastro.new(solicitacao_params)
     if @solicitacao.save
-      redirect_to pre_cadastro_enviado_path
+      session[:pre_cadastro_confirmacao] = {
+        "id" => @solicitacao.id,
+        "email" => @solicitacao.email
+      }
+      redirect_to pre_cadastro_enviado_path, status: :see_other
     else
+      n = @solicitacao.errors.count
+      flash.now[:alert] = if n == 1
+                            "Não foi possível enviar: 1 correção pendente (veja acima do botão Enviar)."
+                          else
+                            "Não foi possível enviar: #{n} correções pendentes (veja acima do botão Enviar)."
+                          end
       render :new, status: :unprocessable_entity
     end
   end
 
   def enviado
+    dados = session.delete(:pre_cadastro_confirmacao)
+    unless dados.is_a?(Hash) && dados["id"].present?
+      redirect_to novo_pre_cadastro_path,
+                  alert: "Para ver a confirmação, envie o formulário de cadastro primeiro."
+      return
+    end
+
+    @solicitacao = SolicitacaoCadastro.find_by(id: dados["id"], email: dados["email"], status: "pendente")
+    unless @solicitacao
+      redirect_to novo_pre_cadastro_path,
+                  alert: "Não encontramos essa solicitação. Se ainda não enviou, preencha o formulário novamente."
+    end
   end
 
   private
