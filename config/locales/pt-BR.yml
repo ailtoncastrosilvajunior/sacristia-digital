@@ -69,7 +69,30 @@ pt-BR:
       plantao_periodo: Período de Plantão
       registro_esportula: Registro de Espórtula
       solicitacao_cadastro: Solicitação de Cadastro
+      lancamento_caixa: Lançamento de caixa
+      item_lancamento: Item do lançamento
     attributes:
+      lancamento_caixa:
+        natureza: Natureza
+        data: Data
+        conta_corrente: Conta corrente
+        conta_corrente_id: Conta corrente
+        evento_escala: Evento (opcional)
+        evento_escala_id: Evento (opcional)
+        contado_por: Contado por
+        fornecedor: Fornecedor
+        tem_documento_fiscal: Documento fiscal
+        tem_recibo: Recibo
+        observacoes: Observações
+        status: Status
+        valor_total: Valor total
+      item_lancamento:
+        plano_conta: Conta
+        plano_conta_id: Conta
+        descricao: Descrição
+        quantidade: Quantidade
+        preco_unitario: Preço unit.
+        valor: Valor
       solicitacao_cadastro:
         nome_completo: Nome completo
         nome: Nome curto
@@ -147,6 +170,29 @@ pt-BR:
     abbr_day_names: [Dom, Seg, Ter, Qua, Qui, Sex, Sáb]
     month_names: [~, Janeiro, Fevereiro, Março, Abril, Maio, Junho, Julho, Agosto, Setembro, Outubro, Novembro, Dezembro]
     abbr_month_names: [~, Jan, Fev, Mar, Abr, Mai, Jun, Jul, Ago, Set, Out, Nov, Dez]
+  helpers:
+    submit:
+      lancamento_caixa:
+        create: Salvar
+        update: Salvar
+  simple_form:
+    labels:
+      lancamento_caixa:
+        natureza: Natureza
+        data: Data
+        conta_corrente: Conta corrente
+        evento_escala: Evento (opcional)
+        contado_por: Contado por
+        fornecedor: Fornecedor
+        tem_documento_fiscal: Documento fiscal
+        tem_recibo: Recibo
+        observacoes: Observações
+      item_lancamento:
+        plano_conta: Conta
+        descricao: Descrição
+        quantidade: Quantidade
+        preco_unitario: Preço unit.
+        valor: Valor
   time:
     formats:
       default: "%d/%m/%Y %H:%M"

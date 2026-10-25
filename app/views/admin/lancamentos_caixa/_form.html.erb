@@ -1,0 +1,158 @@
+<% input_cls = "w-full rounded-xl border border-stone-300 bg-white text-sm font-medium text-stone-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500" %>
+<% label_cls = "block text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1.5" %>
+<% form_return_to = @return_to.presence %>
+<% form_url_opts = form_return_to ? { return_to: form_return_to } : {} %>
+<% form_url = @lancamento.persisted? ? admin_lancamentos_caixa_path(@lancamento, **form_url_opts) : admin_lancamentos_caixa_index_path(**form_url_opts) %>
+<% contas_form = @lancamento.entrada? ? @contas_receita : @contas_despesa %>
+<% contas_payload = contas_form.map { |c| { id: c.id, codigo: c.codigo, nome: c.nome, label: c.label_completo } } %>
+
+<%= simple_form_for @lancamento,
+      as: :lancamento_caixa,
+      url: form_url,
+      html: {
+        class: "w-full space-y-5",
+        data: {
+          controller: "lancamento-natureza lancamento-itens",
+          action: "submit->lancamento-itens#beforeSubmit nested-items:added->lancamento-itens#itemAdded nested-items:removed->lancamento-itens#itemRemoved"
+        }
+      } do |f| %>
+  <%= render "admin/shared/return_to_hidden", return_to: @return_to %>
+
+  <% if f.object.errors.any? %>
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <%= f.object.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <section class="rounded-2xl border border-stone-200/90 bg-white shadow-md shadow-stone-900/5 overflow-hidden ring-1 ring-stone-100">
+    <div class="px-5 py-3.5 border-b border-stone-100 bg-gradient-to-b from-white to-stone-50/90">
+      <h2 class="text-sm font-semibold text-stone-900">Dados do movimento</h2>
+      <p class="text-[11px] text-stone-500 mt-0.5">Data, conta e informações complementares</p>
+    </div>
+    <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-5 gap-y-4">
+      <%= f.input :natureza,
+            collection: LancamentoCaixa::NATUREZAS.map { |n| [n == "entrada" ? "Entrada" : "Saída", n] },
+            include_blank: false,
+            label_html: { class: label_cls },
+            input_html: {
+              class: input_cls,
+              data: { action: "change->lancamento-natureza#reload" }
+            } %>
+      <%= f.input :data,
+            as: :date,
+            html5: true,
+            required: true,
+            label_html: { class: label_cls },
+            input_html: { class: input_cls } %>
+      <%= f.association :conta_corrente,
+            collection: @contas_correntes,
+            label_method: :nome,
+            value_method: :id,
+            include_blank: false,
+            label_html: { class: label_cls },
+            input_html: { class: input_cls } %>
+      <%= f.association :evento_escala,
+            collection: @eventos_para_select,
+            include_blank: "—",
+            label_html: { class: label_cls },
+            input_html: { class: input_cls } %>
+
+      <% if f.object.entrada? %>
+        <%= f.input :contado_por,
+              label_html: { class: label_cls },
+              wrapper_html: { class: "sm:col-span-2 xl:col-span-2" },
+              input_html: { class: input_cls, placeholder: "Quem contou o valor" } %>
+      <% else %>
+        <div class="sm:col-span-2 xl:col-span-4 flex flex-col lg:flex-row lg:items-end gap-4 lg:gap-6">
+          <%= f.input :fornecedor,
+                label_html: { class: label_cls },
+                wrapper_html: { class: "mb-0 flex-1 min-w-0 w-full" },
+                input_html: { class: input_cls } %>
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-3 shrink-0 lg:pb-2.5">
+            <%= f.input :tem_documento_fiscal,
+                  wrapper_html: { class: "mb-0 flex items-center gap-2.5" },
+                  label_html: { class: "text-xs font-semibold text-stone-600 mb-0 order-2 cursor-pointer" },
+                  input_html: { class: "rounded border-stone-300 text-sky-600 focus:ring-sky-500/30 order-1 shrink-0" } %>
+            <%= f.input :tem_recibo,
+                  wrapper_html: { class: "mb-0 flex items-center gap-2.5" },
+                  label_html: { class: "text-xs font-semibold text-stone-600 mb-0 order-2 cursor-pointer" },
+                  input_html: { class: "rounded border-stone-300 text-sky-600 focus:ring-sky-500/30 order-1 shrink-0" } %>
+          </div>
+        </div>
+      <% end %>
+
+      <%= f.input :observacoes,
+            as: :text,
+            label_html: { class: label_cls },
+            wrapper_html: { class: "sm:col-span-2 xl:col-span-4" },
+            input_html: { class: "#{input_cls} min-h-[5rem] resize-y", rows: 3 } %>
+    </div>
+  </section>
+
+  <section class="rounded-2xl border border-stone-200/90 bg-white shadow-md shadow-stone-900/5 overflow-hidden ring-1 ring-stone-100" data-controller="nested-items">
+    <div class="px-5 py-3.5 border-b border-stone-100 bg-gradient-to-b from-white to-stone-50/90 flex items-center justify-between gap-3">
+      <div>
+        <h2 class="text-sm font-semibold text-stone-900">Itens</h2>
+        <p class="text-[11px] text-stone-500 mt-0.5">Conta analítica, valores e descrição</p>
+      </div>
+      <button type="button"
+              data-action="nested-items#add"
+              title="Adicionar item"
+              aria-label="Adicionar item"
+              class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-stone-300 bg-white text-stone-600 hover:text-sky-700 hover:border-sky-300 hover:bg-sky-50 transition-colors shadow-sm">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      </button>
+    </div>
+
+    <div class="px-5 pt-4 pb-3">
+      <div class="hidden xl:grid xl:grid-cols-12 xl:gap-2 px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+        <div class="xl:col-span-4">Conta</div>
+        <div class="xl:col-span-2">Descrição</div>
+        <div class="xl:col-span-1 text-right">Qtd.</div>
+        <div class="xl:col-span-1 text-right">Preço unit.</div>
+        <div class="xl:col-span-1 text-right">Desconto</div>
+        <div class="xl:col-span-2 text-right">Valor</div>
+        <div class="xl:col-span-1 text-center"><span class="sr-only">Ações</span></div>
+      </div>
+
+      <div class="space-y-2" data-nested-items-target="list">
+        <%= f.simple_fields_for :itens_lancamento do |item_f| %>
+          <%= render "item_fields", f: item_f, lancamento: @lancamento, contas_payload: contas_payload, input_cls: input_cls, label_cls: label_cls %>
+        <% end %>
+      </div>
+
+      <template data-nested-items-target="template">
+        <%= f.simple_fields_for :itens_lancamento, ItemLancamento.new, child_index: "NEW_RECORD" do |item_f| %>
+          <%= render "item_fields", f: item_f, lancamento: @lancamento, contas_payload: contas_payload, input_cls: input_cls, label_cls: label_cls %>
+        <% end %>
+      </template>
+    </div>
+
+    <div class="px-5 py-3.5 border-t border-stone-200 bg-stone-50/90 flex flex-wrap items-center justify-end gap-x-3 gap-y-2 shrink-0">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Valor total do lançamento</span>
+      <div class="w-full max-w-[11rem] sm:w-44 shrink-0" data-controller="money-input" data-money-input-decimals-value="2" data-money-input-readonly-value="true">
+        <input type="text"
+               readonly
+               tabindex="-1"
+               autocomplete="off"
+               aria-label="Valor total do lançamento"
+               value="<%= formatar_moeda(@lancamento.valor_total).delete_prefix("R$ ").strip %>"
+               class="<%= input_cls %> tabular-nums font-bold text-right bg-white text-stone-900 ring-1 ring-stone-200/80"
+               data-lancamento-itens-target="valorTotal"
+               data-money-input-target="field" />
+        <%= f.hidden_field :valor_total, data: { lancamento_itens_target: "valorTotalHidden" } %>
+      </div>
+    </div>
+  </section>
+
+  <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+    <%= link_to (@return_to.presence || admin_lancamentos_caixa_index_path),
+          title: "Cancelar",
+          aria: { label: "Cancelar" },
+          class: "inline-flex items-center justify-center w-11 h-11 rounded-xl border border-stone-300 bg-white text-stone-500 hover:text-stone-800 hover:bg-stone-50 transition-colors shadow-sm" do %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    <% end %>
+    <%= f.submit "Salvar",
+          class: "inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-900 text-white text-sm font-semibold shadow-sm transition-colors cursor-pointer" %>
+  </div>
+<% end %>

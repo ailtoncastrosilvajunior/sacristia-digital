@@ -1,0 +1,38 @@
+<%# locals: linhas, colunas %>
+<% linhas.each_with_index do |linha, idx| %>
+  <%
+    row = case linha.destaque
+          when :saldo then ["bg-slate-100 font-semibold", "bg-slate-100", "text-slate-900"]
+          when :entrada then ["bg-emerald-50/90 font-semibold text-emerald-950", "bg-emerald-50/90", "text-emerald-950"]
+          when :despesa then ["bg-slate-900 font-bold uppercase tracking-wide text-white", "bg-slate-900", "text-white"]
+          when :sintetica then ["bg-slate-50 font-semibold text-slate-800", "bg-slate-50", "text-slate-800"]
+          else [idx.even? ? "bg-white" : "bg-slate-50/40", idx.even? ? "bg-white" : "bg-slate-50/40", "text-slate-800"]
+          end
+    row_bg, sticky_bg, nome_cls = row
+  %>
+  <tr class="border-b border-slate-100/90 <%= row_bg %>">
+    <td class="sticky left-0 z-20 px-4 py-2 border-r border-slate-200/80 shadow-[4px_0_12px_-4px_rgba(15,23,42,0.05)] align-middle overflow-hidden <%= sticky_bg %>">
+      <div class="flex items-baseline gap-2 min-w-0 max-w-[14rem]" style="padding-left: <%= linha.nivel %>rem">
+        <% if linha.plano_conta %>
+          <span class="shrink-0 rounded-md bg-slate-900/5 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-500 ring-1 ring-slate-200/80"><%= linha.plano_conta.codigo %></span>
+        <% end %>
+        <span class="<%= nome_cls %> leading-snug text-[13px] <%= linha.tipo == :secao ? 'uppercase text-xs tracking-wider' : '' %>"><%= linha.nome %></span>
+      </div>
+    </td>
+    <% colunas.each do |col| %>
+      <% valor = linha.valores[col.key] %>
+      <% vazio = valor.nil? || valor.to_d.zero? %>
+      <% ref = col.referencia && linha.destaque != :despesa %>
+      <% text_cls = if linha.destaque == :despesa
+                      "text-white/95"
+                    elsif vazio
+                      "text-slate-300"
+                    else
+                      linha.destaque == :saldo || linha.tipo == :conta ? moeda_resumo_classe(valor) : "text-slate-900 font-semibold"
+                    end %>
+      <td class="px-2 py-2 text-right tabular-nums whitespace-nowrap text-[13px] align-middle <%= ref ? 'bg-sky-50/40 ring-1 ring-inset ring-sky-100/80' : '' %> <%= text_cls %>">
+        <%= vazio ? "—" : formatar_moeda(valor) %>
+      </td>
+    <% end %>
+  </tr>
+<% end %>

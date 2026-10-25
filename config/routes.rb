@@ -59,6 +59,12 @@ Rails.application.routes.draw do
         patch :toggle_evento_pago
       end
     end
+    resources :plano_contas, path: "plano-contas", except: [:destroy]
+    resources :lancamentos_caixa, path: "lancamentos-caixa" do
+      member { post :estornar }
+    end
+    get "extrato-financeiro", to: "extrato_financeiro#show", as: :extrato_financeiro
+    get "financeiro-resumo", to: "financeiro_resumo#show", as: :financeiro_resumo
     get "escala-mensal/imprimir", to: "escala_mensal#imprimir", as: :escala_mensal_imprimir
     get "relatorios", to: "relatorios#index"
   end

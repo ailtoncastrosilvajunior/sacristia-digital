@@ -1,0 +1,17 @@
+<%# locals: aba, ano, mes, ano_foco %>
+<% base = { mes: mes, ano: ano, ano_foco: ano_foco } %>
+<% tab_cls = lambda do |id|
+  active = aba == id
+  base_cls = "inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-colors"
+  active ? "#{base_cls} bg-slate-900 text-white shadow-md shadow-slate-900/20" : "#{base_cls} bg-white text-slate-600 ring-1 ring-slate-200/90 hover:bg-slate-50 hover:text-slate-900"
+end %>
+<nav class="flex flex-wrap gap-2" aria-label="Visões do resumo gerencial">
+  <%= link_to admin_financeiro_resumo_path(**base, aba: "plano_contas"), class: tab_cls.call("plano_contas"), aria: { current: (aba == "plano_contas" ? "page" : nil) } do %>
+    <svg class="w-4 h-4 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+    Plano de contas
+  <% end %>
+  <%= link_to admin_financeiro_resumo_path(**base, aba: "periodos"), class: tab_cls.call("periodos"), aria: { current: (aba == "periodos" ? "page" : nil) } do %>
+    <svg class="w-4 h-4 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+    Por período
+  <% end %>
+</nav>

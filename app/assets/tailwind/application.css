@@ -41,3 +41,14 @@
 html.app-loading {
   cursor: wait;
 }
+
+/* Resumo gerencial — grade mensal (table-fixed + scroll único) */
+.financeiro-resumo-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184 / 0.55) transparent;
+}
+
+.financeiro-resumo-matrix {
+  table-layout: fixed;
+}
+

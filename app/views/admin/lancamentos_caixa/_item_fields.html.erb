@@ -1,0 +1,108 @@
+<% contas_payload = local_assigns.fetch(:contas_payload) do
+     contas = lancamento.entrada? ? @contas_receita : @contas_despesa
+     contas.map { |c| { id: c.id, codigo: c.codigo, nome: c.nome, label: c.label_completo } }
+   end %>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-12 gap-3 xl:gap-2 p-4 xl:p-3 rounded-xl border border-stone-200/90 bg-gradient-to-b from-stone-50/80 to-white shadow-sm xl:items-end" data-nested-items-target="item" data-lancamento-itens-target="item">
+  <div class="sm:col-span-2 xl:col-span-4">
+    <label class="<%= label_cls %> xl:sr-only" for="<%= f.field_id(:plano_conta_id) %>">Conta</label>
+    <div class="relative mb-0"
+         data-controller="plano-conta-combobox"
+         data-plano-conta-combobox-contas-value="<%= html_escape(contas_payload.to_json) %>"
+         data-plano-conta-combobox-selected-id-value="<%= f.object.plano_conta_id.to_i %>"
+         data-plano-conta-combobox-selected-label-value="<%= html_escape(f.object.plano_conta&.label_completo.to_s) %>">
+      <%= f.hidden_field :plano_conta_id, data: { plano_conta_combobox_target: "hidden" } %>
+      <input type="search"
+             id="<%= f.field_id(:plano_conta_id) %>"
+             autocomplete="off"
+             placeholder="Buscar por código ou nome…"
+             class="<%= input_cls %> pr-9"
+             data-plano-conta-combobox-target="input"
+             data-action="input->plano-conta-combobox#onInput focus->plano-conta-combobox#onFocus keydown->plano-conta-combobox#onKeydown" />
+      <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+      <ul data-plano-conta-combobox-target="list"
+          class="hidden absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-xl border border-stone-200 bg-white py-1 shadow-lg ring-1 ring-stone-900/5"></ul>
+      <p data-plano-conta-combobox-target="empty" class="hidden absolute z-20 mt-1 w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-500 shadow-lg">Nenhuma conta encontrada.</p>
+    </div>
+    <% if f.object.errors[:plano_conta].any? %>
+      <p class="mt-1 text-xs text-red-600"><%= f.object.errors[:plano_conta].first %></p>
+    <% end %>
+  </div>
+  <div class="sm:col-span-2 xl:col-span-2">
+    <%= f.input :descricao,
+          as: :string,
+          label_html: { class: "#{label_cls} xl:sr-only" },
+          wrapper_html: { class: "mb-0" },
+          input_html: { class: input_cls } %>
+  </div>
+  <div class="xl:col-span-1">
+    <%= f.input :quantidade,
+          label_html: { class: "#{label_cls} xl:sr-only" },
+          wrapper_html: { class: "mb-0" },
+          input_html: {
+            class: "#{input_cls} tabular-nums xl:text-right",
+            inputmode: "decimal",
+            autocomplete: "off",
+            data: { lancamento_item_qty: true, action: "input->lancamento-itens#recalculate blur->lancamento-itens#recalculate" }
+          } %>
+  </div>
+  <div class="xl:col-span-1" data-controller="money-input" data-money-input-decimals-value="2">
+    <%= f.input :preco_unitario,
+          label_html: { class: "#{label_cls} xl:sr-only" },
+          wrapper_html: { class: "mb-0" },
+          input_html: {
+            type: "text",
+            inputmode: "decimal",
+            autocomplete: "off",
+            class: "#{input_cls} tabular-nums xl:text-right",
+            data: {
+              money_input_target: "field",
+              lancamento_item_price: true,
+              action: "focus->money-input#focus blur->money-input#blur input->money-input#input"
+            }
+          } %>
+  </div>
+  <div class="xl:col-span-1" data-controller="money-input" data-money-input-decimals-value="2">
+    <%= f.input :valor_desconto,
+          label: "Desconto",
+          label_html: { class: "#{label_cls} xl:sr-only" },
+          wrapper_html: { class: "mb-0" },
+          input_html: {
+            type: "text",
+            inputmode: "decimal",
+            autocomplete: "off",
+            class: "#{input_cls} tabular-nums xl:text-right",
+            data: {
+              money_input_target: "field",
+              lancamento_item_desconto: true,
+              action: "focus->money-input#focus blur->money-input#blur input->money-input#input"
+            }
+          } %>
+  </div>
+  <div class="xl:col-span-2" data-controller="money-input" data-money-input-decimals-value="2" data-money-input-readonly-value="true">
+    <%= f.input :valor,
+          label_html: { class: "#{label_cls} xl:sr-only" },
+          wrapper_html: { class: "mb-0" },
+          input_html: {
+            type: "text",
+            inputmode: "decimal",
+            autocomplete: "off",
+            readonly: true,
+            tabindex: "-1",
+            class: "#{input_cls} tabular-nums font-semibold xl:text-right bg-stone-50/80",
+            data: {
+              money_input_target: "field",
+              lancamento_item_valor: true
+            }
+          } %>
+  </div>
+  <div class="flex items-center justify-center xl:col-span-1 xl:pb-0.5">
+    <%= f.hidden_field :_destroy, value: "0", data: { nested_items_destroy: true } %>
+    <button type="button"
+            data-action="nested-items#remove"
+            title="Remover item"
+            aria-label="Remover item"
+            class="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-transparent text-stone-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+<%# locals: lancamento, return_to, titulo %>
+<% entrada = lancamento.entrada? %>
+<% actions = capture do %>
+  <% if return_to.present? %>
+    <%= link_to return_to, title: "Voltar", aria: { label: "Voltar" }, class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-white hover:bg-white/15 transition-colors" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+    <% end %>
+  <% end %>
+  <span class="inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white">
+    <%= entrada ? "Entrada" : "Saída" %>
+  </span>
+<% end %>
+<%= render "admin/shared/financeiro/hero",
+      eyebrow: "Lançamento de caixa",
+      title: titulo,
+      subtitle: (entrada ? "Registro de entrada" : "Registro de saída / despesa"),
+      actions: actions %>

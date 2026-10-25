@@ -1,0 +1,19 @@
+<% content_for :title, "Resumo gerencial" %>
+
+<div class="space-y-4 sm:space-y-5 min-h-0 flex-1 flex flex-col">
+  <%= render "admin/financeiro_resumo/nav_abas", aba: @aba, mes: @mes, ano: @ano, ano_foco: @ano_foco %>
+
+  <% if @aba == "periodos" %>
+    <%= render "admin/financeiro_resumo/aba_periodos",
+          ano_foco: @ano_foco,
+          periodos: @periodos,
+          totais_ano: @totais_ano,
+          chart_config: @chart_config,
+          periodo_ref: @periodo_ref,
+          anos_disponiveis: @anos_disponiveis,
+          mes: @mes,
+          ano: @ano %>
+  <% else %>
+    <%= render "admin/financeiro_resumo/aba_plano_contas", colunas: @colunas, linhas: @linhas, mes: @mes, ano: @ano %>
+  <% end %>
+</div>

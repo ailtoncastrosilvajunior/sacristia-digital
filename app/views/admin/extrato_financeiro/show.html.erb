@@ -1,0 +1,74 @@
+<% content_for :title, "Extrato financeiro" %>
+<% label_mes = I18n.l(Date.new(@ano, @mes, 1), format: :month_year) %>
+<% extrato_path = admin_extrato_financeiro_path(mes: @mes, ano: @ano) %>
+<% btn_hero = "inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-2.5 text-xs font-semibold text-white hover:bg-white/15 transition-colors" %>
+
+<div class="space-y-4 sm:space-y-5 min-h-0 flex-1 flex flex-col" data-controller="drawer">
+  <div data-drawer-target="overlay" class="fixed inset-0 z-40 bg-stone-900/30 transition-opacity duration-300 invisible opacity-0 pointer-events-none" data-action="click->drawer#closeOverlay"></div>
+  <div data-drawer-target="panel" class="fixed top-0 right-0 z-50 h-full w-full sm:w-[min(100%,32rem)] lg:w-[28rem] bg-white shadow-2xl shadow-stone-900/10 transform transition-transform duration-300 ease-out translate-x-full border-l border-stone-200 flex flex-col">
+    <turbo-frame id="lancamento_drawer" data-action="turbo:frame-load->drawer#open" class="flex flex-col h-full min-h-0"></turbo-frame>
+  </div>
+
+  <% toolbar = capture do %>
+    <%= render "admin/shared/financeiro/periodo_filter", form_url: admin_extrato_financeiro_path, mes: @mes, ano: @ano, variant: :hero, id_prefix: "extrato" %>
+  <% end %>
+  <% actions = capture do %>
+    <%= link_to new_admin_lancamentos_caixa_path(natureza: "entrada", mes: @mes, ano: @ano, return_to: extrato_path), class: btn_hero do %>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Nova entrada
+    <% end %>
+    <%= link_to new_admin_lancamentos_caixa_path(natureza: "saida", mes: @mes, ano: @ano, return_to: extrato_path), class: btn_hero do %>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+      Nova saída
+    <% end %>
+    <%= link_to admin_financeiro_resumo_path(mes: @mes, ano: @ano, aba: "plano_contas"), class: btn_hero do %>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Resumo gerencial
+    <% end %>
+  <% end %>
+  <%= render "admin/shared/financeiro/hero",
+        eyebrow: "Caixa · #{@conta.nome}",
+        title: "Extrato financeiro",
+        subtitle: label_mes.capitalize,
+        toolbar: toolbar,
+        actions: actions %>
+
+  <%= render "admin/shared/financeiro/metric_strip", items: [
+        { label: "Saldo anterior", value: formatar_moeda(@saldo_anterior), tone: :slate, value_class: moeda_resumo_classe(@saldo_anterior) },
+        { label: "Entradas", value: formatar_moeda(@totais[:entradas]), tone: :emerald },
+        { label: "Saídas", value: formatar_moeda(@totais[:saidas]), tone: :red },
+        { label: "Saldo final", value: formatar_moeda(@saldo_atual), tone: :indigo, sublabel: label_mes.capitalize, value_class: moeda_resumo_classe(@saldo_atual) }
+      ] %>
+
+  <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden ring-1 ring-slate-100 flex flex-col flex-1 min-h-[20rem] h-[calc(100dvh-19rem)] max-h-[44rem]">
+    <div class="shrink-0 border-b border-slate-100 bg-slate-50/80">
+      <table class="w-full table-fixed text-sm">
+        <colgroup>
+          <col class="w-[6.5rem] sm:w-[7.5rem]" /><col /><col class="w-[6.5rem] sm:w-[7.5rem]" /><col class="w-[7.5rem] sm:w-[8.5rem]" />
+        </colgroup>
+        <thead>
+          <tr class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <th class="px-3 py-2 text-left">Data</th>
+            <th class="px-3 py-2 text-left">Descrição</th>
+            <th class="px-2 py-2 text-right">Valor</th>
+            <th class="px-3 py-2 text-right">Saldo</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto overflow-x-auto overscroll-contain">
+      <table class="w-full table-fixed text-sm">
+        <colgroup>
+          <col class="w-[6.5rem] sm:w-[7.5rem]" /><col /><col class="w-[6.5rem] sm:w-[7.5rem]" /><col class="w-[7.5rem] sm:w-[8.5rem]" />
+        </colgroup>
+        <tbody class="divide-y divide-slate-100">
+          <% if @grupos.empty? %>
+            <tr><td colspan="4" class="px-4 py-12 text-center text-slate-500 text-sm">Nenhum lançamento neste período.</td></tr>
+          <% else %>
+            <%= render "admin/extrato_financeiro/tbody", grupos: @grupos, return_to: extrato_path %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -17,6 +17,10 @@ RUN apt-get update -qq && apt-get install -y \
 
 WORKDIR /app
 
+ENV RAILS_ENV=production \
+    RACK_ENV=production \
+    BUNDLE_WITHOUT="development:test"
+
 # Instalar dependências Ruby (path fixo para não ser sobrescrito pelo volume)
 COPY Gemfile Gemfile.lock* ./
 RUN bundle config set --local deployment 'true' && \
@@ -27,9 +31,9 @@ RUN bundle config set --local deployment 'true' && \
 # Copiar código da aplicação
 COPY . .
 
-# Pré-compilar assets (inclui Tailwind)
-RUN bundle exec rails tailwindcss:build 2>/dev/null || true
-RUN bundle exec rails assets:precompile
+# Pré-compilar assets (inclui Tailwind) — exige RAILS_ENV=production e chave dummy no build
+RUN SECRET_KEY_BASE=dummy-build-key bundle exec rails tailwindcss:build 2>/dev/null || true
+RUN SECRET_KEY_BASE=dummy-build-key bundle exec rails assets:precompile
 
 # Expor porta
 EXPOSE 3000

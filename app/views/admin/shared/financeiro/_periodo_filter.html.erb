@@ -1,0 +1,21 @@
+<%# locals: form_url, mes, ano, variant: :hero, id_prefix: "fin" %>
+<% hero = variant.to_sym == :hero %>
+<% input_cls = hero ? "rounded-lg border border-white/20 bg-white/10 pl-3 pr-9 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 focus:border-sky-300/50 cursor-pointer [&>option]:text-stone-900" : "rounded-lg border border-stone-300 bg-white pl-3 pr-9 py-2 text-sm font-semibold text-stone-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 cursor-pointer" %>
+<% btn_cls = hero ? "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg border border-white/25 bg-white/15 text-white hover:bg-white/20 transition-colors" : "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-stone-800 text-white hover:bg-stone-700 transition-colors shadow-sm" %>
+<% wrap_cls = hero ? "flex flex-wrap items-center gap-2" : "inline-flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 rounded-xl border border-stone-200 bg-white shadow-sm px-3 py-2.5" %>
+
+<%= form_with url: form_url, method: :get, local: true, class: wrap_cls do %>
+  <%= hidden_field_tag :aba, local_assigns[:aba] if local_assigns[:aba].present? %>
+  <%= select_tag :mes,
+        options_for_select((1..12).map { |m| [I18n.t("date.month_names")[m], m] }, mes),
+        id: "#{id_prefix}_mes",
+        class: "#{input_cls} min-w-[9.5rem]" %>
+  <%= select_tag :ano,
+        options_for_select(((Date.current.year - 5)..(Date.current.year + 1)).to_a.reverse, ano),
+        id: "#{id_prefix}_ano",
+        class: "#{input_cls} min-w-[6.75rem] w-[6.75rem] tabular-nums" %>
+  <button type="submit" class="<%= btn_cls %>">
+    <svg class="w-4 h-4 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+    Aplicar
+  </button>
+<% end %>

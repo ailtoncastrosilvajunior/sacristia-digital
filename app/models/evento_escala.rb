@@ -15,6 +15,7 @@ class EventoEscala < ApplicationRecord
   has_one :escala_ministro_adoracao, -> { where(adoracao: true) }, class_name: "EscalaMinistro"
   has_one :ministro_adoracao, through: :escala_ministro_adoracao, source: :ministro
   has_many :registro_esportulas, dependent: :destroy
+  has_many :lancamentos_caixa, dependent: :nullify
 
   TIPOS_ESCALA = %w[ordinaria extra].freeze
   STATUS = %w[pendente confirmado concluido cancelado].freeze

@@ -3,6 +3,7 @@
 class RegistroEsportula < ApplicationRecord
   belongs_to :sacerdote
   belongs_to :evento_escala, optional: true
+  has_one :lancamento_caixa, dependent: :nullify
 
   STATUS = %w[pendente pago].freeze
 
@@ -33,6 +34,7 @@ class RegistroEsportula < ApplicationRecord
       status: pago ? "pago" : "pendente"
     )
     reg.save!
+    Financeiro::EsportulaLancamentoService.sync_from_registro!(reg)
     reg
   end
 
@@ -50,5 +52,6 @@ class RegistroEsportula < ApplicationRecord
       competencia_ano: comp.ano,
       competencia_mes: comp.mes
     )
+    Financeiro::EsportulaLancamentoService.sync_from_registro!(reg) if reg.status == "pago"
   end
 end

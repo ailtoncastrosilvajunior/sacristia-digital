@@ -142,6 +142,12 @@ puts "      - coordenador@sacristiadigital.local (coordenador) - senha: #{senha}
 puts "      - ministro@sacristiadigital.local (ministro) - senha: #{senha}"
 
 # Competência do mês atual
+puts "\n💰 Financeiro (plano de contas e caixa)..."
+Financeiro::PlanoContaSeedService.call
+ContaCorrente.padrao
+FinanceiroConfiguracao.instancia
+puts "   ✓ #{PlanoConta.count} contas no plano · caixa: #{ContaCorrente.padrao.nome}"
+
 puts "\n📆 Criando competência do mês atual..."
 hoje = Date.current
 competencia = CompetenciaMensal.find_or_create_by!(ano: hoje.year, mes: hoje.month)

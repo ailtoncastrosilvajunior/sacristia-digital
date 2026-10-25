@@ -1,0 +1,82 @@
+<% content_for :title, "Lançamentos" %>
+<% mes = @mes %>
+<% ano = @ano %>
+<% list_return_to = admin_lancamentos_caixa_index_path(params.permit(:mes, :ano, :natureza, :status, :page).to_h.compact_blank) %>
+<% btn_hero = "inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-2.5 text-xs font-semibold text-white hover:bg-white/15 transition-colors" %>
+
+<div class="space-y-4 sm:space-y-5">
+  <% toolbar = capture do %>
+    <%= render "admin/shared/financeiro/periodo_filter", form_url: admin_lancamentos_caixa_index_path, mes: mes, ano: ano, variant: :hero, id_prefix: "lanc_list" %>
+  <% end %>
+  <% actions = capture do %>
+    <%= link_to new_admin_lancamentos_caixa_path(natureza: "entrada", mes: mes, ano: ano, return_to: list_return_to), class: btn_hero do %>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Nova entrada
+    <% end %>
+    <%= link_to new_admin_lancamentos_caixa_path(natureza: "saida", mes: mes, ano: ano, return_to: list_return_to), class: btn_hero do %>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+      Nova saída
+    <% end %>
+    <%= link_to admin_extrato_financeiro_path(mes: mes, ano: ano), class: btn_hero do %>
+      Extrato
+    <% end %>
+  <% end %>
+  <%= render "admin/shared/financeiro/hero",
+        eyebrow: "Caixa",
+        title: "Lançamentos de caixa",
+        subtitle: I18n.l(Date.new(ano, mes, 1), format: :month_year).capitalize,
+        toolbar: toolbar,
+        actions: actions %>
+
+  <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden ring-1 ring-slate-100">
+    <div class="px-4 py-2.5 border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/90 flex flex-wrap items-end gap-2">
+      <%= form_with url: admin_lancamentos_caixa_index_path, method: :get, local: true, class: "flex flex-wrap gap-2 items-end flex-1" do %>
+        <%= hidden_field_tag :mes, mes %>
+        <%= hidden_field_tag :ano, ano %>
+        <div>
+          <label for="lanc_natureza" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Natureza</label>
+          <%= select_tag :natureza, options_for_select([["Todas", ""], ["Entrada", "entrada"], ["Saída", "saida"]], params[:natureza]), id: "lanc_natureza", class: "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500" %>
+        </div>
+        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-white hover:bg-slate-900 transition-colors">
+          Filtrar
+        </button>
+      <% end %>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-50/90 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+          <tr>
+            <th class="px-4 py-3 text-left">Data</th>
+            <th class="px-4 py-3 text-left">Natureza</th>
+            <th class="px-4 py-3 text-right">Valor</th>
+            <th class="px-4 py-3 text-left">Status</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% if @lancamentos.empty? %>
+            <tr><td colspan="5" class="px-4 py-12 text-center text-slate-500 text-sm">Nenhum lançamento neste período.</td></tr>
+          <% else %>
+            <% @lancamentos.each do |lc| %>
+              <tr class="hover:bg-slate-50/80">
+                <td class="px-4 py-2.5 tabular-nums"><%= l(lc.data) %></td>
+                <td class="px-4 py-2.5"><%= badge_natureza_lancamento(lc.natureza) %></td>
+                <td class="px-4 py-2.5 text-right tabular-nums font-medium <%= lc.entrada? ? 'text-emerald-700' : 'text-red-700' %>"><%= formatar_moeda(lc.valor_total) %></td>
+                <td class="px-4 py-2.5 text-slate-600"><%= lc.status %></td>
+                <td class="px-4 py-2.5 text-right">
+                  <%= link_to "Ver", admin_lancamentos_caixa_path(lc), class: "text-sm font-semibold text-sky-700 hover:text-sky-900" %>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <% if @lancamentos.any? %>
+      <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/50">
+        <%= paginate @lancamentos %>
+      </div>
+    <% end %>
+  </div>
+</div>

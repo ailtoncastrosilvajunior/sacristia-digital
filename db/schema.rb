@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_170001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_25_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_170001) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "auditorias_financeiras", force: :cascade do |t|
+    t.string "acao", null: false
+    t.datetime "created_at", null: false
+    t.text "payload", default: "{}", null: false
+    t.bigint "registro_id", null: false
+    t.string "registro_type", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["registro_type", "registro_id"], name: "index_auditorias_financeiras_on_registro_type_and_registro_id"
+    t.index ["user_id"], name: "index_auditorias_financeiras_on_user_id"
+  end
+
   create_table "calendario_base", force: :cascade do |t|
     t.boolean "ativo", default: true, null: false
     t.datetime "created_at", null: false
@@ -61,6 +73,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_170001) do
     t.boolean "escala_gerada", default: false, null: false
     t.boolean "escala_liberada", default: false, null: false
     t.integer "mes", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "contas_correntes", force: :cascade do |t|
+    t.boolean "ativo", default: true, null: false
+    t.datetime "created_at", null: false
+    t.date "data_saldo_inicial", null: false
+    t.string "nome", null: false
+    t.decimal "saldo_inicial", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "updated_at", null: false
   end
 
@@ -97,6 +118,64 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_170001) do
     t.datetime "updated_at", null: false
     t.decimal "valor_esportula", precision: 10, scale: 2
     t.index ["plantao_periodo_id"], name: "index_evento_escala_on_plantao_periodo_id"
+  end
+
+  create_table "financeiro_configuracoes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "migrado_em"
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "importacoes_financeiras", force: :cascade do |t|
+    t.string "arquivo_nome"
+    t.string "checksum", null: false
+    t.datetime "concluida_em"
+    t.datetime "created_at", null: false
+    t.text "relatorio", default: "{}", null: false
+    t.string "status", default: "pendente", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checksum"], name: "index_importacoes_financeiras_on_checksum", unique: true
+  end
+
+  create_table "itens_lancamento", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "descricao"
+    t.bigint "lancamento_caixa_id", null: false
+    t.integer "ordem", default: 0, null: false
+    t.bigint "plano_conta_id", null: false
+    t.decimal "preco_unitario", precision: 12, scale: 4, default: "0.0", null: false
+    t.decimal "quantidade", precision: 12, scale: 4, default: "1.0", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "valor", precision: 12, scale: 2, null: false
+    t.decimal "valor_desconto", precision: 12, scale: 2, default: "0.0", null: false
+    t.index ["lancamento_caixa_id"], name: "index_itens_lancamento_on_lancamento_caixa_id"
+    t.index ["plano_conta_id"], name: "index_itens_lancamento_on_plano_conta_id"
+  end
+
+  create_table "lancamentos_caixa", force: :cascade do |t|
+    t.bigint "conta_corrente_id", null: false
+    t.string "contado_por"
+    t.datetime "created_at", null: false
+    t.date "data", null: false
+    t.bigint "evento_escala_id"
+    t.string "fornecedor"
+    t.bigint "importacao_financeira_id"
+    t.string "natureza", null: false
+    t.text "observacoes"
+    t.string "planilha_aba"
+    t.integer "planilha_linha"
+    t.bigint "registro_esportula_id"
+    t.string "status", default: "confirmado", null: false
+    t.boolean "tem_documento_fiscal", default: false, null: false
+    t.boolean "tem_recibo", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.decimal "valor_total", precision: 12, scale: 2, default: "0.0", null: false
+    t.index ["conta_corrente_id"], name: "index_lancamentos_caixa_on_conta_corrente_id"
+    t.index ["data"], name: "index_lancamentos_caixa_on_data"
+    t.index ["evento_escala_id"], name: "index_lancamentos_caixa_on_evento_escala_id"
+    t.index ["natureza"], name: "index_lancamentos_caixa_on_natureza"
+    t.index ["registro_esportula_id"], name: "index_lancamentos_caixa_on_registro_esportula_id", unique: true, where: "(registro_esportula_id IS NOT NULL)"
+    t.index ["status"], name: "index_lancamentos_caixa_on_status"
   end
 
   create_table "liturgia_dias", force: :cascade do |t|
@@ -151,6 +230,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_170001) do
     t.index ["ministro_id", "data"], name: "index_oferta_apoios_on_ministro_id_and_data", unique: true
     t.index ["ministro_id"], name: "index_oferta_apoios_on_ministro_id"
     t.index ["status"], name: "index_oferta_apoios_on_status"
+  end
+
+  create_table "plano_contas", force: :cascade do |t|
+    t.boolean "ativo", default: true, null: false
+    t.string "codigo", null: false
+    t.bigint "conta_pai_id"
+    t.datetime "created_at", null: false
+    t.string "natureza", null: false
+    t.string "nome", null: false
+    t.integer "ordem", default: 0, null: false
+    t.boolean "sintetica", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index ["codigo"], name: "index_plano_contas_on_codigo", unique: true
+    t.index ["conta_pai_id"], name: "index_plano_contas_on_conta_pai_id"
   end
 
   create_table "plantao_periodo_ministros", force: :cascade do |t|
@@ -265,6 +358,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_170001) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "auditorias_financeiras", "users"
   add_foreign_key "escala_ministros", "evento_escala"
   add_foreign_key "escala_ministros", "ministros"
   add_foreign_key "escala_ministros", "ministros", column: "ministro_original_id"
@@ -272,9 +366,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_170001) do
   add_foreign_key "evento_escala", "plantao_periodos"
   add_foreign_key "evento_escala", "sacerdotes"
   add_foreign_key "evento_escala", "tipo_servicos"
+  add_foreign_key "itens_lancamento", "lancamentos_caixa", column: "lancamento_caixa_id"
+  add_foreign_key "itens_lancamento", "plano_contas"
+  add_foreign_key "lancamentos_caixa", "contas_correntes", column: "conta_corrente_id"
+  add_foreign_key "lancamentos_caixa", "evento_escala"
+  add_foreign_key "lancamentos_caixa", "importacoes_financeiras", column: "importacao_financeira_id"
+  add_foreign_key "lancamentos_caixa", "registro_esportulas"
   add_foreign_key "liturgia_dias", "users", column: "validado_por_id"
   add_foreign_key "oferta_apoios", "competencia_mensal"
   add_foreign_key "oferta_apoios", "ministros"
+  add_foreign_key "plano_contas", "plano_contas", column: "conta_pai_id"
   add_foreign_key "plantao_periodo_ministros", "ministros"
   add_foreign_key "plantao_periodo_ministros", "plantao_periodos"
   add_foreign_key "plantao_periodos", "competencia_mensal"

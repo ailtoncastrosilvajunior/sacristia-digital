@@ -1,0 +1,37 @@
+<%# locals: items — array of { label:, value:, tone: :neutral|:emerald|:red|:indigo|:slate, sublabel: optional, value_class: optional } %>
+<% cell_tone = {
+  neutral: "bg-white",
+  emerald: "bg-emerald-50/70",
+  red: "bg-red-50/65",
+  indigo: "bg-indigo-50/65",
+  slate: "bg-slate-50/90"
+} %>
+<% label_tone = {
+  neutral: "text-stone-500",
+  emerald: "text-emerald-800/90",
+  red: "text-red-800/90",
+  indigo: "text-indigo-800/90",
+  slate: "text-slate-600"
+} %>
+<% value_tone = {
+  neutral: "text-stone-900",
+  emerald: "text-emerald-950",
+  red: "text-red-950",
+  indigo: "text-indigo-950",
+  slate: "text-slate-900"
+} %>
+
+<div class="rounded-xl shadow-md shadow-slate-900/10 ring-1 ring-slate-200/90 overflow-hidden bg-slate-200/50">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-px">
+    <% items.each do |item| %>
+      <% tone = item.fetch(:tone, :neutral).to_sym %>
+      <div class="flex flex-col justify-center gap-1 px-3 py-3 sm:px-4 sm:py-3.5 min-h-[4.5rem] <%= cell_tone.fetch(tone, cell_tone[:neutral]) %>">
+        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide <%= label_tone.fetch(tone, label_tone[:neutral]) %> leading-tight"><%= item[:label] %></span>
+        <% if item[:sublabel].present? %>
+          <span class="text-[10px] text-stone-400 leading-none"><%= item[:sublabel] %></span>
+        <% end %>
+        <span class="text-sm sm:text-base font-black tabular-nums leading-tight break-all sm:break-normal <%= item[:value_class].presence || value_tone.fetch(tone, value_tone[:neutral]) %>"><%= item[:value] %></span>
+      </div>
+    <% end %>
+  </div>
+</div>

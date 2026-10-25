@@ -1,0 +1,10 @@
+<% content_for :title, "Nova conta" %>
+<div class="space-y-5">
+  <% actions = capture do %>
+    <%= link_to admin_plano_contas_path, title: "Voltar", aria: { label: "Voltar" }, class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-white hover:bg-white/15 transition-colors" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+    <% end %>
+  <% end %>
+  <%= render "admin/shared/financeiro/hero", eyebrow: "Plano de contas", title: "Nova conta", subtitle: "Conta analítica ou sintética", actions: actions %>
+  <%= render "form" %>
+</div>

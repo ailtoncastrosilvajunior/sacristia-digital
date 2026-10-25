@@ -1,0 +1,16 @@
+<%= simple_form_for @plano_conta, url: (@plano_conta.persisted? ? admin_plano_conta_path(@plano_conta) : admin_plano_contas_path) do |f| %>
+  <%= f.error_notification %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <%= f.input :codigo %>
+    <%= f.input :nome %>
+    <%= f.input :natureza, collection: PlanoConta::NATUREZAS, include_blank: false %>
+    <%= f.input :conta_pai_id, collection: PlanoConta.ordenadas.map { |c| [c.label_completo, c.id] }, include_blank: "—" %>
+    <%= f.input :ordem %>
+    <%= f.input :sintetica %>
+    <%= f.input :ativo %>
+  </div>
+  <div class="mt-4 flex gap-2">
+    <%= f.button :submit, class: "px-4 py-2 bg-sky-600 text-white rounded-xl font-semibold" %>
+    <%= link_to "Cancelar", admin_plano_contas_path, class: "px-4 py-2 text-stone-600" %>
+  </div>
+<% end %>
