@@ -1,0 +1,19 @@
+<%# locals: colunas, col_ref: nil, theme: nil %>
+<% ref_theme = local_assigns.fetch(:theme, {}) || {} %>
+<thead class="sticky top-0 z-30">
+  <tr class="border-b border-slate-200 bg-slate-100/95 text-[9px] font-bold uppercase tracking-wider text-slate-500 backdrop-blur-sm shadow-sm">
+    <th scope="col" class="sticky left-0 z-40 bg-slate-100/95 px-2 py-2.5 text-left sm:px-3 shadow-[4px_0_12px_-4px_rgba(15,23,42,0.08)]">Plano de contas</th>
+    <th scope="col" class="px-1 py-2.5 text-center">Tend.</th>
+    <th scope="col" class="hidden px-1 py-2.5 text-center sm:table-cell" title="Últimos 3 meses">3m</th>
+    <th scope="col" class="px-2 py-2.5 text-right"><%= colunas.size %> meses</th>
+    <th scope="col" class="px-2 py-2.5 text-right">Part.</th>
+    <% colunas.each do |col| %>
+      <th scope="col" class="px-2 py-2.5 text-right whitespace-nowrap <%= col.referencia ? (ref_theme[:col_ref].presence || 'bg-sky-50/95 ring-1 ring-inset ring-sky-200/70 text-sky-950') : '' %>">
+        <%= col.label %>
+        <% if col.referencia %>
+          <span class="mt-0.5 block text-[8px] font-semibold normal-case tracking-normal text-slate-400">mês ref.</span>
+        <% end %>
+      </th>
+    <% end %>
+  </tr>
+</thead>

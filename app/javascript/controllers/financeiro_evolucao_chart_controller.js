@@ -1,25 +1,48 @@
 import { Controller } from "@hotwired/stimulus"
-import { Chart, registerables } from "chart.js"
-
-Chart.register(...registerables)
 
 const fmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
 
+const libraryPromises = new Map()
+
+function loadChartFromUrl(url) {
+  if (window.Chart) return Promise.resolve(window.Chart)
+  if (libraryPromises.has(url)) return libraryPromises.get(url)
+
+  const promise = new Promise((resolve, reject) => {
+    const script = document.createElement("script")
+    script.src = url
+    script.async = true
+    script.onload = () => {
+      if (window.Chart) resolve(window.Chart)
+      else reject(new Error("Chart.js não registrou window.Chart"))
+    }
+    script.onerror = () => reject(new Error(`Falha ao carregar ${url}`))
+    document.head.appendChild(script)
+  })
+
+  libraryPromises.set(url, promise)
+  return promise
+}
+
 export default class extends Controller {
   static targets = ["canvas"]
-  static values = { config: Object }
+  static values = { config: Object, library: String }
 
-  connect() {
-    this._onResize = () => this.resize()
+  async connect() {
+    this._onResize = () => this.chart?.resize()
     window.addEventListener("resize", this._onResize)
-    requestAnimationFrame(() => {
-      try {
-        this.render()
-      } catch (error) {
-        console.error("[financeiro-evolucao-chart]", error)
-        this.showFallback("Não foi possível carregar o gráfico. Recarregue a página.")
+    try {
+      if (window.Chart) {
+        this.Chart = window.Chart
+      } else {
+        const url = this.libraryValue || "/assets/chart.umd.min.js"
+        this.Chart = await loadChartFromUrl(url)
       }
-    })
+      this._renderWhenReady()
+    } catch (error) {
+      console.error("[financeiro-evolucao-chart]", error)
+      this.showFallback("Não foi possível carregar o gráfico. Recarregue a página.")
+    }
   }
 
   disconnect() {
@@ -29,83 +52,110 @@ export default class extends Controller {
   }
 
   configValueChanged() {
-    requestAnimationFrame(() => this.render())
-  }
-
-  resize() {
-    this.chart?.resize()
+    if (this.Chart) this._renderWhenReady()
   }
 
   showFallback(message) {
     if (!this.hasCanvasTarget) return
-    const wrap = this.canvasTarget.parentElement
-    if (!wrap) return
+    if (this.element.querySelector("[data-chart-fallback]")) return
     this.canvasTarget.classList.add("hidden")
-    wrap.insertAdjacentHTML(
+    this.element.insertAdjacentHTML(
       "beforeend",
-      `<p class="absolute inset-0 flex items-center justify-center text-sm text-slate-500 px-6 text-center">${message}</p>`
+      `<p data-chart-fallback class="absolute inset-0 flex items-center justify-center text-sm text-slate-500 px-6 text-center">${message}</p>`
     )
   }
 
-  render() {
-    const cfg = this.configValue
-    if (!cfg?.labels?.length || !this.hasCanvasTarget) {
-      if (this.hasCanvasTarget && (!cfg?.labels || cfg.labels.length === 0)) {
-        this.showFallback("Sem dados no ano selecionado para montar o gráfico.")
+  areaGradient(ctx, h, rgb) {
+    const g = ctx.createLinearGradient(0, 0, 0, h)
+    g.addColorStop(0, `rgba(${rgb}, 0.35)`)
+    g.addColorStop(1, `rgba(${rgb}, 0.02)`)
+    return g
+  }
+
+  _renderWhenReady(attempt = 0) {
+    requestAnimationFrame(() => {
+      if (this.element.clientHeight < 8 && attempt < 24) {
+        this._renderWhenReady(attempt + 1)
+        return
       }
+      try {
+        this.render()
+      } catch (error) {
+        console.error("[financeiro-evolucao-chart]", error)
+        this.showFallback("Erro ao desenhar o gráfico.")
+      }
+    })
+  }
+
+  render() {
+    const Chart = this.Chart
+    if (!Chart || !this.hasCanvasTarget) return
+
+    const cfg = this.configValue || {}
+    const labels = cfg.labels || cfg["labels"] || []
+    if (!labels.length) {
+      this.showFallback("Sem dados no ano selecionado para montar o gráfico.")
       return
     }
 
+    const entradas = cfg.entradas || cfg["entradas"] || []
+    const saidas = cfg.saidas || cfg["saidas"] || []
+    const resultadosRaw = cfg.resultados || cfg["resultados"]
+    const resultados = resultadosRaw?.length
+      ? resultadosRaw
+      : labels.map((_, i) => (Number(entradas[i]) || 0) - (Number(saidas[i]) || 0))
+
     this.chart?.destroy()
     const canvas = this.canvasTarget
+    canvas.classList.remove("hidden")
+    this.element.querySelector("[data-chart-fallback]")?.remove()
+
     const ctx = canvas.getContext("2d")
-    const h = canvas.parentElement?.clientHeight || 280
-
-    const gradEntrada = ctx.createLinearGradient(0, 0, 0, h)
-    gradEntrada.addColorStop(0, "rgba(16, 185, 129, 0.95)")
-    gradEntrada.addColorStop(1, "rgba(52, 211, 153, 0.55)")
-
-    const gradSaida = ctx.createLinearGradient(0, 0, 0, h)
-    gradSaida.addColorStop(0, "rgba(244, 63, 94, 0.92)")
-    gradSaida.addColorStop(1, "rgba(251, 113, 133, 0.5)")
+    const h = this.element.clientHeight || 280
 
     this.chart = new Chart(ctx, {
-      type: "bar",
+      type: "line",
       data: {
-        labels: cfg.labels,
+        labels,
         datasets: [
           {
-            type: "bar",
             label: "Entradas",
-            data: cfg.entradas,
-            backgroundColor: gradEntrada,
-            borderRadius: 6,
-            borderSkipped: false,
-            order: 2
-          },
-          {
-            type: "bar",
-            label: "Saídas",
-            data: cfg.saidas,
-            backgroundColor: gradSaida,
-            borderRadius: 6,
-            borderSkipped: false,
-            order: 3
-          },
-          {
-            type: "line",
-            label: "Saldo final",
-            data: cfg.saldos,
-            borderColor: "rgb(30, 58, 138)",
-            backgroundColor: "rgba(59, 130, 246, 0.12)",
-            borderWidth: 3,
-            pointRadius: 4,
-            pointHoverRadius: 6,
+            data: entradas,
+            borderColor: "rgb(16, 185, 129)",
+            backgroundColor: this.areaGradient(ctx, h, "16, 185, 129"),
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointHoverRadius: 5,
             pointBackgroundColor: "#fff",
             pointBorderWidth: 2,
             tension: 0.35,
-            fill: true,
-            order: 1
+            fill: true
+          },
+          {
+            label: "Saídas",
+            data: saidas,
+            borderColor: "rgb(244, 63, 94)",
+            backgroundColor: this.areaGradient(ctx, h, "244, 63, 94"),
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 2,
+            tension: 0.35,
+            fill: true
+          },
+          {
+            label: "Resultado",
+            data: resultados,
+            borderColor: "rgb(59, 130, 246)",
+            backgroundColor: this.areaGradient(ctx, h, "59, 130, 246"),
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: "#fff",
+            pointBorderWidth: 2,
+            tension: 0.35,
+            fill: true
           }
         ]
       },
@@ -115,13 +165,13 @@ export default class extends Controller {
         interaction: { mode: "index", intersect: false },
         plugins: {
           legend: {
-            position: "top",
-            align: "end",
+            position: "bottom",
             labels: {
               usePointStyle: true,
               pointStyle: "circle",
-              padding: 12,
-              font: { size: 11, weight: "600" }
+              padding: 16,
+              font: { size: 11, weight: "600" },
+              color: "#475569"
             }
           },
           tooltip: {
@@ -137,7 +187,7 @@ export default class extends Controller {
         },
         scales: {
           x: {
-            grid: { display: false },
+            grid: { color: "rgba(148, 163, 184, 0.12)" },
             ticks: { font: { size: 10, weight: "600" }, color: "#64748b" }
           },
           y: {

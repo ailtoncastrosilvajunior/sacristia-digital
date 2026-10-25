@@ -1,16 +1,26 @@
 <% content_for :title, "Resumo gerencial" %>
+<%
+  extrato_label =
+    if @aba == "plano_contas" && @colunas
+      @colunas.find(&:referencia)&.label || format("%d/%02d", @ano, @mes)
+    elsif @periodo_ref
+      @periodo_ref.label
+    else
+      format("%d/%02d", @ano, @mes)
+    end
+%>
 
-<div class="space-y-4 sm:space-y-5 min-h-0 flex-1 flex flex-col">
-  <%= render "admin/financeiro_resumo/nav_abas", aba: @aba, mes: @mes, ano: @ano, ano_foco: @ano_foco %>
+<div class="space-y-4 sm:space-y-5 w-full">
+  <%= render "admin/financeiro_resumo/hero_resumo", aba: @aba, mes: @mes, ano: @ano, extrato_label: extrato_label %>
+
+  <%= render "admin/financeiro_resumo/nav_abas", aba: @aba, mes: @mes, ano: @ano %>
 
   <% if @aba == "periodos" %>
     <%= render "admin/financeiro_resumo/aba_periodos",
-          ano_foco: @ano_foco,
           periodos: @periodos,
           totais_ano: @totais_ano,
           chart_config: @chart_config,
           periodo_ref: @periodo_ref,
-          anos_disponiveis: @anos_disponiveis,
           mes: @mes,
           ano: @ano %>
   <% else %>

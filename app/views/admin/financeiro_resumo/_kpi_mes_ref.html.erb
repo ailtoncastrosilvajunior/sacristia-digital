@@ -1,0 +1,25 @@
+<%# locals: kpis, col_ref, ultimo_titulo: "Saldo do mês", ultimo_sublabel: "Fechamento" %>
+<% ultimo_titulo = local_assigns.fetch(:ultimo_titulo, "Saldo do mês") %>
+<% ultimo_sublabel = local_assigns.fetch(:ultimo_sublabel, "Fechamento") %>
+<div class="relative z-10 shrink-0 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="<%= resumo_panel_card_classes %> border-slate-300/70 p-4">
+    <p class="text-[10px] font-bold uppercase tracking-wide text-slate-600">Saldo anterior</p>
+    <p class="mt-0.5 text-[10px] text-slate-400"><%= col_ref.label %></p>
+    <p class="mt-1.5 text-xl font-black tabular-nums break-all sm:break-normal <%= moeda_resumo_classe(kpis[:saldo_anterior]) %>"><%= formatar_moeda(kpis[:saldo_anterior]) %></p>
+  </div>
+  <div class="<%= resumo_panel_card_classes %> border-emerald-300/70 p-4">
+    <p class="text-[10px] font-bold uppercase tracking-wide text-emerald-800/90">Entradas</p>
+    <p class="mt-0.5 text-[10px] text-slate-400">Mês ref.</p>
+    <p class="mt-1.5 text-xl font-black tabular-nums text-slate-900 break-all sm:break-normal"><%= formatar_moeda(kpis[:entradas]) %></p>
+  </div>
+  <div class="<%= resumo_panel_card_classes %> border-rose-300/70 p-4">
+    <p class="text-[10px] font-bold uppercase tracking-wide text-rose-800/90">Despesas</p>
+    <p class="mt-0.5 text-[10px] text-slate-400">Mês ref.</p>
+    <p class="mt-1.5 text-xl font-black tabular-nums text-slate-900 break-all sm:break-normal"><%= formatar_moeda(kpis[:saidas]) %></p>
+  </div>
+  <div class="<%= resumo_panel_card_classes %> border-indigo-300/70 p-4">
+    <p class="text-[10px] font-bold uppercase tracking-wide text-indigo-800/90"><%= ultimo_titulo %></p>
+    <p class="mt-0.5 text-[10px] text-slate-400"><%= ultimo_sublabel %> · <%= col_ref.label %></p>
+    <p class="mt-1.5 text-xl font-black tabular-nums break-all sm:break-normal <%= moeda_resumo_classe(kpis[:saldo_final]) %>"><%= formatar_moeda(kpis[:saldo_final]) %></p>
+  </div>
+</div>

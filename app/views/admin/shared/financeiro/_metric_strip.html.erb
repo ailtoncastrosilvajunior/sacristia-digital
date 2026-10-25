@@ -21,11 +21,11 @@
   slate: "text-slate-900"
 } %>
 
-<div class="rounded-xl shadow-md shadow-slate-900/10 ring-1 ring-slate-200/90 overflow-hidden bg-slate-200/50">
+<div class="relative z-10 rounded-2xl shadow-md shadow-slate-900/10 ring-1 ring-slate-200/90 overflow-hidden bg-slate-200/50">
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-px">
     <% items.each do |item| %>
       <% tone = item.fetch(:tone, :neutral).to_sym %>
-      <div class="flex flex-col justify-center gap-1 px-3 py-3 sm:px-4 sm:py-3.5 min-h-[4.5rem] <%= cell_tone.fetch(tone, cell_tone[:neutral]) %>">
+      <div class="flex flex-col justify-center gap-1 px-3 py-3.5 sm:px-4 sm:py-4 min-h-[5rem] <%= cell_tone.fetch(tone, cell_tone[:neutral]) %>">
         <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide <%= label_tone.fetch(tone, label_tone[:neutral]) %> leading-tight"><%= item[:label] %></span>
         <% if item[:sublabel].present? %>
           <span class="text-[10px] text-stone-400 leading-none"><%= item[:sublabel] %></span>

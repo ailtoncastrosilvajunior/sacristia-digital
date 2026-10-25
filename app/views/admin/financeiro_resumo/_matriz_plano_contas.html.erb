@@ -1,0 +1,49 @@
+<%# locals: colunas, col_ref, grupos, saldos_finais %>
+<% min_w = resumo_matrix_min_width_rem(colunas) %>
+
+<div class="<%= resumo_panel_card_classes %> overflow-hidden flex flex-col min-h-[20rem] max-h-[calc(100dvh-16rem)]">
+  <div class="min-h-0 flex-1 overflow-auto overscroll-contain financeiro-resumo-scroll">
+    <table class="financeiro-resumo-matrix w-full table-fixed border-collapse text-left text-[11px] leading-tight" style="min-width: <%= min_w %>rem;">
+      <%= render "admin/financeiro_resumo/matriz_colgroup", colunas: colunas %>
+      <%= render "admin/financeiro_resumo/matriz_thead", colunas: colunas, col_ref: col_ref %>
+      <tbody class="divide-y divide-slate-100/80">
+        <% if grupos[:saldo] %>
+          <%= render "admin/financeiro_resumo/matriz_saldo_row",
+                titulo: "Saldo anterior",
+                descricao: "Conta corrente antes dos movimentos do mês",
+                valores_por_coluna: grupos[:saldo].valores,
+                colunas: colunas,
+                col_ref: col_ref,
+                row_tone: :slate %>
+        <% end %>
+
+        <%= render "admin/financeiro_resumo/matriz_corpo_grupo",
+              title: "Entradas",
+              accent: "emerald",
+              header_linha: grupos.dig(:receitas, :header),
+              linhas: grupos.dig(:receitas, :linhas) || [],
+              colunas: colunas,
+              empty_message: "Nenhuma conta de entrada no período." %>
+
+        <%= render "admin/financeiro_resumo/matriz_corpo_grupo",
+              title: "Despesas",
+              accent: "rose",
+              header_linha: grupos.dig(:despesas, :header),
+              linhas: grupos.dig(:despesas, :linhas) || [],
+              colunas: colunas,
+              empty_message: "Nenhuma conta de despesa no período." %>
+
+        <% if saldos_finais.any? %>
+          <%= render "admin/financeiro_resumo/matriz_saldo_row",
+                titulo: "Saldo final",
+                descricao: "Saldo anterior + entradas − despesas (fechamento do mês)",
+                valores_por_coluna: saldos_finais,
+                colunas: colunas,
+                col_ref: col_ref,
+                row_tone: :indigo,
+                footer: true %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

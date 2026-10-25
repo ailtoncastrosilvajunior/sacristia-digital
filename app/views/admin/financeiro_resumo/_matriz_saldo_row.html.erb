@@ -1,0 +1,19 @@
+<%# locals: titulo, descricao, valores_por_coluna, colunas, col_ref, row_tone: :slate, footer: false %>
+<% sticky_bg = row_tone.to_sym == :indigo ? "bg-indigo-50/40" : "bg-slate-50/90" %>
+<% footer = local_assigns.fetch(:footer, false) %>
+<tr class="<%= footer ? 'border-t-2 border-slate-300 bg-gradient-to-r from-indigo-50/90 via-white to-white' : 'border-b border-slate-200/90 bg-gradient-to-r from-slate-50/90 to-white' %> font-semibold">
+  <td class="sticky left-0 z-20 px-2 py-2.5 shadow-[4px_0_12px_-4px_rgba(15,23,42,0.08)] sm:px-3 <%= sticky_bg %>">
+    <p class="text-[11px] font-bold uppercase tracking-wide text-slate-800"><%= titulo %></p>
+    <p class="text-[10px] font-normal text-slate-500 leading-snug"><%= descricao %></p>
+  </td>
+  <td class="px-1 py-2.5"></td>
+  <td class="hidden px-1 py-2.5 sm:table-cell"></td>
+  <td class="px-2 py-2.5 text-right tabular-nums text-slate-400 text-[10px]">—</td>
+  <td class="px-2 py-2.5 text-right text-slate-400 text-[10px]">—</td>
+  <% colunas.each do |col| %>
+    <% v = valores_por_coluna[col.key].to_d %>
+    <td class="px-2 py-2.5 text-right tabular-nums text-[11px] font-bold <%= col.referencia ? 'bg-sky-50/80 ring-1 ring-inset ring-sky-100/80' : '' %> <%= moeda_resumo_classe(v) %>">
+      <%= formatar_moeda(v) %>
+    </td>
+  <% end %>
+</tr>

@@ -1,0 +1,12 @@
+<%# locals: colunas %>
+<% w = resumo_matrix_col_widths %>
+<colgroup>
+  <col style="width: <%= w[:conta] %>rem" />
+  <col style="width: <%= w[:tend] %>rem" />
+  <col style="width: <%= w[:spark] %>rem" />
+  <col style="width: <%= w[:periodo] %>rem" />
+  <col style="width: <%= w[:part] %>rem" />
+  <% colunas.each do %>
+    <col style="width: <%= w[:mes] %>rem" />
+  <% end %>
+</colgroup>

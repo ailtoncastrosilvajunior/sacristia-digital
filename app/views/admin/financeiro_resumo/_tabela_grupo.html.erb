@@ -1,0 +1,117 @@
+<%# locals: title, accent, header_linha, linhas, colunas, scroll_body: false, empty_message: nil %>
+<% scroll_body = local_assigns.fetch(:scroll_body, true) %>
+<% accent_key = accent.to_s %>
+<% theme = resumo_grupo_theme(accent_key) %>
+<% col_maxes = resumo_col_maxes(linhas, colunas) %>
+<% total_periodo = header_linha ? resumo_soma_periodo(header_linha, colunas) : 0.to_d %>
+<% outer = scroll_body ? "flex max-h-[min(52vh,28rem)] flex-col" : "" %>
+<% icon_path = accent_key == "emerald" ? "M4.5 15.75l7.5-7.5 7.5 7.5" : "M19.5 8.25l-7.5 7.5-7.5-7.5" %>
+
+<div class="<%= resumo_panel_card_classes %> <%= theme[:border] %> overflow-hidden <%= outer %>">
+  <div class="shrink-0 border-b px-3 py-3 sm:px-4 <%= theme[:header] %>">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl <%= theme[:icon_wrap] %>">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= icon_path %>"/>
+          </svg>
+        </span>
+        <div>
+          <h3 class="text-sm font-bold uppercase tracking-wide <%= theme[:title] %>"><%= title %></h3>
+          <% if linhas.any? %>
+            <p class="text-[10px] text-slate-500"><%= linhas.count { |l| l.tipo == :conta && !l.plano_conta&.sintetica? } %> conta(s) analítica(s) · barra = peso na coluna · ref. à esquerda</p>
+          <% end %>
+        </div>
+      </div>
+      <% if header_linha %>
+        <div class="text-left sm:text-right">
+          <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Subtotal <%= colunas.size %> meses</p>
+          <p class="text-lg font-black tabular-nums text-slate-900"><%= formatar_moeda(total_periodo) %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% if linhas.blank? %>
+    <p class="px-3 py-8 text-center text-xs text-slate-500 sm:px-4"><%= empty_message || "Nenhuma conta no período." %></p>
+  <% else %>
+    <div class="overflow-x-auto financeiro-resumo-scroll <%= "min-h-0 flex-1 overflow-y-auto" if scroll_body %>">
+      <table class="min-w-[920px] w-full border-collapse text-left text-[11px] leading-tight">
+        <thead class="<%= "sticky top-0 z-20 shadow-sm" if scroll_body %>">
+          <tr class="border-b border-slate-200 bg-slate-100/95 text-[9px] font-bold uppercase tracking-wider text-slate-500 backdrop-blur-sm">
+            <th class="sticky left-0 z-30 min-w-[13rem] bg-slate-100/95 px-2 py-2.5 sm:px-3">Plano de contas</th>
+            <th class="w-10 px-1 py-2.5 text-center">Tend.</th>
+            <th class="hidden w-12 px-1 py-2.5 text-center sm:table-cell" title="Últimos 3 meses">3m</th>
+            <th class="min-w-[6.5rem] px-2 py-2.5 text-right"><%= colunas.size %> meses</th>
+            <th class="min-w-[4.5rem] px-2 py-2.5 text-right">Part.</th>
+            <% colunas.each_with_index do |col, idx| %>
+              <th class="min-w-[5.25rem] px-2 py-2.5 text-right whitespace-nowrap <%= col.referencia ? theme[:col_ref] : "" %>">
+                <%= col.label %>
+                <% if col.referencia %>
+                  <span class="mt-0.5 block text-[8px] font-semibold normal-case tracking-normal text-slate-400">mês ref.</span>
+                <% end %>
+              </th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100/90">
+          <% linhas.each_with_index do |linha, row_idx| %>
+            <% next unless linha.tipo == :conta %>
+            <% sum_periodo = resumo_soma_periodo(linha, colunas) %>
+            <% part_pct = resumo_participacao_pct(sum_periodo, total_periodo) %>
+            <% sintetica = linha.plano_conta&.sintetica? %>
+            <tr class="transition-colors hover:bg-slate-50/90 <%= sintetica ? 'bg-slate-50/70 font-semibold' : (row_idx.even? ? 'bg-white' : 'bg-slate-50/35') %>">
+              <td class="sticky left-0 z-10 px-2 py-2 shadow-[2px_0_8px_-2px_rgba(15,23,42,0.08)] sm:px-3 <%= sintetica ? 'bg-slate-50/90' : (row_idx.even? ? 'bg-white' : 'bg-slate-50/80') %>">
+                <div class="flex items-start gap-2" style="padding-left: <%= linha.nivel * 0.65 %>rem">
+                  <% if linha.plano_conta %>
+                    <span class="mt-0.5 shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-600 ring-1 ring-slate-200/80"><%= linha.plano_conta.codigo %></span>
+                  <% end %>
+                  <span class="min-w-0 font-medium leading-snug text-slate-800"><%= linha.nome %></span>
+                </div>
+              </td>
+              <td class="px-1 py-2 text-center align-middle">
+                <%= sintetica ? "" : resumo_tendencia_mark(resumo_tendencia_linha(linha, colunas)) %>
+              </td>
+              <td class="hidden px-1 py-2 text-center align-middle sm:table-cell">
+                <%= sintetica ? "" : resumo_sparkline_bars(linha, colunas, accent_key) %>
+              </td>
+              <td class="relative px-2 py-2 text-right tabular-nums">
+                <% if sum_periodo.zero? %>
+                  <span class="text-slate-300">—</span>
+                <% else %>
+                  <%= resumo_intensidade_bar(sum_periodo, col_maxes[:periodo], accent_key) %>
+                  <span class="relative z-[1] font-semibold text-slate-900"><%= formatar_moeda(sum_periodo) %></span>
+                <% end %>
+              </td>
+              <td class="px-2 py-2 text-right">
+                <% if part_pct && !sintetica %>
+                  <span class="inline-flex min-w-[2.75rem] justify-end rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold tabular-nums text-slate-600 ring-1 ring-slate-200/70"><%= number_with_precision(part_pct, precision: 1, separator: ",") %>%</span>
+                <% else %>
+                  <span class="text-slate-300">—</span>
+                <% end %>
+              </td>
+              <% colunas.each do |col| %>
+                <%= resumo_celula_valor(linha.valores[col.key], col_maxes[col.key], accent_key, ref_column: col.referencia) %>
+              <% end %>
+            </tr>
+          <% end %>
+          <% if header_linha %>
+            <tr class="border-t-2 border-slate-200 text-[11px] font-bold <%= theme[:subtotal] %>">
+              <td class="sticky left-0 z-10 px-2 py-2.5 sm:px-3 <%= theme[:subtotal] %>">Subtotal <%= title %></td>
+              <td class="px-1 py-2.5"></td>
+              <td class="hidden sm:table-cell"></td>
+              <td class="px-2 py-2.5 text-right tabular-nums text-slate-900"><%= formatar_moeda(total_periodo) %></td>
+              <td class="px-2 py-2.5 text-right tabular-nums text-slate-500">100%</td>
+              <% colunas.each do |col| %>
+                <% v = header_linha.valores[col.key].to_d %>
+                <td class="px-2 py-2.5 text-right tabular-nums text-slate-900 <%= col.referencia ? theme[:col_ref] : '' %>">
+                  <%= v.zero? ? tag.span("—", class: "text-slate-300 font-normal") : formatar_moeda(v) %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

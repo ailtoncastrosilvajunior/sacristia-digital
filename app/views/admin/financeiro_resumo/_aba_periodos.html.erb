@@ -1,129 +1,172 @@
-<%# locals: ano_foco, periodos, totais_ano, chart_config, periodo_ref, anos_disponiveis, mes, ano %>
+<%# locals: periodos, totais_ano, chart_config, periodo_ref, mes, ano %>
 <% ref = periodo_ref %>
+<% stats = resumo_periodos_stats(periodos, totais_ano, ref) %>
+<% col_max = resumo_periodos_col_maxes(periodos) %>
+<% resultado_positivo = stats[:resultado] >= 0 %>
 
 <div class="space-y-4 sm:space-y-5 w-full">
-  <div class="rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-100 px-4 py-4 sm:px-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-    <div class="min-w-0">
-      <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-sky-700">Visão mensal</p>
-      <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-0.5">Demonstrativo <%= ano_foco %></h2>
-      <p class="text-sm text-slate-500 mt-1">Saldo anterior, entradas, saídas e saldo final — conferência via extrato</p>
-    </div>
-    <%= form_with url: admin_financeiro_resumo_path, method: :get, local: true, class: "flex flex-wrap items-end gap-2 shrink-0" do %>
-      <%= hidden_field_tag :aba, "periodos" %>
-      <%= hidden_field_tag :mes, mes %>
-      <%= hidden_field_tag :ano, ano %>
-      <div>
-        <label for="ano_foco_select" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Ano</label>
-        <%= select_tag :ano_foco,
-              options_for_select(anos_disponiveis.map { |a| [a, a] }, ano_foco),
-              id: "ano_foco_select",
-              class: "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 min-w-[6.75rem] tabular-nums" %>
+<% if ref %>
+  <%= render "admin/financeiro_resumo/kpi_mes_ref",
+        kpis: {
+          saldo_anterior: ref.saldo_anterior,
+          entradas: ref.entradas,
+          saidas: ref.saidas,
+          saldo_final: ref.saldo_final
+        },
+        col_ref: ref,
+        ultimo_titulo: "Saldo final",
+        ultimo_sublabel: "Mês ref." %>
+<% end %>
+
+<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="<%= resumo_panel_card_classes %> border-emerald-300/70 p-4">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <p class="text-[10px] font-bold uppercase tracking-wide text-emerald-800/90">Entradas · <%= ano %></p>
+        <p class="mt-1 text-xl font-black tabular-nums text-slate-900 break-all sm:break-normal"><%= formatar_moeda(stats[:entradas]) %></p>
       </div>
-      <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-white hover:bg-slate-900 transition-colors">
-        Aplicar
-      </button>
-      <% if ref %>
-        <%= link_to admin_extrato_financeiro_path(mes: ref.mes, ano: ref.ano),
-              class: "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg border border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100 transition-colors" do %>
-          Extrato · <%= ref.label %>
-        <% end %>
-      <% end %>
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-200/80">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
+      </span>
+    </div>
+    <p class="mt-2 text-[11px] text-slate-500">Média mensal <span class="font-semibold tabular-nums text-slate-700"><%= formatar_moeda(stats[:media_entradas]) %></span></p>
+  </div>
+
+  <div class="<%= resumo_panel_card_classes %> p-4 border-2 <%= resultado_positivo ? 'border-emerald-300/80' : 'border-amber-300/80' %>">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <p class="text-[10px] font-bold uppercase tracking-wide text-slate-600">Resultado líquido · <%= ano %></p>
+        <p class="mt-1 text-xl font-black tabular-nums break-all sm:break-normal <%= moeda_resumo_classe(stats[:resultado]) %>"><%= formatar_moeda(stats[:resultado]) %></p>
+      </div>
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200/80">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+      </span>
+    </div>
+    <% if stats[:margem_pct] %>
+      <p class="mt-2 text-[11px] text-slate-500">Margem sobre entradas <span class="font-semibold tabular-nums text-slate-700"><%= number_with_precision(stats[:margem_pct], precision: 1, separator: ",") %>%</span></p>
     <% end %>
   </div>
 
-  <% if ref %>
-    <%= render "admin/shared/financeiro/metric_strip", items: [
-          { label: "Saldo anterior", value: formatar_moeda(ref.saldo_anterior), tone: :slate, sublabel: ref.label, value_class: moeda_resumo_classe(ref.saldo_anterior) },
-          { label: "Entradas", value: formatar_moeda(ref.entradas), tone: :emerald, sublabel: "Mês ref." },
-          { label: "Saídas", value: formatar_moeda(ref.saidas), tone: :red, sublabel: "Mês ref." },
-          { label: "Saldo final", value: formatar_moeda(ref.saldo_final), tone: :indigo, sublabel: ref.label, value_class: moeda_resumo_classe(ref.saldo_final) }
-        ] %>
-  <% end %>
-
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-5">
-    <div class="xl:col-span-2 rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 ring-1 ring-slate-100 overflow-hidden">
-      <div class="px-4 sm:px-5 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
-        <p class="text-[10px] font-bold uppercase tracking-wider text-sky-300/90">Evolução no ano</p>
-        <h3 class="text-base font-bold mt-0.5">Entradas, saídas e saldo mensal</h3>
+  <div class="<%= resumo_panel_card_classes %> border-rose-300/70 p-4">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <p class="text-[10px] font-bold uppercase tracking-wide text-rose-800/90">Saídas · <%= ano %></p>
+        <p class="mt-1 text-xl font-black tabular-nums text-slate-900 break-all sm:break-normal"><%= formatar_moeda(stats[:saidas]) %></p>
       </div>
-      <div class="p-3 sm:p-4">
-        <%= tag.div class: "relative w-full h-64 sm:h-72",
-              data: {
-                controller: "financeiro-evolucao-chart",
-                financeiro_evolucao_chart_config_value: chart_config
-              } do %>
-          <canvas data-financeiro-evolucao-chart-target="canvas" class="absolute inset-0 w-full h-full" role="img" aria-label="Gráfico de evolução financeira"></canvas>
-        <% end %>
-      </div>
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-700 ring-1 ring-rose-200/80">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+      </span>
     </div>
+    <p class="mt-2 text-[11px] text-slate-500">Média mensal <span class="font-semibold tabular-nums text-slate-700"><%= formatar_moeda(stats[:media_saidas]) %></span></p>
+  </div>
 
-    <div class="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-md shadow-slate-900/5 ring-1 ring-slate-100 h-fit">
-      <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Consolidado <%= ano_foco %></p>
-      <dl class="mt-3 space-y-3 text-sm">
-        <div class="flex justify-between gap-3 py-2 border-b border-slate-100">
-          <dt class="text-slate-600">Entradas</dt>
-          <dd class="font-bold tabular-nums text-emerald-700"><%= formatar_moeda(totais_ano[:entradas]) %></dd>
-        </div>
-        <div class="flex justify-between gap-3 py-2 border-b border-slate-100">
-          <dt class="text-slate-600">Saídas</dt>
-          <dd class="font-bold tabular-nums text-red-700"><%= formatar_moeda(totais_ano[:saidas]) %></dd>
-        </div>
-        <div class="flex justify-between gap-3 pt-1">
-          <dt class="font-semibold text-slate-800">Saldo final</dt>
-          <dd class="font-black tabular-nums text-base <%= moeda_resumo_classe(totais_ano[:saldo_final]) %>"><%= formatar_moeda(totais_ano[:saldo_final]) %></dd>
-        </div>
-      </dl>
+  <div class="<%= resumo_panel_card_classes %> border-sky-300/70 p-4">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <p class="text-[10px] font-bold uppercase tracking-wide text-sky-800/90">Mês ref.<%= ref ? " · #{ref.label}" : "" %></p>
+        <p class="mt-1 text-xl font-black tabular-nums break-all sm:break-normal <%= moeda_resumo_classe(stats[:resultado_mes_ref]) %>"><%= formatar_moeda(stats[:resultado_mes_ref]) %></p>
+      </div>
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-500/15 text-sky-700 ring-1 ring-sky-200/80">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      </span>
+    </div>
+    <div class="mt-2"><%= resumo_chip_variacao(stats[:variacao_resultado_ref_pct]) %></div>
+  </div>
+</div>
+
+<section class="<%= resumo_panel_card_classes %> p-4 sm:p-5">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <div>
+      <h2 class="text-base font-bold text-slate-900 sm:text-lg">Entradas × saídas × resultado</h2>
+      <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">Série mensal do ano <%= ano %> (meses já encerrados ou em curso).</p>
+    </div>
+    <span class="rounded-full bg-sky-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-sky-800 ring-1 ring-sky-200/80">Gráfico</span>
+  </div>
+
+  <div class="relative mt-4 overflow-hidden rounded-xl border border-slate-200/80 bg-gradient-to-b from-slate-50/90 via-white to-white p-3 pt-4 sm:mt-5 sm:p-4 sm:pt-5">
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-sky-500/5 to-transparent" aria-hidden="true"></div>
+    <%= javascript_include_tag "chart.umd.min.js", "data-turbo-track": "reload" %>
+    <%= tag.div class: "relative h-64 w-full sm:h-72",
+          data: {
+            controller: "financeiro-evolucao-chart",
+            financeiro_evolucao_chart_config_value: chart_config,
+            financeiro_evolucao_chart_library_value: asset_path("chart.umd.min.js")
+          } do %>
+      <canvas data-financeiro-evolucao-chart-target="canvas" class="block h-full w-full" role="img" aria-label="Gráfico de entradas, saídas e resultado mensais"></canvas>
+    <% end %>
+  </div>
+</section>
+
+<div class="<%= resumo_panel_card_classes %> overflow-hidden">
+  <div class="border-b border-slate-200 bg-gradient-to-r from-slate-100 via-white to-white px-4 py-3 sm:px-5">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wide text-slate-800">Meses do ano</h3>
+        <p class="text-[10px] text-slate-500">Barra = peso relativo ao maior valor da coluna · clique em Extrato para conferir lançamentos</p>
+      </div>
+      <div class="text-left sm:text-right">
+        <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Saldo final · <%= ano %></p>
+        <p class="text-lg font-black tabular-nums <%= moeda_resumo_classe(stats[:saldo_final]) %>"><%= formatar_moeda(stats[:saldo_final]) %></p>
+      </div>
     </div>
   </div>
 
-  <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden ring-1 ring-slate-100">
-    <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/80">
-      <h3 class="text-sm font-bold text-slate-800">Meses do ano</h3>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="w-full min-w-[40rem] text-sm">
-        <thead>
-          <tr class="text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-            <th class="px-4 py-2.5 text-left bg-slate-100 text-slate-600">Período</th>
-            <th class="px-4 py-2.5 text-right bg-slate-50 text-slate-600">Saldo ant.</th>
-            <th class="px-4 py-2.5 text-right bg-emerald-50/80 text-emerald-900">Entradas</th>
-            <th class="px-4 py-2.5 text-right bg-rose-50/80 text-rose-900">Saídas</th>
-            <th class="px-4 py-2.5 text-right bg-indigo-50/80 text-indigo-950">Saldo final</th>
-            <th class="px-3 py-2.5 w-28 bg-white"></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <% periodos.each do |p| %>
-            <% destaque = p.ano == ano && p.mes == mes && !p.futuro %>
-            <tr class="<%= destaque ? 'bg-sky-50/80' : 'hover:bg-slate-50/70' %> <%= p.futuro ? 'opacity-45' : '' %>">
-              <td class="px-4 py-2 font-semibold tabular-nums text-slate-800">
-                <%= p.label %>
-                <% if destaque %><span class="ml-1.5 text-[10px] font-bold text-sky-700 uppercase">Ref.</span><% end %>
-              </td>
-              <td class="px-4 py-2 text-right tabular-nums text-sm <%= moeda_resumo_classe(p.saldo_anterior) %>"><%= formatar_moeda(p.saldo_anterior) %></td>
-              <td class="px-4 py-2 text-right tabular-nums text-sm font-medium text-emerald-800"><%= p.futuro && p.entradas.zero? ? "—" : formatar_moeda(p.entradas) %></td>
-              <td class="px-4 py-2 text-right tabular-nums text-sm font-medium text-red-800"><%= p.futuro && p.saidas.zero? ? "—" : formatar_moeda(p.saidas) %></td>
-              <td class="px-4 py-2 text-right tabular-nums text-sm font-bold <%= moeda_resumo_classe(p.saldo_final) %>"><%= formatar_moeda(p.saldo_final) %></td>
-              <td class="px-3 py-2 text-center">
-                <% unless p.futuro %>
-                  <%= link_to "Extrato", admin_extrato_financeiro_path(mes: p.mes, ano: p.ano),
-                        class: "inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-semibold text-sky-800 bg-sky-50 ring-1 ring-sky-200/80 hover:bg-sky-100" %>
+  <div class="overflow-x-auto financeiro-resumo-scroll">
+    <table class="min-w-[52rem] w-full border-collapse text-left text-[11px] leading-tight">
+      <thead>
+        <tr class="border-b border-slate-200 bg-slate-100/95 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+          <th class="sticky left-0 z-10 min-w-[6.5rem] bg-slate-100/95 px-4 py-2.5 text-left shadow-[2px_0_8px_-2px_rgba(15,23,42,0.08)]">Período</th>
+          <th class="min-w-[6rem] px-3 py-2.5 text-right">Saldo ant.</th>
+          <th class="min-w-[6rem] px-3 py-2.5 text-right text-emerald-800">Entradas</th>
+          <th class="min-w-[6rem] px-3 py-2.5 text-right text-rose-800">Saídas</th>
+          <th class="min-w-[6rem] px-3 py-2.5 text-right text-slate-700">Resultado</th>
+          <th class="min-w-[6rem] px-3 py-2.5 text-right text-indigo-900">Saldo final</th>
+          <th class="w-24 px-2 py-2.5 text-center">Ação</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100/90">
+        <% periodos.each_with_index do |p, idx| %>
+          <% destaque = ref && p.ano == ref.ano && p.mes == ref.mes && !p.futuro %>
+          <% resultado_mes = p.entradas.to_d - p.saidas.to_d %>
+          <tr class="transition-colors <%= destaque ? 'bg-sky-50/70' : (idx.even? ? 'bg-white hover:bg-slate-50/80' : 'bg-slate-50/35 hover:bg-slate-50/80') %> <%= p.futuro ? 'opacity-40' : '' %>">
+            <td class="sticky left-0 z-10 px-4 py-2.5 font-semibold tabular-nums shadow-[2px_0_8px_-2px_rgba(15,23,42,0.08)] <%= destaque ? 'bg-sky-50/90 text-sky-950' : (idx.even? ? 'bg-white' : 'bg-slate-50/80') %>">
+              <%= p.label %>
+              <% if destaque %>
+                <span class="ml-1.5 inline-flex rounded-full bg-sky-600 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white">Ref.</span>
+              <% elsif p.futuro %>
+                <span class="ml-1 text-[9px] font-medium text-slate-400">futuro</span>
+              <% end %>
+            </td>
+            <td class="px-3 py-2.5 text-right tabular-nums font-medium <%= moeda_resumo_classe(p.saldo_anterior) %>"><%= formatar_moeda(p.saldo_anterior) %></td>
+            <%= resumo_celula_moeda_bar(p.entradas, col_max[:entradas], "emerald", ref: destaque, futuro: p.futuro && p.entradas.zero?) %>
+            <%= resumo_celula_moeda_bar(p.saidas, col_max[:saidas], "rose", ref: destaque, futuro: p.futuro && p.saidas.zero?) %>
+            <td class="px-3 py-2.5 text-right tabular-nums font-semibold <%= p.futuro ? 'text-slate-300' : moeda_resumo_classe(resultado_mes) %>">
+              <%= p.futuro && resultado_mes.zero? ? "—" : formatar_moeda(resultado_mes) %>
+            </td>
+            <td class="px-3 py-2.5 text-right tabular-nums font-bold <%= destaque ? 'bg-sky-50/40' : '' %> <%= moeda_resumo_classe(p.saldo_final) %>"><%= formatar_moeda(p.saldo_final) %></td>
+            <td class="px-2 py-2.5 text-center align-middle">
+              <% unless p.futuro %>
+                <%= link_to admin_extrato_financeiro_path(mes: p.mes, ano: p.ano),
+                      class: "inline-flex items-center justify-center rounded-lg px-2 py-1 text-[10px] font-bold text-sky-900 bg-sky-50 ring-1 ring-sky-200/80 hover:bg-sky-100 transition-colors" do %>
+                  Extrato
                 <% end %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-        <tfoot>
-          <tr class="bg-slate-800 text-white text-sm font-bold">
-            <td class="px-4 py-2.5">Total</td>
-            <td class="px-4 py-2.5 text-right text-slate-400">—</td>
-            <td class="px-4 py-2.5 text-right tabular-nums text-emerald-300"><%= formatar_moeda(totais_ano[:entradas]) %></td>
-            <td class="px-4 py-2.5 text-right tabular-nums text-rose-300"><%= formatar_moeda(totais_ano[:saidas]) %></td>
-            <td class="px-4 py-2.5 text-right tabular-nums text-sky-200"><%= formatar_moeda(totais_ano[:saldo_final]) %></td>
-            <td></td>
+              <% end %>
+            </td>
           </tr>
-        </tfoot>
-      </table>
-    </div>
+        <% end %>
+      </tbody>
+      <tfoot>
+        <tr class="border-t-2 border-slate-300 bg-slate-900 text-[11px] font-bold text-white">
+          <td class="sticky left-0 z-10 bg-slate-900 px-4 py-2.5">Total / fechamento <%= ano %></td>
+          <td class="px-3 py-2.5 text-right tabular-nums text-slate-500">—</td>
+          <td class="px-3 py-2.5 text-right tabular-nums text-emerald-300"><%= formatar_moeda(stats[:entradas]) %></td>
+          <td class="px-3 py-2.5 text-right tabular-nums text-rose-300"><%= formatar_moeda(stats[:saidas]) %></td>
+          <td class="px-3 py-2.5 text-right tabular-nums <%= stats[:resultado] >= 0 ? 'text-emerald-300' : 'text-amber-300' %>"><%= formatar_moeda(stats[:resultado]) %></td>
+          <td class="px-3 py-2.5 text-right tabular-nums text-sky-200"><%= formatar_moeda(stats[:saldo_final]) %></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
   </div>
+</div>
 </div>

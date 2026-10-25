@@ -37,6 +37,7 @@ module Financeiro
         labels: visiveis.map(&:label),
         entradas: visiveis.map { |p| p.entradas.to_f },
         saidas: visiveis.map { |p| p.saidas.to_f },
+        resultados: visiveis.map { |p| (p.entradas.to_d - p.saidas.to_d).to_f },
         saldos: visiveis.map { |p| p.saldo_final.to_f }
       }
     end
