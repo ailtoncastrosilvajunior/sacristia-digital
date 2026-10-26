@@ -82,16 +82,63 @@
       </div>
 
       <%# Resumo por sacerdote — largura fixa, só scroll vertical %>
-      <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden xl:sticky xl:top-4 ring-1 ring-slate-100 min-w-0 w-full max-w-full">
-        <div class="px-3 py-2 border-b border-slate-200/80 bg-gradient-to-br from-slate-800 via-slate-800 to-sky-900 text-white">
-          <p class="text-[9px] font-semibold uppercase tracking-widest text-sky-300/90">Análise</p>
-          <h2 class="text-sm font-semibold tracking-tight leading-tight">Resumo · <%= @competencia.label_curto %></h2>
-          <p class="text-[11px] text-slate-400 mt-0.5"><%= @resumo_por_sacerdote.size %> sacerdotes na competência</p>
+      <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden xl:sticky xl:top-4 ring-1 ring-slate-100 min-w-0 w-full max-w-full"
+           data-controller="esportula-resumo-filter"
+           data-esportula-resumo-filter-total-value="<%= @resumo_por_sacerdote.size %>"
+           data-esportula-resumo-filter-horarios-value="<%= esportula_horarios_filtro(@eventos).to_json %>">
+        <div class="px-3 py-2 border-b border-slate-700/50 bg-gradient-to-br from-slate-800 via-slate-800 to-sky-900 text-white">
+          <div class="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+            <div class="min-w-0">
+              <p class="text-[9px] font-semibold uppercase tracking-widest text-sky-300/90">Análise</p>
+              <h2 class="text-sm font-semibold tracking-tight leading-tight">Resumo · <%= @competencia.label_curto %></h2>
+              <p class="text-[11px] text-slate-400 mt-0.5" data-esportula-resumo-filter-target="count"><%= @resumo_por_sacerdote.size %> sacerdotes na competência</p>
+            </div>
+            <% if @resumo_por_sacerdote.any? %>
+              <div class="flex items-center gap-0.5 shrink-0 self-start sm:self-center rounded-md border border-white/10 bg-black/15 px-1 py-0.5"
+                   title="Filtro instantâneo — sem botão aplicar">
+                <label class="sr-only" for="esportula_resumo_filtro_nome">Nome do sacerdote</label>
+                <input type="text"
+                       id="esportula_resumo_filtro_nome"
+                       placeholder="Nome"
+                       autocomplete="off"
+                       spellcheck="false"
+                       class="h-6 w-[5.5rem] sm:w-[6.25rem] min-h-0 rounded border-0 bg-transparent px-1.5 text-[10px] leading-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
+                       data-esportula-resumo-filter-target="nome"
+                       data-action="input->esportula-resumo-filter#filter" />
+                <span class="h-3 w-px bg-white/15 shrink-0" aria-hidden="true"></span>
+                <label class="sr-only" for="esportula_resumo_filtro_horario">Horário</label>
+                <input type="text"
+                       id="esportula_resumo_filtro_horario"
+                       placeholder="00:00"
+                       autocomplete="off"
+                       inputmode="numeric"
+                       list="esportula_resumo_horarios"
+                       class="h-6 w-[2.85rem] sm:w-[3.1rem] min-h-0 rounded border-0 bg-transparent px-1 text-[10px] leading-none tabular-nums text-white placeholder:text-slate-500 focus:outline-none focus:ring-0"
+                       data-esportula-resumo-filter-target="horario"
+                       data-action="input->esportula-resumo-filter#filter" />
+                <datalist id="esportula_resumo_horarios" data-esportula-resumo-filter-target="horariosList"></datalist>
+                <button type="button"
+                        class="hidden h-6 w-6 shrink-0 items-center justify-center rounded text-[13px] leading-none text-sky-200/90 hover:bg-white/10 hover:text-white"
+                        title="Limpar filtros"
+                        aria-label="Limpar filtros"
+                        data-esportula-resumo-filter-target="clear"
+                        data-action="esportula-resumo-filter#clear">
+                  ×
+                </button>
+              </div>
+            <% end %>
+          </div>
         </div>
         <% if @resumo_por_sacerdote.any? %>
           <div class="overflow-x-auto overflow-y-auto max-h-[min(72vh,680px)]">
-            <%= render "admin/registros_esportula/competencia/resumo_table", resumo_por_sacerdote: @resumo_por_sacerdote, resumo_totais: @resumo_totais %>
+            <%= render "admin/registros_esportula/competencia/resumo_table",
+                  resumo_por_sacerdote: @resumo_por_sacerdote,
+                  resumo_totais: @resumo_totais,
+                  resumo_eventos_map: @resumo_eventos_map %>
           </div>
+          <p class="hidden px-4 py-6 text-center text-sm text-slate-500" data-esportula-resumo-filter-target="empty">
+            Nenhum sacerdote corresponde ao filtro.
+          </p>
         <% else %>
           <p class="px-4 py-10 text-center text-sm text-stone-500">Sem dados para resumir.</p>
         <% end %>

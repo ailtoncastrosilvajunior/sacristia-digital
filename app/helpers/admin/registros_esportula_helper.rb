@@ -41,5 +41,25 @@ module Admin
       { missa: nome.match?(/missa/i), confissao: nome.match?(/confiss/i) }
     end
 
+    def esportula_resumo_eventos_map(eventos)
+      eventos.each_with_object({}) do |ev, map|
+        next if ev.sacerdote_id.blank?
+
+        flags = esportula_tipo_flags(ev.tipo_servico.nome)
+        map[ev.sacerdote_id] ||= []
+        map[ev.sacerdote_id] << {
+          horario: ev.horario.strftime("%H:%M"),
+          missa: flags[:missa],
+          confissao: flags[:confissao],
+          previsto: ev.valor_esportula.to_f,
+          realizado: ev.esportula_paga? ? ev.valor_esportula.to_f : 0
+        }
+      end
+    end
+
+    def esportula_horarios_filtro(eventos)
+      eventos.filter_map { |ev| ev.horario&.strftime("%H:%M") }.uniq.sort
+    end
+
   end
 end

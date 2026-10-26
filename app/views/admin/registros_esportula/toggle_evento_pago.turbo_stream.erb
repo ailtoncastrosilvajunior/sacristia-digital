@@ -5,7 +5,7 @@
 <% if @resumo_linha.present? %>
   <%= turbo_stream.replace dom_id(@resumo_linha[:sacerdote], :esportula_resumo),
         partial: "admin/registros_esportula/competencia/resumo_row",
-        locals: { linha: @resumo_linha } %>
+        locals: { linha: @resumo_linha, resumo_eventos_map: @resumo_eventos_map } %>
 <% end %>
 
 <%= turbo_stream.replace "esportulas_competencia_resumo_foot",

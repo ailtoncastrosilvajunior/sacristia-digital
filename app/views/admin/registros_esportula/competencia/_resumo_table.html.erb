@@ -1,4 +1,4 @@
-<%# locals: resumo_por_sacerdote, resumo_totais %>
+<%# locals: resumo_por_sacerdote, resumo_totais, resumo_eventos_map %>
 <div id="esportulas_competencia_resumo" class="bg-gradient-to-b from-slate-50/50 to-white">
   <table class="w-full text-xs">
     <thead class="sticky top-0 z-10 bg-slate-800 text-[9px] font-bold uppercase tracking-wide text-slate-300 border-b border-slate-700">
@@ -14,7 +14,7 @@
     </thead>
     <tbody>
       <% resumo_por_sacerdote.each do |linha| %>
-        <%= render "admin/registros_esportula/competencia/resumo_row", linha: linha %>
+        <%= render "admin/registros_esportula/competencia/resumo_row", linha: linha, resumo_eventos_map: resumo_eventos_map %>
       <% end %>
     </tbody>
     <%= render "admin/registros_esportula/competencia/resumo_foot", resumo_totais: resumo_totais %>

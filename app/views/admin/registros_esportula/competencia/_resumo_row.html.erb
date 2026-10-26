@@ -1,19 +1,24 @@
-<%# locals: linha %>
+<%# locals: linha, resumo_eventos_map %>
 <% s = linha[:sacerdote] %>
 <% quitado = linha[:saldo].to_d.zero? && linha[:previsto].to_d.positive? %>
 <% zebra = s.id.even? %>
-<tr id="<%= dom_id(s, :esportula_resumo) %>" class="group border-b border-slate-100/90 transition-colors <%= zebra ? 'bg-slate-50/35' : 'bg-white' %> hover:bg-sky-50/60">
+<% eventos = (resumo_eventos_map || {})[s.id] || [] %>
+<tr id="<%= dom_id(s, :esportula_resumo) %>"
+    data-esportula-resumo-filter-target="row"
+    data-nome="<%= s.nome %>"
+    data-eventos="<%= h(eventos.to_json) %>"
+    class="group border-b border-slate-100/90 transition-colors <%= zebra ? 'bg-slate-50/35' : 'bg-white' %> hover:bg-sky-50/60">
   <td class="px-2.5 py-2 align-middle">
     <%= link_to s.nome, admin_sacerdote_path(s), class: "font-semibold text-slate-800 group-hover:text-sky-800 leading-snug", title: s.nome %>
   </td>
-  <td class="px-1 py-2 text-center align-middle">
+  <td class="px-1 py-2 text-center align-middle" data-esportula-resumo-missas>
     <% if linha[:missas].positive? %>
       <span class="inline-flex min-w-[1.25rem] justify-center rounded-md bg-sky-100 px-1 py-0.5 text-[10px] font-bold tabular-nums text-sky-800 ring-1 ring-sky-200/80"><%= linha[:missas] %></span>
     <% else %>
       <span class="text-slate-300 tabular-nums">·</span>
     <% end %>
   </td>
-  <td class="px-1 py-2 text-center align-middle">
+  <td class="px-1 py-2 text-center align-middle" data-esportula-resumo-confissoes>
     <% if linha[:confissoes].positive? %>
       <span class="inline-flex min-w-[1.25rem] justify-center rounded-md bg-amber-100 px-1 py-0.5 text-[10px] font-bold tabular-nums text-amber-900 ring-1 ring-amber-200/80"><%= linha[:confissoes] %></span>
     <% else %>
@@ -21,15 +26,15 @@
     <% end %>
   </td>
   <td class="px-1 py-2 text-center align-middle">
-    <span class="inline-flex min-w-[1.35rem] justify-center rounded-md bg-slate-200/80 px-1 py-0.5 text-[10px] font-black tabular-nums text-slate-800"><%= linha[:total_servicos] %></span>
+    <span data-esportula-resumo-total class="inline-flex min-w-[1.35rem] justify-center rounded-md bg-slate-200/80 px-1 py-0.5 text-[10px] font-black tabular-nums text-slate-800"><%= linha[:total_servicos] %></span>
   </td>
-  <td class="px-2 py-2 text-right align-middle tabular-nums font-semibold text-emerald-900 whitespace-nowrap">
+  <td class="px-2 py-2 text-right align-middle tabular-nums font-semibold text-emerald-900 whitespace-nowrap" data-esportula-resumo-previsto>
     <%= number_to_currency(linha[:previsto], precision: 0) %>
   </td>
-  <td class="px-2 py-2 text-right align-middle tabular-nums font-semibold text-sky-800 whitespace-nowrap">
+  <td class="px-2 py-2 text-right align-middle tabular-nums font-semibold text-sky-800 whitespace-nowrap" data-esportula-resumo-realizado>
     <%= number_to_currency(linha[:realizado], precision: 0) %>
   </td>
-  <td class="px-2.5 py-2 text-right align-middle tabular-nums font-bold whitespace-nowrap <%= quitado ? 'text-emerald-700' : 'text-indigo-800' %>">
+  <td class="px-2.5 py-2 text-right align-middle tabular-nums font-bold whitespace-nowrap <%= quitado ? 'text-emerald-700' : 'text-indigo-800' %>" data-esportula-resumo-saldo>
     <%= number_to_currency(linha[:saldo], precision: 0) %>
   </td>
 </tr>

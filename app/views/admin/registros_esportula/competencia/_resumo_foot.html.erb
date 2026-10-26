@@ -1,13 +1,16 @@
 <%# locals: resumo_totais %>
 <% t = resumo_totais %>
+<% previsto_l = number_to_currency(t[:previsto], precision: 0) %>
+<% realizado_l = number_to_currency(t[:realizado], precision: 0) %>
+<% saldo_l = number_to_currency(t[:saldo], precision: 0) %>
 <tfoot id="esportulas_competencia_resumo_foot" class="sticky bottom-0 z-10 bg-gradient-to-r from-slate-800 to-slate-900 text-[11px] font-bold text-white border-t border-slate-700 shadow-[0_-4px_12px_rgba(15,23,42,0.12)]">
   <tr>
     <td class="px-2.5 py-2.5 text-sky-100/90">Total geral</td>
-    <td class="px-1 py-2.5 text-center tabular-nums text-white/90"><%= t[:missas] %></td>
-    <td class="px-1 py-2.5 text-center tabular-nums text-white/90"><%= t[:confissoes] %></td>
-    <td class="px-1 py-2.5 text-center tabular-nums text-white"><%= t[:total_servicos] %></td>
-    <td class="px-2 py-2.5 text-right tabular-nums text-emerald-200 whitespace-nowrap"><%= number_to_currency(t[:previsto], precision: 0) %></td>
-    <td class="px-2 py-2.5 text-right tabular-nums text-sky-200 whitespace-nowrap"><%= number_to_currency(t[:realizado], precision: 0) %></td>
-    <td class="px-2.5 py-2.5 text-right tabular-nums text-indigo-200 whitespace-nowrap"><%= number_to_currency(t[:saldo], precision: 0) %></td>
+    <td class="px-1 py-2.5 text-center tabular-nums text-white/90" data-esportula-resumo-filter-target="footMissas" data-initial="<%= t[:missas] %>"><%= t[:missas] %></td>
+    <td class="px-1 py-2.5 text-center tabular-nums text-white/90" data-esportula-resumo-filter-target="footConfissoes" data-initial="<%= t[:confissoes] %>"><%= t[:confissoes] %></td>
+    <td class="px-1 py-2.5 text-center tabular-nums text-white" data-esportula-resumo-filter-target="footTotal" data-initial="<%= t[:total_servicos] %>"><%= t[:total_servicos] %></td>
+    <td class="px-2 py-2.5 text-right tabular-nums text-emerald-200 whitespace-nowrap" data-esportula-resumo-filter-target="footPrevisto" data-initial="<%= previsto_l %>"><%= previsto_l %></td>
+    <td class="px-2 py-2.5 text-right tabular-nums text-sky-200 whitespace-nowrap" data-esportula-resumo-filter-target="footRealizado" data-initial="<%= realizado_l %>"><%= realizado_l %></td>
+    <td class="px-2.5 py-2.5 text-right tabular-nums text-indigo-200 whitespace-nowrap" data-esportula-resumo-filter-target="footSaldo" data-initial="<%= saldo_l %>"><%= saldo_l %></td>
   </tr>
 </tfoot>

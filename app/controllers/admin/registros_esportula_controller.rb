@@ -89,18 +89,16 @@ module Admin
     end
 
     def load_esportulas_competencia_dados(competencia)
-      @eventos = competencia.evento_escalas
-        .nao_cancelados
-        .includes(:tipo_servico, :sacerdote, :registro_esportulas)
-        .order(:data, :horario)
-        .to_a
-      @eventos = @eventos.select { |e| e.valor_esportula.to_d.positive? }
+      @eventos = eventos_esportula_da_competencia(competencia)
+      @resumo_eventos_map = helpers.esportula_resumo_eventos_map(@eventos)
       @resumo_por_sacerdote, @resumo_totais = EsportulasCompetenciaResumo.call(competencia)
     end
 
     def preparar_resposta_toggle_evento!(evento)
       evento.reload
       @competencia = evento.competencia_mensal
+      @eventos = eventos_esportula_da_competencia(@competencia)
+      @resumo_eventos_map = helpers.esportula_resumo_eventos_map(@eventos)
       @resumo_por_sacerdote, @resumo_totais = EsportulasCompetenciaResumo.call(@competencia)
       @resumo_linha = @resumo_por_sacerdote.find { |l| l[:sacerdote].id == evento.sacerdote_id } if evento.sacerdote_id.present?
     end
@@ -117,6 +115,15 @@ module Admin
             alert: mensagem
         end
       end
+    end
+
+    def eventos_esportula_da_competencia(competencia)
+      lista = competencia.evento_escalas
+        .nao_cancelados
+        .includes(:tipo_servico, :sacerdote, :registro_esportulas)
+        .order(:data, :horario)
+        .to_a
+      lista.select { |e| e.valor_esportula.to_d.positive? }
     end
 
     def resolve_competencia_para_esportulas
