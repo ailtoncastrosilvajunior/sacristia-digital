@@ -84,7 +84,7 @@ class ExtratoContaCorrenteService
     @lancamentos ||= @conta.lancamentos_caixa
       .confirmados
       .where(data: @de..@ate)
-      .includes(:evento_escala, itens_lancamento: :plano_conta)
+      .includes({ evento_escala: :sacerdote }, itens_lancamento: :plano_conta)
       .order(:data, :id)
       .to_a
   end

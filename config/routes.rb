@@ -62,6 +62,7 @@ Rails.application.routes.draw do
     resources :plano_contas, path: "plano-contas", except: [:destroy]
     resources :lancamentos_caixa, path: "lancamentos-caixa" do
       member { post :estornar }
+      collection { get :eventos }
     end
     get "extrato-financeiro", to: "extrato_financeiro#show", as: :extrato_financeiro
     get "financeiro-resumo", to: "financeiro_resumo#show", as: :financeiro_resumo

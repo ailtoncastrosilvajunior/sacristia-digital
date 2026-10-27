@@ -69,6 +69,26 @@ module Admin
       end
     end
 
+    # JSON para o select de eventos do formulário: eventos do período,
+    # com os da data preferida (params[:data]) em primeiro lugar.
+    def eventos
+      de = parse_data_param(params[:de])
+      ate = parse_data_param(params[:ate]) || de
+      return render(json: { grupos: [] }) unless de
+
+      de, ate = ate, de if ate < de
+      preferida = parse_data_param(params[:data])
+
+      eventos = EventoEscala.nao_cancelados.includes(:tipo_servico, :sacerdote)
+                            .where(data: de..ate).order(:data, :horario).limit(200).to_a
+      do_dia, outros = preferida ? eventos.partition { |e| e.data == preferida } : [[], eventos]
+
+      grupos = []
+      grupos << { label: "Do dia #{I18n.l(preferida)}", opcoes: do_dia.map { |e| opcao_evento(e) } } if do_dia.any?
+      grupos << { label: (do_dia.any? ? "Outros dias do período" : "Período"), opcoes: outros.map { |e| opcao_evento(e) } } if outros.any?
+      render json: { grupos: grupos }
+    end
+
     def estornar
       @lancamento.estornar!(user: current_user)
       redirect_to admin_lancamentos_caixa_path(@lancamento), notice: "Lançamento estornado."
@@ -88,26 +108,44 @@ module Admin
       @contas_correntes = ContaCorrente.ativas.order(:nome)
       @contas_receita = PlanoConta.ativas.analiticas.por_natureza("receita").ordenadas
       @contas_despesa = PlanoConta.ativas.analiticas.por_natureza("despesa").ordenadas
-      @eventos_recentes = eventos_recentes_para_form
-      @eventos_para_select = @eventos_recentes.map { |e| [rotulo_evento_escala_select(e), e.id] }
     end
 
-    def eventos_recentes_para_form
-      eventos = EventoEscala.nao_cancelados.includes(:tipo_servico).order(data: :desc).limit(100).to_a
+    # Eventos do dia do lançamento (hoje, por padrão) + o evento já vinculado.
+    # Outros períodos são buscados via #eventos.
+    def eventos_para_select
+      @eventos_para_select ||= eventos_do_dia_para_form.map { |e| [rotulo_evento_escala_select(e), e.id] }
+    end
+    helper_method :eventos_para_select
+
+    def data_inicial_eventos
+      @lancamento&.data || Date.current
+    end
+    helper_method :data_inicial_eventos
+
+    def eventos_do_dia_para_form
+      eventos = EventoEscala.nao_cancelados.includes(:tipo_servico, :sacerdote)
+                            .where(data: data_inicial_eventos).order(:horario).to_a
       ev_id = @lancamento&.evento_escala_id
       if ev_id && eventos.none? { |e| e.id == ev_id }
-        vinculado = if @lancamento.association(:evento_escala).loaded?
-                      @lancamento.evento_escala
-                    else
-                      EventoEscala.includes(:tipo_servico).find_by(id: ev_id)
-                    end
+        vinculado = EventoEscala.includes(:tipo_servico, :sacerdote).find_by(id: ev_id)
         eventos << vinculado if vinculado
       end
       eventos
     end
 
+    def parse_data_param(valor)
+      Date.iso8601(valor.to_s)
+    rescue ArgumentError
+      nil
+    end
+
+    def opcao_evento(evento)
+      { id: evento.id, label: rotulo_evento_escala_select(evento) }
+    end
+
     def rotulo_evento_escala_select(evento)
-      "#{I18n.l(evento.data)} #{evento.horario.strftime('%H:%M')} — #{evento.tipo_servico.nome}"
+      rotulo = "#{I18n.l(evento.data)} #{evento.horario.strftime('%H:%M')} — #{evento.tipo_servico.nome}"
+      evento.sacerdote ? "#{rotulo} — #{evento.sacerdote.nome}" : rotulo
     end
 
     def data_padrao_novo_lancamento

@@ -36,6 +36,14 @@
       <td class="px-3 py-1.5 align-middle min-w-0">
         <div class="min-w-0 leading-tight">
           <p class="text-[13px] font-medium text-slate-800 truncate" title="<%= linha.descricao %>"><%= linha.descricao %></p>
+          <% evento = lc.natureza == "entrada" ? lc.evento_escala : nil %>
+          <% if evento %>
+            <% horario = evento.horario.respond_to?(:strftime) ? evento.horario.strftime("%H:%M") : evento.horario.to_s.first(5) %>
+            <% info_evento = [horario.presence && "Missa às #{horario}", evento.sacerdote && "Sacerdote: #{evento.sacerdote.nome}"].compact.join(" · ") %>
+            <% if info_evento.present? %>
+              <p class="text-[10px] text-sky-700 mt-0.5 truncate" title="<%= info_evento %>"><%= info_evento %></p>
+            <% end %>
+          <% end %>
           <% if detalhe.present? %>
             <p class="text-[10px] text-slate-500 mt-0.5 line-clamp-2 whitespace-pre-wrap break-words" title="<%= detalhe %>"><%= detalhe %></p>
           <% end %>

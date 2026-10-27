@@ -1,6 +1,6 @@
 <% content_for :title, "Extrato financeiro" %>
 <% label_mes = I18n.l(Date.new(@ano, @mes, 1), format: :month_year) %>
-<% extrato_path = admin_extrato_financeiro_path(mes: @mes, ano: @ano) %>
+<% extrato_path = admin_extrato_financeiro_path({ mes: @mes, ano: @ano, dia_de: (@de.day if @filtro_datas), dia_ate: (@ate.day if @filtro_datas) }.compact) %>
 <% btn_hero = "inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-2.5 text-xs font-semibold text-white hover:bg-white/15 transition-colors" %>
 
 <div class="space-y-4 sm:space-y-5 min-h-0 flex-1 flex flex-col" data-controller="drawer">
@@ -10,7 +10,7 @@
   </div>
 
   <% toolbar = capture do %>
-    <%= render "admin/shared/financeiro/periodo_filter", form_url: admin_extrato_financeiro_path, mes: @mes, ano: @ano, variant: :hero, id_prefix: "extrato" %>
+    <%= render "admin/shared/financeiro/periodo_filter", form_url: admin_extrato_financeiro_path, mes: @mes, ano: @ano, variant: :hero, id_prefix: "extrato", datas: true, de: @de, ate: @ate, limpar: @filtro_datas %>
   <% end %>
   <% actions = capture do %>
     <%= link_to new_admin_lancamentos_caixa_path(natureza: "entrada", mes: @mes, ano: @ano, return_to: extrato_path), class: btn_hero do %>
@@ -29,7 +29,7 @@
   <%= render "admin/shared/financeiro/hero",
         eyebrow: "Caixa · #{@conta.nome}",
         title: "Extrato financeiro",
-        subtitle: label_mes.capitalize,
+        subtitle: (@filtro_datas ? "#{label_mes.capitalize} · #{l(@de, format: "%d/%m")} a #{l(@ate, format: "%d/%m")}" : label_mes.capitalize),
         toolbar: toolbar,
         actions: actions %>
 

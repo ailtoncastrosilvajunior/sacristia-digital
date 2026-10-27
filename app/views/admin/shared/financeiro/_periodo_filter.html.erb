@@ -1,4 +1,5 @@
-<%# locals: form_url, mes, ano, variant: :hero, id_prefix: "fin" %>
+<%# locals: form_url, mes, ano, variant: :hero, id_prefix: "fin", datas: false, de: nil, ate: nil, limpar: false %>
+<% datas = local_assigns[:datas] %>
 <% hero = variant.to_sym == :hero %>
 <% input_cls = hero ? "rounded-lg border border-white/20 bg-white/10 pl-3 pr-9 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400/40 focus:border-sky-300/50 cursor-pointer [&>option]:text-stone-900" : "rounded-lg border border-stone-300 bg-white pl-3 pr-9 py-2 text-sm font-semibold text-stone-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 cursor-pointer" %>
 <% btn_cls = hero ? "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg border border-white/25 bg-white/15 text-white hover:bg-white/20 transition-colors" : "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg bg-stone-800 text-white hover:bg-stone-700 transition-colors shadow-sm" %>
@@ -14,8 +15,22 @@
         options_for_select(((Date.current.year - 5)..(Date.current.year + 1)).to_a.reverse, ano),
         id: "#{id_prefix}_ano",
         class: "#{input_cls} min-w-[6.75rem] w-[6.75rem] tabular-nums" %>
+  <% if datas %>
+    <% ultimo_dia = Date.new(ano.to_i, mes.to_i, -1).day %>
+    <% dia_cls = "#{input_cls} !pl-3 !pr-2 w-[4.25rem] text-center tabular-nums" %>
+    <% lbl_cls = "text-[10px] font-bold uppercase tracking-wider #{hero ? "text-sky-200/80" : "text-stone-500"}" %>
+    <div class="inline-flex items-center gap-1.5">
+      <span class="<%= lbl_cls %>">Dias</span>
+      <input type="number" name="dia_de" required inputmode="numeric" min="1" max="<%= ultimo_dia %>" aria-label="Dia inicial" id="<%= id_prefix %>_dia_de" value="<%= local_assigns[:de]&.day || 1 %>" class="<%= dia_cls %>">
+      <span class="<%= lbl_cls %>">a</span>
+      <input type="number" name="dia_ate" required inputmode="numeric" min="1" max="<%= ultimo_dia %>" aria-label="Dia final" id="<%= id_prefix %>_dia_ate" value="<%= local_assigns[:ate]&.day || ultimo_dia %>" class="<%= dia_cls %>">
+    </div>
+  <% end %>
   <button type="submit" class="<%= btn_cls %>">
     <svg class="w-4 h-4 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
     Aplicar
   </button>
+  <% if datas && local_assigns[:limpar] %>
+    <%= link_to "Limpar", url_for(form_url) + "?" + { mes: mes, ano: ano }.to_query, class: "text-xs font-semibold #{hero ? "text-sky-200 hover:text-white" : "text-sky-700 hover:underline"}", title: "Voltar ao mês inteiro" %>
+  <% end %>
 <% end %>

@@ -1,0 +1,10 @@
+<%# locals: data (Date ou nil) %>
+<% tons = {
+  0 => { chip: "bg-amber-50 ring-amber-200 text-amber-900", abbr: "bg-amber-500 text-white" },
+  6 => { chip: "bg-indigo-50 ring-indigo-200 text-indigo-900", abbr: "bg-indigo-500 text-white" }
+} %>
+<% tom = data ? (tons[data.wday] || { chip: "bg-sky-50 ring-sky-200 text-sky-900", abbr: "bg-sky-600 text-white" }) : { chip: "bg-sky-50 ring-sky-200 text-sky-900", abbr: "bg-sky-600 text-white" } %>
+<span class="<%= data ? "inline-flex" : "hidden" %> items-center gap-1.5 rounded-full py-0.5 pl-0.5 pr-2.5 text-[11px] font-semibold ring-1 <%= tom[:chip] %>" data-evento-select-target="diaSemana">
+  <span class="rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider <%= tom[:abbr] %>" data-role="abbr"><%= data ? l(data, format: "%a").delete(".").upcase : "" %></span>
+  <span data-role="nome"><%= data ? l(data, format: "%A").capitalize : "" %></span>
+</span>
