@@ -21,7 +21,7 @@
             <th class="px-1 py-1.5 text-center w-8">M</th>
             <th class="px-1.5 py-1.5 text-right text-emerald-200/90">Prev.</th>
             <th class="px-1.5 py-1.5 text-right text-indigo-200/90">Saldo</th>
-            <th class="px-1 py-1.5 w-[3.25rem] text-center"></th>
+            <th class="px-1 py-1.5 min-w-[4.5rem] text-center"></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100/90">
@@ -48,6 +48,29 @@
                           <% end %>>
                     Pagar
                   </button>
+                <% elsif linha.lote_pagamento_esportula %>
+                  <div class="flex flex-col items-center gap-0.5">
+                    <% if linha.lancamento_caixa %>
+                      <%= esportula_link_lancamento_caixa(
+                            linha.lancamento_caixa,
+                            competencia_mensal_id: competencia.id,
+                            label: "Extrato"
+                          ) %>
+                    <% end %>
+                    <%= button_to estornar_lote_acumulado_admin_registros_esportula_index_path,
+                          method: :post,
+                          form: { class: "inline" },
+                          params: {
+                            competencia_mensal_id: competencia.id,
+                            lote_pagamento_esportula_id: linha.lote_pagamento_esportula.id
+                          },
+                          class: "inline-flex min-w-[2.75rem] items-center justify-center rounded-md border border-red-200 bg-red-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-red-800 hover:bg-red-100 transition-colors",
+                          data: {
+                            turbo_confirm: "Estornar o pagamento acumulado de #{linha.nome}? Todas as espórtulas deste destinatário voltarão a pendente e o lançamento de caixa será removido."
+                          } do %>
+                      Estornar
+                    <% end %>
+                  </div>
                 <% elsif linha.lancamento_caixa %>
                   <%= esportula_link_lancamento_caixa(
                         linha.lancamento_caixa,

@@ -53,6 +53,20 @@ module Admin
         alert: e.message
     end
 
+    def estornar_lote_acumulado
+      @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
+      lote = @competencia.lote_pagamento_esportulas.pagos.find(params[:lote_pagamento_esportula_id])
+      nome = lote.nome_destinatario
+      LotePagamentoEsportulaService.estornar_lote!(lote)
+
+      redirect_to competencia_admin_registros_esportula_index_path(competencia_mensal_id: @competencia.id),
+        notice: "Estorno registrado — #{nome}. Espórtulas voltaram a pendente."
+    rescue ArgumentError, ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e
+      msg = e.is_a?(ActiveRecord::RecordNotFound) ? "Lote não encontrado." : e.message
+      redirect_to competencia_admin_registros_esportula_index_path(competencia_mensal_id: params[:competencia_mensal_id]),
+        alert: msg
+    end
+
     def toggle_evento_pago
       evento = EventoEscala.find(params[:evento_escala_id])
       pago = params[:pago].to_s == "1"

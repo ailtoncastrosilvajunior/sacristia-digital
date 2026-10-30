@@ -67,6 +67,7 @@ Rails.application.routes.draw do
         get :competencia
         patch :toggle_evento_pago
         post :pagar_lote_acumulado
+        post :estornar_lote_acumulado
       end
     end
     resources :plano_contas, path: "plano-contas", except: [:destroy]

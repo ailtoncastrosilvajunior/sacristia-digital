@@ -5,26 +5,22 @@ class LotePagamentoEsportulaService
     reg = RegistroEsportula.find_by(evento_escala_id: evento.id)
     return unless reg&.status == "pago"
 
-    if reg.lote_pagamento_esportula_id.blank?
-      RegistroEsportula.sync_pago_from_evento!(evento, pago: false)
-      return
+    if reg.lote_pagamento_esportula_id.present?
+      raise ArgumentError, "Espórtula paga em lote — estorne no card Destinatários acumulados."
     end
 
-    lote = reg.lote_pagamento_esportula
-    LotePagamentoEsportula.transaction do
-      lote.lote_pagamento_esportula_eventos.where(evento_escala_id: evento.id).destroy_all
-      reg.update!(status: "pendente", lote_pagamento_esportula_id: nil)
+    RegistroEsportula.sync_pago_from_evento!(evento, pago: false)
+  end
 
-      restantes = lote.evento_escalas.reload
-      if restantes.empty?
-        lote.lancamento_caixa&.destroy
-        lote.update!(status: "pendente", valor: 0)
-      else
-        novo_valor = restantes.sum { |e| e.valor_esportula.to_d }
-        lote.update!(valor: novo_valor, status: "pago")
-        lote.lancamento_caixa&.destroy
-        Financeiro::EsportulaLancamentoService.sync_from_lote!(lote)
+  def self.estornar_lote!(lote)
+    raise ArgumentError, "Lote não está pago." unless lote.pago?
+
+    LotePagamentoEsportula.transaction do
+      lote.registro_esportulas.find_each do |reg|
+        reg.update!(status: "pendente", lote_pagamento_esportula_id: nil)
       end
+      lote.lancamento_caixa&.destroy!
+      lote.destroy!
     end
   end
 

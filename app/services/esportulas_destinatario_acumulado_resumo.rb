@@ -3,7 +3,7 @@
 class EsportulasDestinatarioAcumuladoResumo
   Linha = Struct.new(
     :destinatario_tipo, :destinatario_esportula, :destinatario_sacerdote,
-    :nome, :missas, :previsto, :realizado, :saldo, :lancamento_caixa,
+    :nome, :missas, :previsto, :realizado, :saldo, :lancamento_caixa, :lote_pagamento_esportula,
     keyword_init: true
   )
 
@@ -38,6 +38,7 @@ class EsportulasDestinatarioAcumuladoResumo
       saldo = previsto - realizado
       missas = evs.count { |e| e.tipo_servico.nome.to_s.match?(/missa/i) }
       lancamento = lancamento_caixa_acumulado(evs, saldo: saldo, previsto: previsto)
+      lote = lote_pagamento_acumulado(evs, saldo: saldo, previsto: previsto)
 
       Linha.new(
         destinatario_tipo: sample.esportula_destinatario_tipo == "instituicao" ? "instituicao" : "sacerdote",
@@ -48,7 +49,8 @@ class EsportulasDestinatarioAcumuladoResumo
         previsto: previsto,
         realizado: realizado,
         saldo: saldo,
-        lancamento_caixa: lancamento
+        lancamento_caixa: lancamento,
+        lote_pagamento_esportula: lote
       )
     end
 
@@ -65,5 +67,11 @@ class EsportulasDestinatarioAcumuladoResumo
     return nil unless previsto.positive? && saldo.zero?
 
     evs.lazy.filter_map(&:esportula_lancamento_caixa).first
+  end
+
+  def lote_pagamento_acumulado(evs, saldo:, previsto:)
+    return nil unless previsto.positive? && saldo.zero?
+
+    evs.lazy.filter_map { |ev| ev.registro_esportula_vinculado&.lote_pagamento_esportula }.find(&:pago?)
   end
 end

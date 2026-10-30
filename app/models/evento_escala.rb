@@ -76,6 +76,11 @@ class EventoEscala < ApplicationRecord
     registro_esportula_vinculado&.status == "pago"
   end
 
+  def esportula_paga_em_lote?
+    reg = registro_esportula_vinculado
+    reg&.status == "pago" && reg.lote_pagamento_esportula_id.present?
+  end
+
   def esportula_lancamento_caixa
     reg = registro_esportula_vinculado
     return nil unless reg&.status == "pago"
