@@ -43,7 +43,7 @@ function aggregate(events) {
     previsto,
     previstoImediato,
     realizado,
-    saldo: previstoImediato - realizado
+    saldo: previsto - realizado
   }
 }
 
@@ -189,7 +189,7 @@ export default class extends Controller {
   }
 
   paintRow(row, stats) {
-    const quitado = stats.saldo === 0 && stats.previstoImediato > 0
+    const quitado = stats.saldo === 0 && stats.previsto > 0
     const saldoCell = row.querySelector("[data-esportula-resumo-saldo]")
     if (saldoCell) {
       saldoCell.textContent = fmt.format(stats.saldo)

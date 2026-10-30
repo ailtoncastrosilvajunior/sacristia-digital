@@ -55,7 +55,7 @@ module Admin
           confissao: flags[:confissao],
           previsto: valor,
           previsto_imediato: imediato ? valor : 0,
-          realizado: imediato && ev.esportula_paga? ? valor : 0
+          realizado: ev.esportula_paga? ? valor : 0
         }
       end
     end

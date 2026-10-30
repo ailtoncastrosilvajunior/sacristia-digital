@@ -45,7 +45,6 @@ class EsportulasCompetenciaResumo
           AND e2.sacerdote_id = evento_escala.sacerdote_id
           AND e2.status <> 'cancelado'
           AND e2.valor_esportula > 0
-          AND e2.esportula_modo = 'imediato'
       ), 0) AS realizado
     SQL
 
@@ -84,7 +83,7 @@ class EsportulasCompetenciaResumo
         previsto: previsto,
         previsto_imediato: previsto_imediato,
         realizado: realizado,
-        saldo: previsto_imediato - realizado
+        saldo: previsto - realizado
       }
     end.sort_by { |l| l[:sacerdote].nome.to_s.downcase }
   end
