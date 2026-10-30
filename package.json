@@ -1,0 +1,8 @@
+{
+  "name": "sacristia-digital",
+  "private": true,
+  "description": "Puppeteer para Grover (cartaz liturgia → PNG)",
+  "dependencies": {
+    "puppeteer": "23.11.1"
+  }
+}
