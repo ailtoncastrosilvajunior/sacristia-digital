@@ -52,7 +52,8 @@
       <td class="px-2 py-1.5 text-right tabular-nums whitespace-nowrap align-middle text-[13px] font-medium <%= linha.valor_com_sinal.positive? ? "text-emerald-700" : "text-red-700" %>">
         <div class="inline-flex items-center justify-end gap-0.5 max-w-full">
           <span class="opacity-0 group-hover/row:opacity-100 focus-within:opacity-100 transition-opacity flex items-center shrink-0">
-            <%= link_to admin_lancamentos_caixa_path(lc),
+            <% drawer_opts = return_to.present? ? { return_to: return_to } : {} %>
+            <%= link_to admin_lancamentos_caixa_path(lc, **drawer_opts),
                   data: { turbo_frame: "lancamento_drawer" },
                   title: "Detalhes",
                   aria: { label: "Detalhes do lançamento ##{lc.id}" },

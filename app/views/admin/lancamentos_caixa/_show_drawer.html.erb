@@ -1,6 +1,8 @@
 <%# Detalhes do lançamento no drawer lateral (turbo-frame lancamento_drawer). %>
 <turbo-frame id="lancamento_drawer" data-action="turbo:frame-load->drawer#open" class="flex flex-col h-full min-h-0 bg-white">
   <% lc = @lancamento %>
+  <% volta = @return_to.presence %>
+  <% lote_esportula = lc.lote_pagamento_esportula %>
   <% cor = lc.entrada? ? "#059669" : "#dc2626" %>
   <% campo = "rounded-xl border border-stone-200/90 bg-gradient-to-b from-white to-stone-50/90 px-3 py-2.5 shadow-sm" %>
   <% rotulo = "text-[10px] font-bold uppercase tracking-wider text-stone-400" %>
@@ -24,7 +26,11 @@
         </div>
         <div class="mt-1 flex flex-wrap items-center gap-2">
           <%= badge_natureza_lancamento(lc.natureza) %>
-          <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full border border-stone-200 bg-stone-50 text-stone-600"><%= lc.status %></span>
+          <% if lc.status == "confirmado" %>
+            <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800">Confirmado</span>
+          <% else %>
+            <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide rounded-full border border-stone-200 bg-stone-100 text-stone-600">Estornado</span>
+          <% end %>
         </div>
         <p class="mt-2 text-lg font-bold tabular-nums <%= lc.entrada? ? "text-emerald-700" : "text-red-700" %>">
           <%= formatar_moeda(lc.valor_com_sinal) %>
@@ -91,10 +97,30 @@
     </div>
   </div>
 
-  <footer class="shrink-0 border-t border-stone-200 px-4 py-3 sm:px-5 flex flex-wrap gap-2 bg-stone-50/80">
-    <%= link_to "Abrir página completa", admin_lancamentos_caixa_path(lc), class: "inline-flex flex-1 min-w-[8rem] items-center justify-center px-3 py-2.5 rounded-xl border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 text-sm font-semibold transition-colors", data: { turbo_frame: "_top" } %>
-    <% if lc.status == "confirmado" %>
-      <%= link_to "Editar", edit_admin_lancamentos_caixa_path(lc), class: "inline-flex items-center justify-center px-3 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition-colors", data: { turbo_frame: "_top" } %>
+  <footer class="shrink-0 border-t border-stone-200 px-4 py-3 sm:px-5 space-y-2 bg-stone-50/80">
+    <% if lote_esportula.present? && lc.status == "confirmado" %>
+      <p class="text-[10px] text-amber-900 leading-snug bg-amber-50 border border-amber-200/80 rounded-lg px-2.5 py-1.5">
+        Lançamento de <strong>lote acumulado</strong>. Estornar aqui só marca o caixa; para desfazer o pagamento na escala, use <strong>Estornar lote</strong> em Espórtulas.
+      </p>
     <% end %>
+    <div class="flex flex-wrap gap-2">
+      <%= link_to "Abrir página completa",
+            admin_lancamentos_caixa_path(lc, **(volta ? { return_to: volta } : {})),
+            class: "inline-flex flex-1 min-w-[8rem] items-center justify-center px-3 py-2.5 rounded-xl border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 text-sm font-semibold transition-colors",
+            data: { turbo_frame: "_top" } %>
+      <% if lc.status == "confirmado" %>
+        <% edit_opts = volta ? { return_to: volta } : {} %>
+        <%= link_to "Editar",
+              edit_admin_lancamentos_caixa_path(lc, **edit_opts),
+              class: "inline-flex flex-1 min-w-[6rem] items-center justify-center px-3 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition-colors",
+              data: { turbo_frame: "_top" } %>
+        <% estorno_confirm = lote_esportula.present? ? "Estornar este lançamento no caixa? O lote de espórtulas continuará marcado como pago até você estornar o lote." : "Estornar este lançamento? Ele deixa de entrar no extrato e nos totais." %>
+        <%= button_to "Estornar",
+              estornar_admin_lancamentos_caixa_path(lc, **(volta ? { return_to: volta } : {})),
+              method: :post,
+              class: "inline-flex flex-1 min-w-[6rem] items-center justify-center px-3 py-2.5 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 text-sm font-semibold transition-colors",
+              data: { turbo_confirm: estorno_confirm, turbo_frame: "_top" } %>
+      <% end %>
+    </div>
   </footer>
 </turbo-frame>

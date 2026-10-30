@@ -1,0 +1,37 @@
+<%# locals: resumo (Esportulas::ConferenciaMesService::ResumoAcumulado) %>
+<% colunas = [
+  [:previsto, "Previsto", "Soma dos eventos acumulado na competência", resumo.previsto, :escala],
+  [:pago, "Pago", "Lotes com status pago", resumo.pago, :escala],
+  [:caixa_21, "2.1 caixa", "Itens 2.1 em LC confirmado dos lotes pagos", resumo.caixa_21, :caixa],
+  [:delta, "Δ", "2.1 − previsto", resumo.delta, :delta]
+] %>
+<div class="overflow-x-auto rounded-xl border border-violet-200/80 ring-1 ring-violet-100/80">
+  <table class="w-full text-[10px] sm:text-[11px] border-collapse">
+    <thead>
+      <tr class="bg-violet-50/90 text-stone-600">
+        <th class="border-b border-violet-200/80 px-3 py-1.5 text-left font-bold uppercase tracking-wide min-w-[5rem]">
+          Acumulado
+        </th>
+        <% colunas.each do |_key, label, subtitulo, _valor, tipo| %>
+          <th class="border-b border-violet-200/80 px-2 py-1.5 text-right font-bold min-w-[4.5rem] <%= tipo == :delta ? 'bg-amber-100/60 text-amber-950' : '' %>"
+              title="<%= subtitulo %>">
+            <%= label %>
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="bg-white">
+        <td class="border-r border-violet-100 px-3 py-2 text-[11px] font-semibold text-violet-950">
+          Total do mês
+        </td>
+        <% colunas.each do |key, _label, _sub, valor, tipo| %>
+          <% linha = Esportulas::ConferenciaMesService::Linha.new(key: key, tipo: tipo, label: "", subtitulo: "", valores_por_dia: {}, total: 0) %>
+          <td class="px-2 py-2 text-right tabular-nums <%= tipo == :delta ? 'bg-amber-50/40' : '' %>">
+            <%= esportula_conferencia_celula(valor, linha: linha, total: true) %>
+          </td>
+        <% end %>
+      </tr>
+    </tbody>
+  </table>
+</div>

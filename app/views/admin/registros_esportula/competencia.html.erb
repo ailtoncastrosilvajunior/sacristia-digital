@@ -1,6 +1,6 @@
 <% content_for :title, "Espórtulas — #{@competencia&.label || 'Competência'}" %>
 
-<div class="space-y-5">
+<div class="space-y-5" data-controller="modal">
   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
     <div>
       <%= link_to "← Dashboard", admin_root_path(competencia_mensal_id: @competencia&.id), class: "text-sm text-stone-500 hover:text-stone-700 mb-2 inline-block" %>
@@ -32,9 +32,29 @@
             class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-800 text-white text-sm font-semibold hover:bg-stone-700 transition-colors" do %>
           Todos os registros
         <% end %>
+        <%= link_to conferencia_caixa_admin_registros_esportula_index_path(competencia_mensal_id: @competencia.id),
+              class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-sky-200 bg-sky-50 text-sky-900 text-sm font-semibold hover:bg-sky-100 transition-colors",
+              data: { turbo_frame: "esportula_conferencia_caixa" } do %>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Conferir caixa
+        <% end %>
       <% end %>
     </div>
   </div>
+
+  <% if @competencia.present? %>
+    <div data-modal-target="backdrop"
+         class="fixed inset-0 z-[60] hidden items-center justify-center bg-stone-900/50 p-3 sm:p-6"
+         data-action="click->modal#closeBackground">
+      <div class="flex w-full max-w-[min(96vw,72rem)] justify-center" data-action="click->modal#stopPropagation">
+        <%= turbo_frame_tag "esportula_conferencia_caixa",
+              data: {
+                modal_target: "frame",
+                action: "turbo:frame-load->modal#show turbo:frame-render->modal#show"
+              } %>
+      </div>
+    </div>
+  <% end %>
 
   <% if @competencia.nil? %>
     <div class="rounded-2xl border border-dashed border-stone-300 bg-white p-12 text-center">

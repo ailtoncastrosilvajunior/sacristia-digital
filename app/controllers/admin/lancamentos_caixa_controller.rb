@@ -92,7 +92,10 @@ module Admin
 
     def estornar
       @lancamento.estornar!(user: current_user)
-      redirect_to admin_lancamentos_caixa_path(@lancamento), notice: "Lançamento estornado."
+      redirect_with_return_to(
+        default: admin_lancamentos_caixa_path(@lancamento),
+        notice: "Lançamento estornado."
+      )
     end
 
     private

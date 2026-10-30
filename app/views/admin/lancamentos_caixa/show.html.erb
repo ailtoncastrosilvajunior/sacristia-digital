@@ -51,7 +51,11 @@
         <div class="flex flex-wrap sm:flex-col gap-2 shrink-0 sm:items-stretch sm:min-w-[9rem]">
           <% if lc.status == "confirmado" %>
             <%= link_to "Editar", edit_admin_lancamentos_caixa_path(lc), class: "inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition-colors shadow-sm" %>
-            <%= button_to "Estornar", estornar_admin_lancamentos_caixa_path(lc), method: :post, class: "inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 text-sm font-semibold transition-colors", data: { turbo_confirm: "Estornar este lançamento?" } %>
+            <%= button_to "Estornar",
+                  estornar_admin_lancamentos_caixa_path(lc, **(@return_to.present? ? { return_to: @return_to } : {})),
+                  method: :post,
+                  class: "inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 text-sm font-semibold transition-colors",
+                  data: { turbo_confirm: "Estornar este lançamento? Ele deixa de entrar no extrato e nos totais." } %>
           <% end %>
           <%= link_to volta, class: btn_sec do %>
             <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>

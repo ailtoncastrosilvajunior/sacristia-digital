@@ -69,6 +69,30 @@ module Admin
       nome.sub(/\APe\.\s*/i, "").split(/\s+/).first.presence || nome.truncate(12)
     end
 
+    def esportula_conferencia_celula(valor, linha:, total: false)
+      v = valor.to_d
+      if v.zero?
+        return tag.span("—", class: "text-stone-300 select-none")
+      end
+
+      texto = number_to_currency(v, precision: 0)
+      classes = ["whitespace-nowrap"]
+      if linha.tipo == :delta
+        classes << (total ? "font-bold" : "font-medium")
+        classes << (v.negative? ? "text-red-700" : "text-amber-800")
+        classes << "rounded px-0.5 bg-amber-100/90 ring-1 ring-amber-200/80" unless total
+      elsif linha.tipo == :caixa
+        classes << "font-medium text-sky-900"
+      elsif linha.tipo == :escala
+        classes << "font-medium text-emerald-900"
+      else
+        classes << "font-medium text-stone-800"
+      end
+      classes << "font-bold" if total && linha.tipo != :delta
+
+      tag.span(texto, class: classes.join(" "))
+    end
+
     def esportula_link_lancamento_caixa(lancamento, competencia_mensal_id: nil, label: nil)
       return if lancamento.blank?
 

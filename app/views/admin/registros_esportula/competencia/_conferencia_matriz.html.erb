@@ -1,0 +1,50 @@
+<%# locals: dias, linhas — dias nas linhas, métricas nas colunas %>
+<div class="overflow-x-auto rounded-xl border border-stone-200/90 ring-1 ring-stone-100">
+  <table class="w-full text-[10px] sm:text-[11px] border-collapse min-w-max">
+    <thead>
+      <tr class="bg-stone-100/95 text-stone-600">
+        <th class="sticky left-0 z-20 border-b border-r border-stone-200 bg-stone-100 px-2 py-1.5 text-left font-bold uppercase tracking-wide min-w-[3.25rem]">
+          Dia
+        </th>
+        <% colunas = { previsto: "Previsto", pago: "Pago", caixa_21: "2.1 caixa", delta: "Δ" } %>
+        <% linhas.each do |linha| %>
+          <th class="border-b border-stone-200 px-2 py-1.5 text-right font-bold min-w-[4.5rem] max-w-[7rem] <%= linha.tipo == :delta ? 'bg-amber-100/60 text-amber-950' : '' %>"
+              title="<%= linha.subtitulo %>">
+            <span class="block leading-tight"><%= colunas.fetch(linha.key, linha.label) %></span>
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-stone-100">
+      <% dias.each do |dia| %>
+        <% fim_semana = dia.saturday? || dia.sunday? %>
+        <% valores_dia = linhas.map { |l| l.valores_por_dia[dia].to_d } %>
+        <% dia_vazio = valores_dia.all?(&:zero?) %>
+        <tr class="<%= fim_semana ? 'bg-stone-50/90' : 'bg-white' %> <%= 'opacity-60' if dia_vazio %> hover:bg-sky-50/40">
+          <td class="sticky left-0 z-10 border-r border-stone-100 bg-inherit px-2 py-1 align-middle whitespace-nowrap">
+            <span class="font-bold tabular-nums text-stone-900"><%= format("%02d", dia.day) %></span>
+            <span class="text-[9px] font-semibold uppercase text-stone-500 ml-0.5"><%= l(dia, format: "%a") %></span>
+          </td>
+          <% linhas.each do |linha| %>
+            <% valor = linha.valores_por_dia[dia].to_d %>
+            <td class="px-2 py-1 text-right tabular-nums align-middle <%= linha.tipo == :delta ? 'bg-amber-50/30' : '' %>">
+              <%= esportula_conferencia_celula(valor, linha: linha) %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr class="bg-stone-200/70 font-bold text-stone-900 border-t border-stone-300">
+        <td class="sticky left-0 z-10 border-r border-stone-300 bg-stone-200/90 px-2 py-1.5 uppercase text-[9px] tracking-wide">
+          Total
+        </td>
+        <% linhas.each do |linha| %>
+          <td class="px-2 py-1.5 text-right tabular-nums">
+            <%= esportula_conferencia_celula(linha.total, linha: linha, total: true) %>
+          </td>
+        <% end %>
+      </tr>
+    </tfoot>
+  </table>
+</div>

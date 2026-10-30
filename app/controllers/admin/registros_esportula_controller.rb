@@ -20,6 +20,12 @@ module Admin
       load_esportulas_competencia_dados(@competencia)
     end
 
+    def conferencia_caixa
+      @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
+      @conferencia = Esportulas::ConferenciaMesService.call(@competencia)
+      render layout: false
+    end
+
     def pagar_lote_acumulado
       @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
       tipo = params[:destinatario_tipo]

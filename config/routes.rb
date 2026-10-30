@@ -65,6 +65,7 @@ Rails.application.routes.draw do
     resources :registros_esportula, path: "esportulas" do
       collection do
         get :competencia
+        get :conferencia_caixa
         patch :toggle_evento_pago
         post :pagar_lote_acumulado
         post :estornar_lote_acumulado
