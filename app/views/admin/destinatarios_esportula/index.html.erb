@@ -1,0 +1,61 @@
+<% content_for :title, "Destinatários de espórtula" %>
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <%= link_to competencia_admin_registros_esportula_index_path,
+            class: "inline-flex items-center gap-1.5 mb-2 px-3 py-1.5 rounded-lg border border-stone-300 bg-white text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors" do %>
+        <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Espórtulas
+      <% end %>
+      <h1 class="text-2xl font-semibold text-stone-800">Instituições / destinatários</h1>
+      <p class="text-sm text-stone-500 mt-1">Pagamentos acumulados no fim do mês (ex.: Padres Eudistas).</p>
+    </div>
+    <%= link_to new_admin_destinatarios_esportula_path,
+          class: "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-600 hover:bg-slate-700 text-white text-sm font-semibold transition-colors shadow-sm" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Novo destinatário
+    <% end %>
+  </div>
+
+  <div class="rounded-xl border border-stone-200 bg-white overflow-hidden shadow-sm">
+    <table class="w-full text-sm">
+      <thead class="bg-stone-50 text-left text-xs uppercase tracking-wide text-stone-500">
+        <tr>
+          <th class="px-4 py-3">Nome</th>
+          <th class="px-4 py-3">Status</th>
+          <th class="px-4 py-3 text-right">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-stone-100">
+        <% @destinatarios.each do |d| %>
+          <tr class="hover:bg-stone-50/80">
+            <td class="px-4 py-3 font-medium text-stone-800"><%= d.nome %></td>
+            <td class="px-4 py-3">
+              <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full <%= d.ativo? ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-600' %>">
+                <%= d.ativo? ? "Ativo" : "Inativo" %>
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center justify-end gap-2">
+                <%= link_to edit_admin_destinatarios_esportula_path(d),
+                      class: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 bg-white text-xs font-semibold text-stone-700 hover:bg-sky-50 hover:border-sky-200 hover:text-sky-800 transition-colors" do %>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  Editar
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @destinatarios.empty? %>
+      <div class="px-4 py-12 text-center">
+        <p class="text-stone-500 mb-4">Nenhum destinatário cadastrado.</p>
+        <%= link_to new_admin_destinatarios_esportula_path,
+              class: "inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-600 hover:bg-slate-700 text-white text-sm font-semibold" do %>
+          Cadastrar destinatário
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

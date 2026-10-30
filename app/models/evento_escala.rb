@@ -7,6 +7,12 @@ class EventoEscala < ApplicationRecord
   belongs_to :tipo_servico
   belongs_to :sacerdote, optional: true
   belongs_to :plantao_periodo, optional: true
+  belongs_to :calendario_base, optional: true
+  belongs_to :esportula_destinatario_sacerdote, class_name: "Sacerdote", optional: true
+  belongs_to :destinatario_esportula, class_name: "DestinatarioEsportula", optional: true
+
+  ESPORTULA_MODOS = %w[imediato acumulado].freeze
+  ESPORTULA_DESTINATARIO_TIPOS = %w[sacerdote instituicao].freeze
 
   has_many :escala_ministros, dependent: :destroy
   has_many :ministros, through: :escala_ministros
@@ -16,6 +22,8 @@ class EventoEscala < ApplicationRecord
   has_one :ministro_adoracao, through: :escala_ministro_adoracao, source: :ministro
   has_many :registro_esportulas, dependent: :destroy
   has_many :lancamentos_caixa, dependent: :nullify
+  has_one :lote_pagamento_esportula_evento, dependent: :destroy
+  has_one :lote_pagamento_esportula, through: :lote_pagamento_esportula_evento
 
   TIPOS_ESCALA = %w[ordinaria extra].freeze
   STATUS = %w[pendente confirmado concluido cancelado].freeze
@@ -25,6 +33,8 @@ class EventoEscala < ApplicationRecord
   validates :quantidade_ministros, numericality: { greater_than_or_equal_to: 0 }
   validates :tipo_escala, inclusion: { in: TIPOS_ESCALA }
   validates :status, inclusion: { in: STATUS }
+  validates :esportula_modo, inclusion: { in: ESPORTULA_MODOS }
+  validates :esportula_destinatario_tipo, inclusion: { in: ESPORTULA_DESTINATARIO_TIPOS }
   validate :plantao_apenas_para_extra
 
   # Preenche a escala do evento com os ministros do bloco de plantão (cópia).
@@ -64,6 +74,47 @@ class EventoEscala < ApplicationRecord
 
   def esportula_paga?
     registro_esportula_vinculado&.status == "pago"
+  end
+
+  def esportula_lancamento_caixa
+    reg = registro_esportula_vinculado
+    return nil unless reg&.status == "pago"
+
+    if reg.lote_pagamento_esportula_id.present?
+      reg.lote_pagamento_esportula&.lancamento_caixa
+    else
+      reg.lancamento_caixa
+    end
+  end
+
+  def esportula_imediato?
+    esportula_modo == "imediato"
+  end
+
+  def esportula_acumulado?
+    esportula_modo == "acumulado"
+  end
+
+  def esportula_substituto_no_slot?
+    return false if calendario_base_id.blank? || calendario_base.blank?
+
+    calendario_base.sacerdote_id.present? && sacerdote_id != calendario_base.sacerdote_id
+  end
+
+  def esportula_destinatario_nome
+    if esportula_destinatario_tipo == "instituicao"
+      destinatario_esportula&.nome || "Instituição"
+    else
+      esportula_destinatario_sacerdote&.nome || sacerdote&.nome || "—"
+    end
+  end
+
+  def esportula_pagamento_chave_destinatario
+    if esportula_destinatario_tipo == "instituicao"
+      ["instituicao", destinatario_esportula_id]
+    else
+      ["sacerdote", esportula_destinatario_sacerdote_id]
+    end
   end
 
   # Eventos com 0 ministros (ex.: confissão) não entram na escala de ministros.

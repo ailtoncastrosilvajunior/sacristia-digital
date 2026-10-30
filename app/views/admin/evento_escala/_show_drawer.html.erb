@@ -75,6 +75,12 @@
           <%= ev.valor_esportula.present? ? number_to_currency(ev.valor_esportula, unit: "R$ ", separator: ",", delimiter: ".") : "—" %>
         </dd>
       </div>
+      <div class="<%= campo %> col-span-2 sm:col-span-1">
+        <dt class="<%= rotulo %>">Pagamento</dt>
+        <dd class="<%= valor %> text-xs leading-snug">
+          <%= esportula_modo_rotulo(ev.esportula_modo) %> · <%= ev.esportula_destinatario_nome %>
+        </dd>
+      </div>
       <% end %>
       <% if ev.plantao_periodo.present? %>
       <div class="<%= campo %> <%= mostrar_esportula? ? '' : 'col-span-2' %>">

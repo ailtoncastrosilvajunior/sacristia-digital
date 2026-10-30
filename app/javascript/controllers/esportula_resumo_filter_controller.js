@@ -27,11 +27,13 @@ function aggregate(events) {
   let missas = 0
   let confissoes = 0
   let previsto = 0
+  let previstoImediato = 0
   let realizado = 0
   for (const e of events) {
     if (e.missa) missas += 1
     if (e.confissao) confissoes += 1
     previsto += Number(e.previsto) || 0
+    previstoImediato += Number(e.previsto_imediato) || 0
     realizado += Number(e.realizado) || 0
   }
   return {
@@ -39,8 +41,9 @@ function aggregate(events) {
     confissoes,
     total_servicos: events.length,
     previsto,
+    previstoImediato,
     realizado,
-    saldo: previsto - realizado
+    saldo: previstoImediato - realizado
   }
 }
 
@@ -186,7 +189,7 @@ export default class extends Controller {
   }
 
   paintRow(row, stats) {
-    const quitado = stats.saldo === 0 && stats.previsto > 0
+    const quitado = stats.saldo === 0 && stats.previstoImediato > 0
     const saldoCell = row.querySelector("[data-esportula-resumo-saldo]")
     if (saldoCell) {
       saldoCell.textContent = fmt.format(stats.saldo)

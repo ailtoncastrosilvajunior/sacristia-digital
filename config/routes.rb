@@ -47,16 +47,26 @@ Rails.application.routes.draw do
     resources :liturgia_dias, path: "liturgia", only: [:index, :show, :edit, :update] do
       collection { post :buscar }
       member do
+        get :cartaz
+        post :gerar_cartaz
         post :validar
         post :reabrir
         post :sincronizar
         delete :remover_imagem
       end
     end
+    resources :igmr_paragrafos, path: "igmr", only: %i[index new create edit update] do
+      collection do
+        get :importar
+        post :importar
+      end
+    end
+    resources :destinatarios_esportula, path: "destinatarios-esportula", except: [:show, :destroy]
     resources :registros_esportula, path: "esportulas" do
       collection do
         get :competencia
         patch :toggle_evento_pago
+        post :pagar_lote_acumulado
       end
     end
     resources :plano_contas, path: "plano-contas", except: [:destroy]

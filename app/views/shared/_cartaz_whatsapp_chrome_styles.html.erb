@@ -1,0 +1,93 @@
+<style>
+  :root {
+    --cartaz-navy: #0c2340;
+    --cartaz-muted: #5a6b7d;
+  }
+  * { box-sizing: border-box; }
+  .cartaz-body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 50% 0%, #334155 0%, #0f172a 55%, #020617 100%);
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0 2.5rem;
+  }
+  .cartaz-toolbar {
+    width: 100%;
+    max-width: 420px;
+    padding: 0 1rem 1.25rem;
+  }
+  .cartaz-toolbar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.65rem;
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+  .cartaz-toolbar-link {
+    color: var(--cartaz-navy);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .cartaz-toolbar-link:hover { text-decoration: underline; }
+  .cartaz-toolbar-btn,
+  .cartaz-toolbar-inner input[type="submit"] {
+    border: none;
+    background: var(--cartaz-navy);
+    color: #fff;
+    font-weight: 700;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+  }
+  .cartaz-toolbar-btn:disabled,
+  .cartaz-toolbar-inner input[type="submit"]:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .cartaz-toolbar-btn--ghost {
+    background: #fff;
+    color: var(--cartaz-navy);
+    border: 2px solid var(--cartaz-navy);
+  }
+  .cartaz-toolbar-hint {
+    color: var(--cartaz-muted);
+    font-size: 0.72rem;
+    line-height: 1.45;
+    flex: 1 1 100%;
+  }
+  #cartaz-export-root {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 1rem;
+  }
+  .lm-preview-stage {
+    padding: 0.65rem;
+    border-radius: 28px;
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 24px 64px rgba(0, 0, 0, 0.55);
+  }
+  .lm-preview-wrap {
+    --lm-scale: min(0.72, calc((100vh - 220px) / 1024), calc((100vw - 48px) / 576));
+    width: calc(576px * var(--lm-scale));
+    height: calc(1024px * var(--lm-scale));
+    overflow: hidden;
+    border-radius: 18px;
+  }
+  .lm-preview-wrap .lm-canvas {
+    transform: scale(var(--lm-scale));
+    transform-origin: top left;
+    margin: 0;
+  }
+</style>

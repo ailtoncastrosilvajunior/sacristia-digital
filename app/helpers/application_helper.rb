@@ -48,4 +48,15 @@ module ApplicationHelper
                    data: { search_target: "filter" })
     end
   end
+
+  def esportula_modo_select_options
+    [
+      ["Imediato", "imediato"],
+      ["Acumulado (fim do mês)", "acumulado"]
+    ]
+  end
+
+  def esportula_modo_rotulo(modo)
+    modo.to_s == "acumulado" ? "Acumulado" : "Imediato"
+  end
 end

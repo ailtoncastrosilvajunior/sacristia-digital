@@ -10,7 +10,8 @@ class LiturgiaSincronizarJob < ApplicationJob
       data = inicio + i
       resposta = Liturgia::SincronizarService.call(data)
       if resposta.ok?
-        Rails.logger.info("[Liturgia] #{data}: #{resposta.status}")
+        detalhe = resposta.status == :validada_automaticamente ? " (validada automaticamente)" : ""
+        Rails.logger.info("[Liturgia] #{data}: #{resposta.status}#{detalhe}")
       else
         Rails.logger.warn("[Liturgia] #{data}: FALHOU - #{resposta.mensagem}")
       end

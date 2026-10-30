@@ -17,6 +17,7 @@ class LiturgiaDia < ApplicationRecord
   serialize :divergencias, type: Array, coder: JSON
 
   has_one_attached :imagem_santo
+  has_one_attached :cartaz_whatsapp
   belongs_to :validado_por, class_name: "User", optional: true
 
   validates :data, presence: true, uniqueness: true
@@ -41,6 +42,11 @@ class LiturgiaDia < ApplicationRecord
 
   def pode_validar?
     leituras.present? && santo_nome.present?
+  end
+
+  # Validada na busca automática (fontes concordaram); sem usuário humano em validado_por.
+  def validacao_automatica?
+    validada? && validado_por_id.nil?
   end
 
   def validar!(user)

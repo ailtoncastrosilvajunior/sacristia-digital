@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <%= render "shared/cartaz_whatsapp_chrome_styles" %>
     <%= yield :head %>
   </head>
   <body class="cartaz-body">
@@ -43,7 +44,7 @@
             link.click();
           }).finally(function () {
             btn.disabled = false;
-            btn.textContent = "Baixar PNG";
+            btn.textContent = btn.dataset.labelDefault || "Baixar preview";
           });
         });
 

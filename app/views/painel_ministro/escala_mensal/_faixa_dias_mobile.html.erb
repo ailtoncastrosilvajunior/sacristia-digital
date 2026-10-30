@@ -1,0 +1,32 @@
+<%# locals: competencia, por_data, dias_meus_celebracao, dias_meus_plantao, hoje — faixa horizontal só no celular %>
+<div data-escala-filtro-target="faixa" class="relative flex touch-pan-x gap-1.5 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] lg:hidden">
+  <% (competencia.periodo..competencia.periodo_fim).each do |d| %>
+    <% dia = por_data[d] %>
+    <% eh_hoje = d == hoje %>
+    <% meu_miss = dias_meus_celebracao.include?(d) %>
+    <% meu_plant = dias_meus_plantao.include?(d) %>
+    <% meu = meu_miss || meu_plant %>
+    <% tem_escala = dia.present? %>
+    <% titulo = [l(d, format: :long), (meu_miss ? "sua missa" : nil), (meu_plant ? "seu extra" : nil)].compact.join(" · ") %>
+    <% if tem_escala || meu_plant %>
+      <%= link_to "#dia-#{d.day}",
+            data: { escala_filtro_target: "faixaDia", action: "click->escala-filtro#irParaDia", dia: d.day, hoje: eh_hoje.to_s, meu: meu.to_s },
+            title: titulo,
+            class: "flex w-11 shrink-0 flex-col items-center rounded-xl py-1.5 ring-1 transition-shadow #{eh_hoje ? 'bg-sky-500 text-white ring-sky-500' : 'bg-white text-slate-900 ring-stone-200'}" do %>
+        <span class="text-[10px] font-bold uppercase <%= eh_hoje ? 'text-sky-100' : 'text-slate-500' %>"><%= I18n.t("date.abbr_day_names")[d.wday].first(3) %></span>
+        <span class="text-base font-extrabold tabular-nums leading-tight"><%= d.day %></span>
+        <span class="mt-0.5 flex h-2 items-center justify-center gap-0.5">
+          <% if meu_miss %><span class="h-1.5 w-1.5 rounded-full <%= eh_hoje ? 'bg-white' : 'bg-sky-600' %>"></span><% end %>
+          <% if meu_plant %><span class="h-1.5 w-1.5 rounded-full <%= eh_hoje ? 'bg-orange-200' : 'bg-orange-500' %>"></span><% end %>
+          <% if !meu && tem_escala %><span class="h-1 w-1 rounded-full <%= eh_hoje ? 'bg-sky-200' : 'bg-stone-400' %>"></span><% end %>
+        </span>
+      <% end %>
+    <% else %>
+      <span data-hoje="<%= eh_hoje %>" class="flex w-11 shrink-0 flex-col items-center rounded-xl py-1.5 <%= eh_hoje ? 'bg-sky-100 text-sky-800 ring-1 ring-sky-300' : 'text-slate-300' %>">
+        <span class="text-[10px] font-bold uppercase"><%= I18n.t("date.abbr_day_names")[d.wday].first(3) %></span>
+        <span class="text-base font-extrabold tabular-nums"><%= d.day %></span>
+        <span class="mt-0.5 h-2" aria-hidden="true"></span>
+      </span>
+    <% end %>
+  <% end %>
+</div>

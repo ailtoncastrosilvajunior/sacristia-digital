@@ -72,22 +72,38 @@
       <%# —— Santo —— %>
       <div role="tabpanel" id="panel-santo" data-tabs-target="panel" data-tabs-panel-value="santo" aria-labelledby="tab-santo" hidden class="p-4 sm:p-6">
         <div class="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-start">
-          <div class="flex flex-col items-center gap-3 sm:sticky sm:top-4">
-            <% if @liturgia_dia.imagem_santo.attached? %>
-              <%= image_tag url_for(@liturgia_dia.imagem_santo), class: "h-32 w-32 rounded-2xl object-cover ring-4 ring-stone-100 shadow-md border border-stone-200", alt: @liturgia_dia.santo_nome %>
-              <%= link_to "Remover imagem", remover_imagem_admin_liturgia_dia_path(@liturgia_dia),
-                    data: { turbo_method: :delete, turbo_confirm: "Remover a imagem do santo?" },
-                    class: "text-xs font-medium text-red-600 hover:text-red-800 hover:underline" %>
-            <% else %>
-              <div class="flex h-32 w-32 items-center justify-center rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50 text-center px-2">
-                <span class="text-xs text-stone-400">Sem imagem<br><span class="text-[10px]">(opcional)</span></span>
+          <div class="flex flex-col items-center gap-3 sm:sticky sm:top-4 w-full max-w-[11rem]"
+               data-controller="image-upload">
+            <%= f.file_field :imagem_santo,
+                  accept: "image/jpeg,image/png,image/webp",
+                  class: "hidden",
+                  data: { image_upload_target: "input", action: "change->image-upload#selected" } %>
+            <div data-image-upload-target="dropzone"
+                 data-action="click->image-upload#open keydown->image-upload#keydown dragover->image-upload#dragover dragleave->image-upload#dragleave drop->image-upload#drop"
+                 class="relative flex h-32 w-32 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50 text-center px-2 transition-colors hover:border-stone-400 hover:bg-stone-100/80"
+                 role="button" tabindex="0"
+                 aria-label="Selecionar ou arrastar imagem do santo">
+              <% preview_src = @liturgia_dia.imagem_santo.attached? ? url_for(@liturgia_dia.imagem_santo) : nil %>
+              <img data-image-upload-target="preview"
+                   <% if preview_src %>src="<%= preview_src %>"<% end %>
+                   alt="<%= @liturgia_dia.santo_nome %>"
+                   class="absolute inset-0 h-full w-full rounded-2xl object-cover ring-4 ring-stone-100 shadow-md border border-stone-200 <%= preview_src ? '' : 'hidden' %>">
+              <div data-image-upload-target="placeholder"
+                   class="text-xs text-stone-500 pointer-events-none <%= preview_src ? 'hidden' : '' %>">
+                Arraste aqui<br>ou clique<br><span class="text-[10px] text-stone-400">(opcional)</span>
               </div>
+            </div>
+            <button type="button" data-action="image-upload#open"
+                    class="inline-flex w-full cursor-pointer items-center justify-center rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-sm hover:bg-stone-50 transition-colors">
+              <%= @liturgia_dia.imagem_santo.attached? ? "Trocar imagem" : "Selecionar imagem" %>
+            </button>
+            <p class="text-[11px] text-stone-400 text-center leading-snug">JPG, PNG ou WebP · até 5 MB</p>
+            <p data-image-upload-target="status" class="hidden text-[11px] text-center leading-snug max-w-[11rem]"></p>
+            <% if @liturgia_dia.imagem_santo.attached? %>
+              <%= link_to "Remover imagem salva", remover_imagem_admin_liturgia_dia_path(@liturgia_dia),
+                    data: { turbo_method: :delete, turbo_confirm: "Remover a imagem do santo?" },
+                    class: "text-xs font-medium text-red-600 hover:text-red-800 hover:underline text-center" %>
             <% end %>
-            <label class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-sm hover:bg-stone-50 transition-colors w-full max-w-[8rem]">
-              <%= f.file_field :imagem_santo, accept: "image/jpeg,image/png,image/webp", class: "sr-only" %>
-              <span><%= @liturgia_dia.imagem_santo.attached? ? "Trocar" : "Enviar" %></span>
-            </label>
-            <p class="text-[11px] text-stone-400 text-center">JPG, PNG ou WebP · 5 MB</p>
           </div>
           <div class="space-y-4 min-w-0">
             <div class="<%= @liturgia_dia.santo_nome.blank? ? 'rounded-xl border border-amber-200 bg-amber-50/50 p-4' : '' %>">

@@ -20,10 +20,52 @@ module Admin
       load_esportulas_competencia_dados(@competencia)
     end
 
+    def pagar_lote_acumulado
+      @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
+      tipo = params[:destinatario_tipo]
+      data = params[:data_pagamento].presence&.then { |d| Date.parse(d) } || Date.current
+
+      lote = if tipo == "instituicao"
+               inst = DestinatarioEsportula.find(params[:destinatario_esportula_id])
+               LotePagamentoEsportulaService.registrar_pagamento!(
+                 competencia: @competencia,
+                 destinatario_tipo: "instituicao",
+                 destinatario_esportula: inst,
+                 data_pagamento: data,
+                 forma_pagamento: params[:forma_pagamento]
+               )
+             else
+               sacerdote = Sacerdote.find(params[:destinatario_sacerdote_id])
+               LotePagamentoEsportulaService.registrar_pagamento!(
+                 competencia: @competencia,
+                 destinatario_tipo: "sacerdote",
+                 destinatario_sacerdote: sacerdote,
+                 data_pagamento: data,
+                 forma_pagamento: params[:forma_pagamento]
+               )
+             end
+
+      load_esportulas_competencia_dados(@competencia)
+      redirect_to competencia_admin_registros_esportula_index_path(competencia_mensal_id: @competencia.id),
+        notice: "Pagamento registrado — #{lote.nome_destinatario}."
+    rescue ArgumentError, ActiveRecord::RecordInvalid => e
+      redirect_to competencia_admin_registros_esportula_index_path(competencia_mensal_id: params[:competencia_mensal_id]),
+        alert: e.message
+    end
+
     def toggle_evento_pago
       evento = EventoEscala.find(params[:evento_escala_id])
       pago = params[:pago].to_s == "1"
-      RegistroEsportula.sync_pago_from_evento!(evento, pago: pago)
+
+      if evento.esportula_acumulado?
+        if pago
+          raise ArgumentError, "Espórtula acumulada — use o card Destinatários acumulados para pagar."
+        end
+
+        LotePagamentoEsportulaService.desmarcar_evento!(evento)
+      else
+        RegistroEsportula.sync_pago_from_evento!(evento, pago: pago)
+      end
       preparar_resposta_toggle_evento!(evento)
 
       respond_to do |format|
@@ -92,6 +134,7 @@ module Admin
       @eventos = eventos_esportula_da_competencia(competencia)
       @resumo_eventos_map = helpers.esportula_resumo_eventos_map(@eventos)
       @resumo_por_sacerdote, @resumo_totais = EsportulasCompetenciaResumo.call(competencia)
+      @resumo_acumulado = EsportulasDestinatarioAcumuladoResumo.call(competencia)
     end
 
     def preparar_resposta_toggle_evento!(evento)
@@ -120,7 +163,10 @@ module Admin
     def eventos_esportula_da_competencia(competencia)
       lista = competencia.evento_escalas
         .nao_cancelados
-        .includes(:tipo_servico, :sacerdote, :registro_esportulas)
+        .includes(
+          :tipo_servico, :sacerdote, :destinatario_esportula, :calendario_base, :esportula_destinatario_sacerdote,
+          registro_esportulas: [:lancamento_caixa, { lote_pagamento_esportula: :lancamento_caixa }]
+        )
         .order(:data, :horario)
         .to_a
       lista.select { |e| e.valor_esportula.to_d.positive? }

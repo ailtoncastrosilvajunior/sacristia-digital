@@ -1,24 +1,32 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Escala do mês: filtra os dias (todos / minha escala) e leva a lista até o dia escolhido.
-// A lista do mês inteiro já vem na página; nada aqui consulta o servidor.
+// Celular: faixa fixa no topo + scroll só nos cards. Desktop: calendário lateral + scroll na lista.
 export default class extends Controller {
-  static targets = ["dia", "botao", "faixa", "lista"]
+  static targets = ["dia", "botao", "lista", "celula", "faixa", "faixaDia"]
   static values = { filtro: { type: String, default: "todos" } }
 
   connect() {
     this.aplicar()
+    const navegadores = [...this.celulaTargets, ...this.faixaDiaTargets]
+    if (navegadores.length === 0) return
+
     const hash = window.location.hash.match(/^#dia-(\d+)$/)
-    const hoje = this.faixaTarget.querySelector("[data-hoje='true']")
+    const hoje = navegadores.find((el) => el.dataset.hoje === "true")
     const dia = hash ? hash[1] : hoje?.dataset.dia
-    if (dia) this.rolarPara(dia, "auto")
-    this.centralizarNaFaixa(hoje)
+    if (dia) {
+      this.rolarPara(dia, "auto")
+      this.destacarDia(dia)
+      this.centralizarFaixa(dia, "auto")
+    }
   }
 
   filtrar(event) {
     this.filtroValue = event.currentTarget.dataset.filtro
     this.aplicar()
-    this.listaTarget.scrollTo({ top: 0 })
+    if (this.hasListaTarget) {
+      this.listaTarget.scrollTo({ top: 0, behavior: "smooth" })
+    }
   }
 
   irParaDia(event) {
@@ -29,7 +37,9 @@ export default class extends Controller {
       this.aplicar()
     }
     this.rolarPara(link.dataset.dia, "smooth")
-    this.centralizarNaFaixa(link)
+    this.destacarDia(link.dataset.dia)
+    this.centralizarFaixa(link.dataset.dia)
+    history.replaceState(null, "", `#dia-${link.dataset.dia}`)
   }
 
   aplicar() {
@@ -48,15 +58,34 @@ export default class extends Controller {
     })
   }
 
-  // Posiciona o card do dia no topo da área rolável, à vista imediata.
   rolarPara(dia, behavior) {
-    const card = this.diaTargets.find((el) => el.dataset.dia === String(dia))
-    if (card) this.listaTarget.scrollTo({ top: card.offsetTop, behavior })
+    const card = this.diaTargets.find((el) => el.dataset.dia === String(dia) && !el.classList.contains("hidden"))
+    if (!card || !this.hasListaTarget) return
+
+    this.listaTarget.scrollTo({ top: card.offsetTop, behavior })
   }
 
-  centralizarNaFaixa(item) {
+  destacarDia(dia) {
+    const selRing = (el, sel) => {
+      el.classList.toggle("ring-2", sel)
+      el.classList.toggle("ring-sky-600", sel)
+      el.classList.toggle("ring-offset-1", sel)
+      el.classList.toggle("ring-offset-stone-50", sel)
+      el.classList.toggle("shadow-md", sel)
+      el.classList.toggle("z-[1]", sel)
+    }
+    this.celulaTargets.forEach((el) => selRing(el, el.dataset.dia === String(dia)))
+    this.faixaDiaTargets.forEach((el) => selRing(el, el.dataset.dia === String(dia)))
+  }
+
+  centralizarFaixa(dia, behavior = "smooth") {
+    if (!this.hasFaixaTarget) return
+    const item = this.faixaDiaTargets.find((el) => el.dataset.dia === String(dia))
     if (!item) return
     const faixa = this.faixaTarget
-    faixa.scrollTo({ left: item.offsetLeft - (faixa.clientWidth - item.clientWidth) / 2, behavior: "smooth" })
+    faixa.scrollTo({
+      left: item.offsetLeft - (faixa.clientWidth - item.clientWidth) / 2,
+      behavior,
+    })
   }
 }

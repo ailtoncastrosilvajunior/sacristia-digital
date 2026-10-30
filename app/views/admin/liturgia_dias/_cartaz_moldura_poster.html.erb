@@ -1,0 +1,67 @@
+<% ld = local_assigns[:ld] || @liturgia_dia %>
+<% cartaz = local_assigns[:cartaz] || @cartaz %>
+<% data = ld.data %>
+<% igmr = cartaz.igmr_paragrafo %>
+<% max_min = cartaz.linhas_escala.map { |l| l.ministros.size }.max.to_i %>
+<% max_min = 3 if max_min < 1 %>
+<% festa = ld.titulo.presence || ld.santo_nome.to_s %>
+
+<article id="cartaz-poster-export" class="lm-canvas" aria-label="Cartaz liturgia do dia">
+  <% if ld.imagem_santo.attached? %>
+    <div class="lm-layer lm-foto" aria-hidden="true">
+      <%= image_tag liturgia_cartaz_blob_url(ld.imagem_santo), alt: "" %>
+    </div>
+  <% end %>
+
+  <div class="lm-layer lm-caixa-festa">
+    <% if festa.present? %>
+      <div class="lm-festa-principal"><%= festa.upcase %></div>
+    <% end %>
+  </div>
+
+  <div class="lm-layer lm-caixa-dia">
+    <div class="lm-dia-linha">
+      <span class="lm-dia-semana"><%= l(data, format: "%A").upcase %></span>
+      <span class="lm-dia-sep">·</span>
+      <span class="lm-data-extenso"><%= l(data, format: "%d de %B de %Y").upcase %></span>
+    </div>
+  </div>
+
+  <span class="lm-layer lm-cor-dot" style="background-color: <%= ld.cor_css %>;<%= ld.cor.to_s.downcase.start_with?('branc') ? 'border:1px solid #94a3b8;' : '' %>"></span>
+  <span class="lm-layer lm-cor-nome"><%= ld.cor.presence || "—" %></span>
+
+  <% if cartaz.linhas_leitura.any? %>
+    <div class="lm-layer lm-leituras">
+      <% cartaz.linhas_leitura.each do |linha| %>
+        <div class="lm-leitura-linha">
+          <div class="lm-ref"><%= linha.rotulo %> — <%= linha.referencia %></div>
+          <div class="lm-trecho"><%= linha.trecho %></div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="lm-layer lm-igmr">
+    <% if igmr %>
+      <p class="lm-igmr-texto"><strong><%= igmr.numero %>.</strong> <%= truncate(igmr.texto, length: 360) %></p>
+    <% else %>
+      <p class="lm-igmr-pendente">Cadastre o parágrafo <%= cartaz.igmr_numero %> em Admin → IGMR.</p>
+    <% end %>
+  </div>
+
+  <% if cartaz.linhas_escala.any? %>
+    <table class="lm-layer lm-escala">
+      <tbody>
+        <% cartaz.linhas_escala.first(4).each do |linha| %>
+          <tr>
+            <td class="lm-col-hora"><%= linha.horario %></td>
+            <td class="lm-col-pres"><%= linha.presidente %></td>
+            <% max_min.times do |i| %>
+              <td class="lm-col-min"><%= linha.ministros[i].to_s.presence || "—" %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</article>

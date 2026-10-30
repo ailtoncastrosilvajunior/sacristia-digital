@@ -1,0 +1,182 @@
+<style>
+  .lm-canvas {
+    position: relative;
+    width: 576px;
+    height: 1024px;
+    margin: 0 auto;
+    background: url("<%= liturgia_cartaz_moldura_data_uri %>") no-repeat 0 0 / 576px 1024px;
+    overflow: hidden;
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    color: #0b2d5c;
+    -webkit-font-smoothing: antialiased;
+  }
+  .lm-layer {
+    position: absolute;
+    overflow: hidden;
+    z-index: 2;
+  }
+  /* Caixa superior (celebração) — y ~255–308 */
+  .lm-caixa-festa {
+    left: 38px;
+    top: 256px;
+    width: 262px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+  }
+  .lm-festa-principal {
+    font-size: 7.2px;
+    font-weight: 800;
+    letter-spacing: 0.025em;
+    line-height: 1.28;
+    text-transform: uppercase;
+    color: #1b6b3a;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* Caixa inferior (dia + data) — y ~312–324 */
+  .lm-caixa-dia {
+    left: 38px;
+    top: 312px;
+    width: 262px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+  }
+  .lm-dia-linha {
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lm-dia-semana { color: #0b2d5c; }
+  .lm-dia-sep { margin: 0 3px; opacity: 0.65; }
+  .lm-data-extenso { color: #0b2d5c; }
+  /* Círculo cinza da moldura (x ~50–62, y ~358) + nome à direita na faixa verde */
+  .lm-cor-dot {
+    left: 51px;
+    top: 357px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    z-index: 3;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+  }
+  .lm-cor-nome {
+    left: 188px;
+    top: 359px;
+    width: 120px;
+    height: 16px;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #14532d;
+    line-height: 16px;
+    z-index: 3;
+  }
+  /* Abertura da foto (medida na moldura) */
+  .lm-foto {
+    z-index: 1;
+    left: 346px;
+    top: 256px;
+    width: 198px;
+    height: 132px;
+    clip-path: polygon(8% 6%, 92% 6%, 100% 22%, 100% 100%, 0 100%, 0 22%);
+    overflow: hidden;
+  }
+  .lm-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+  .lm-leituras {
+    left: 116px;
+    top: 456px;
+    width: 444px;
+    height: 172px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .lm-leitura-linha {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .lm-ref {
+    font-weight: 800;
+    font-size: 6.8px;
+    color: #0b2d5c;
+    line-height: 1.2;
+    margin-bottom: 1px;
+  }
+  .lm-trecho {
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 6.6px;
+    font-weight: 600;
+    color: #1e3a5f;
+    line-height: 1.22;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lm-igmr {
+    left: 116px;
+    top: 666px;
+    width: 444px;
+    height: 88px;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 7.4px;
+    color: #1e3a5f;
+    line-height: 1.38;
+  }
+  .lm-igmr-texto {
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lm-igmr-pendente {
+    font-family: "Source Sans 3", sans-serif;
+    font-size: 6.5px;
+    color: #9a3412;
+    background: rgba(254, 243, 199, 0.85);
+    padding: 4px;
+    border-radius: 4px;
+    margin: 0;
+  }
+  .lm-escala {
+    left: 40px;
+    top: 850px;
+    width: 508px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 6.4px;
+  }
+  .lm-escala td {
+    padding: 3px 2px;
+    vertical-align: middle;
+    font-weight: 700;
+    color: #0b2d5c;
+    text-align: center;
+    height: 21px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lm-escala .lm-col-hora { width: 14%; font-weight: 800; }
+  .lm-escala .lm-col-pres { width: 26%; font-size: 6px; }
+  .lm-escala .lm-col-min { width: 15%; font-size: 6px; }
+</style>

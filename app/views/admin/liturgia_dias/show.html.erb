@@ -15,6 +15,13 @@
             data: { turbo_confirm: "Substituir leituras, nome do santo e imagem pelos dados da Canção Nova? Edições manuais serão perdidas." },
             class: "px-3 py-2 rounded-lg border border-stone-300 text-sm text-stone-700 hover:bg-stone-50 cursor-pointer" %>
       <% if @liturgia_dia.validada? %>
+        <%= link_to "Cartaz WhatsApp", cartaz_admin_liturgia_dia_path(@liturgia_dia),
+              class: "px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700",
+              target: "_blank", rel: "noopener" %>
+        <% if @liturgia_dia.cartaz_whatsapp.attached? %>
+          <%= link_to "Baixar PNG", rails_blob_path(@liturgia_dia.cartaz_whatsapp, disposition: "attachment"),
+                class: "px-3 py-2 rounded-lg border border-emerald-600 text-emerald-800 text-sm font-medium hover:bg-emerald-50" %>
+        <% end %>
         <%= button_to "Retirar dos ministros", reabrir_admin_liturgia_dia_path(@liturgia_dia), method: :post,
               class: "px-3 py-2 rounded-lg bg-amber-100 text-amber-900 text-sm hover:bg-amber-200 cursor-pointer" %>
       <% elsif @liturgia_dia.pode_validar? %>
@@ -30,12 +37,24 @@
 
   <% if @liturgia_dia.validada? %>
     <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-      Validada por <strong><%= @liturgia_dia.validado_por&.nome.presence || @liturgia_dia.validado_por&.email || "—" %></strong>
-      em <%= l(@liturgia_dia.validado_em, format: "%d/%m/%Y %H:%M") if @liturgia_dia.validado_em %>. Visível aos ministros.
+      <% if @liturgia_dia.validacao_automatica? %>
+        Validada <strong>automaticamente</strong> (leituras concordaram entre as fontes)
+        em <%= l(@liturgia_dia.validado_em, format: "%d/%m/%Y %H:%M") if @liturgia_dia.validado_em %>.
+      <% else %>
+        Validada por <strong><%= @liturgia_dia.validado_por&.nome.presence || @liturgia_dia.validado_por&.email || "—" %></strong>
+        em <%= l(@liturgia_dia.validado_em, format: "%d/%m/%Y %H:%M") if @liturgia_dia.validado_em %>.
+      <% end %>
+      Visível aos ministros.
     </div>
+    <% if @igmr_paragrafo.nil? %>
+      <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        Cartaz WhatsApp: falta o <strong>IGMR n.º <%= @igmr_numero %></strong>.
+        <%= link_to "Cadastrar ou importar", admin_igmr_paragrafos_path, class: "font-semibold text-amber-950 underline hover:no-underline" %>
+      </div>
+    <% end %>
   <% else %>
     <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-      Rascunho: ainda <strong>não</strong> aparece para os ministros. Confira as leituras (comparação automática entre fontes abaixo), informe o <strong>nome do santo</strong> (obrigatório; imagem opcional) e valide.
+      Rascunho: ainda <strong>não</strong> aparece para os ministros. Dias com divergência entre fontes ou sem nome do santo exigem conferência manual; quando tudo concorda na busca, a validação pode ser automática.
     </div>
   <% end %>
 

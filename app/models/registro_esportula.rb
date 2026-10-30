@@ -3,6 +3,7 @@
 class RegistroEsportula < ApplicationRecord
   belongs_to :sacerdote
   belongs_to :evento_escala, optional: true
+  belongs_to :lote_pagamento_esportula, optional: true
   has_one :lancamento_caixa, dependent: :nullify
 
   STATUS = %w[pendente pago].freeze

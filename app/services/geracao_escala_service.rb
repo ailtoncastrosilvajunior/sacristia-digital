@@ -46,7 +46,7 @@ class GeracaoEscalaService
         next if existentes.include?([data, cb.horario.strftime("%H:%M"), tipo_servico.id])
 
         criados += 1
-        @competencia.evento_escalas.create!(
+        evento = @competencia.evento_escalas.create!(
           tipo_servico_id: tipo_servico.id,
           data: data,
           horario: cb.horario,
@@ -54,8 +54,10 @@ class GeracaoEscalaService
           sacerdote_id: cb.sacerdote_id,
           valor_esportula: valor,
           tipo_escala: "ordinaria",
-          status: "confirmado"
+          status: "confirmado",
+          calendario_base_id: cb.id
         )
+        EsportulaDestinatarioResolver.apply!(evento, calendario_base: cb)
       end
     end
     criados

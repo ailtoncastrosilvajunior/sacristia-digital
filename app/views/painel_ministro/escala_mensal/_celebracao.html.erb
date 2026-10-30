@@ -4,55 +4,53 @@
 <% troca = meu && @trocas_pendentes[meu[:em_id]] %>
 <% acoes = meu && dia.data >= @hoje %>
 <% retorno = ministro_escala_mensal_path(competencia_mensal_id: @competencia.id, anchor: "dia-#{dia.data.day}") %>
-<li class="p-2.5">
-  <div class="overflow-hidden rounded-2xl ring-1 <%= meu ? 'bg-white ring-sky-300' : 'bg-white ring-slate-200' %>">
+<li class="px-2 py-1.5 sm:px-2.5">
+  <div class="overflow-hidden rounded-xl ring-1 <%= meu ? 'bg-white ring-sky-300' : 'bg-white ring-slate-200' %>">
     <% if meu %>
-      <div class="flex items-center gap-2 border-b border-sky-200 bg-sky-100 px-3 py-1.5 text-sky-900">
-        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-        <span class="flex-1 text-[11px] font-bold uppercase leading-tight tracking-wide">Você está escalado nesta celebração</span>
-        <% if troca %><span class="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-sky-800">Troca solicitada</span><% end %>
+      <div class="flex items-center gap-1.5 border-b border-sky-200 bg-sky-100 px-2.5 py-1 text-sky-900">
+        <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        <span class="flex-1 text-[10px] font-bold uppercase leading-tight tracking-wide">Você está escalado</span>
+        <% if troca %><span class="shrink-0 rounded-full bg-white px-1.5 py-0.5 text-[10px] font-bold text-sky-800">Troca pedida</span><% end %>
       </div>
     <% end %>
 
-    <div class="space-y-2.5 p-3">
-      <div class="flex items-baseline justify-between gap-3">
-        <p class="flex shrink-0 items-baseline gap-2">
-          <span class="text-2xl font-extrabold tabular-nums leading-none text-slate-900"><%= ev.horario.strftime("%-H:%M") %></span>
-          <span class="text-xs font-bold uppercase tracking-wide text-slate-500"><%= ev.tipo_servico&.nome %></span>
+    <div class="space-y-2 p-2.5">
+      <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+        <p class="flex shrink-0 items-baseline gap-1.5">
+          <span class="text-xl font-extrabold tabular-nums leading-none text-slate-900 sm:text-2xl"><%= ev.horario.strftime("%-H:%M") %></span>
+          <span class="text-[11px] font-bold uppercase tracking-wide text-slate-500"><%= ev.tipo_servico&.nome %></span>
         </p>
         <% if ev.sacerdote %>
-          <p class="min-w-0 truncate text-right text-sm font-semibold text-slate-900"><%= ev.sacerdote.nome %></p>
+          <p class="min-w-0 truncate text-right text-xs text-slate-900 sm:text-sm">
+            <span class="font-medium text-slate-500">Sacerdote:</span>
+            <span class="font-semibold"><%= ev.sacerdote.nome %></span>
+          </p>
         <% end %>
       </div>
 
       <% if ministros.empty? %>
-        <p class="text-sm italic text-slate-400">Sem ministros escalados</p>
+        <p class="text-xs italic text-slate-400">Sem ministros escalados</p>
       <% else %>
-        <div>
-          <p class="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            Ministros servindo
-            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold normal-case tracking-normal text-slate-700"><%= ministros.size %></span>
-          </p>
-          <div class="flex flex-wrap gap-1">
-            <% ministros.each do |m| %>
-              <%= render "painel_ministro/escala_mensal/ministro_badge", nome: m[:nome], meu: m[:meu], adoracao: m[:adoracao] %>
-            <% end %>
-          </div>
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-500">Ministros</span>
+          <% ministros.each do |m| %>
+            <%= render "painel_ministro/escala_mensal/ministro_badge", nome: m[:nome], meu: m[:meu], adoracao: m[:adoracao] %>
+          <% end %>
         </div>
       <% end %>
 
       <% if acoes %>
         <% if troca %>
-          <div class="flex items-center justify-between gap-2 rounded-xl bg-white px-3 py-2 ring-1 ring-sky-200">
-            <p class="text-sm text-slate-700">Pedido enviado a <strong><%= troca.substituto.nome %></strong>. Aguardando resposta.</p>
+          <div class="flex flex-col gap-2 rounded-lg bg-white px-2.5 py-2 ring-1 ring-sky-200 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-xs text-slate-700 sm:text-sm">Pedido enviado a <strong><%= troca.substituto.nome %></strong>. Aguardando resposta.</p>
             <%= button_to "Cancelar pedido", ministro_solicitacao_troca_path(troca), method: :delete,
                   class: "shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-sky-700 ring-1 ring-sky-200 hover:bg-sky-50" %>
           </div>
         <% else %>
-          <div class="flex flex-wrap items-start justify-end gap-2">
-            <details class="group w-36 open:w-full">
-              <summary class="flex cursor-pointer list-none items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 ring-1 ring-slate-300 active:bg-slate-50">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          <div class="flex flex-wrap items-center justify-end gap-1.5">
+            <details class="group w-full min-[420px]:w-auto open:min-[420px]:w-full">
+              <summary class="flex cursor-pointer list-none items-center justify-center gap-1 rounded-lg bg-white px-2.5 py-2 text-xs font-semibold text-slate-800 ring-1 ring-slate-300 active:bg-slate-50 sm:text-sm">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
                 Solicitar troca
               </summary>
               <%= form_with url: ministro_solicitacao_trocas_path, method: :post, class: "mt-2 space-y-2" do %>
@@ -61,13 +59,13 @@
                 <%= select_tag :substituto_id,
                       options_for_select(@ministros_para_troca.reject { |m| na_equipe.include?(m.id) }.map { |m| [m.nome, m.id] }),
                       prompt: "Quem vai te substituir?", required: true,
-                      class: "w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" %>
-                <%= text_area_tag :motivo, nil, rows: 2, maxlength: 500, placeholder: "Recado ou motivo (opcional)", class: "w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" %>
-                <%= submit_tag "Pedir a este ministro", class: "w-full cursor-pointer rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-bold text-white active:bg-sky-700" %>
+                      class: "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" %>
+                <%= text_area_tag :motivo, nil, rows: 2, maxlength: 500, placeholder: "Recado ou motivo (opcional)", class: "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" %>
+                <%= submit_tag "Pedir a este ministro", class: "w-full cursor-pointer rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-white active:bg-sky-700" %>
               <% end %>
             </details>
             <%= link_to "Ver detalhes", ministro_servico_path(ev), data: { turbo_frame: "servico_modal" },
-                  class: "flex w-36 items-center justify-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2.5 text-sm font-semibold text-white active:bg-slate-900" %>
+                  class: "inline-flex items-center justify-center gap-1 rounded-lg bg-slate-800 px-2.5 py-2 text-xs font-semibold text-white active:bg-slate-900 sm:text-sm" %>
           </div>
         <% end %>
       <% end %>

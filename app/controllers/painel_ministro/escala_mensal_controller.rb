@@ -21,13 +21,50 @@ module PainelMinistro
                                           .includes(escala_ministro: [:ministro, { evento_escala: %i[tipo_servico sacerdote] }])
                                           .select { |t| !t.evento_escala.cancelado? && t.evento_escala.data >= @hoje }
                                           .sort_by { |t| [t.evento_escala.data, t.evento_escala.horario] }
-      @dias_meus = @dias.select { |d| d.eventos.any? { |e| meu_escala_ministro(e) } }.map(&:data)
+      enriquecer_dias_plantao_ministro!
+      @dias_meus_celebracao = @dias.select { |d| d.eventos.any? { |e| meu_escala_ministro(e) } }.map(&:data)
+      @dias_meus_plantao = datas_plantao_do_ministro(@competencia, @meu_id)
+      @dias_meus = (@dias_meus_celebracao | @dias_meus_plantao).sort
     end
 
     private
 
     def meu_escala_ministro(evento)
       evento.escala_ministros.find { |em| em.ministro_id == @meu_id }
+    end
+
+    # Dias só de plantão (sem missa na lista) entram para o ministro ver no calendário e na lista.
+    def enriquecer_dias_plantao_ministro!
+      datas = datas_plantao_do_ministro(@competencia, @meu_id)
+      return if datas.empty?
+
+      plantoes = @competencia.plantao_periodos.includes(:ministros).ordenados.to_a
+      por_data = @dias.index_by(&:data)
+      datas.each do |data|
+        next if por_data[data]
+
+        plantao = plantoes.find { |p| p.cobre_dia?(data) }
+        next unless plantao
+
+        @dias << EscalaMensalImpressao::Dia.new(data: data, eventos: [], extras: [], plantao: plantao)
+      end
+      @dias.sort_by!(&:data)
+      agrupar_plantao!(@dias)
+    end
+
+    def datas_plantao_do_ministro(competencia, ministro_id)
+      blocos = PlantaoPeriodo
+        .joins(:plantao_periodo_ministros)
+        .where(competencia_mensal_id: competencia.id, plantao_periodo_ministros: { ministro_id: ministro_id })
+        .ordenados
+      ultimo = competencia.periodo_fim.day
+      blocos.flat_map do |bloco|
+        bloco.range_dias.filter_map do |dia|
+          next if dia > ultimo
+
+          Date.new(competencia.ano, competencia.mes, dia)
+        end
+      end.uniq.sort
     end
 
     def carregar_escala

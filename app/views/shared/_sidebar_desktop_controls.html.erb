@@ -1,0 +1,26 @@
+<%# locals: mode (:expand | :collapse) — targets do sidebar_controller %>
+<% if mode == :expand %>
+  <% btn = "inline-flex items-center justify-center rounded-lg border border-stone-200/90 bg-white text-stone-600 shadow-sm hover:bg-stone-50 hover:text-stone-900 transition-colors" %>
+  <button type="button"
+          data-sidebar-target="expandButton"
+          data-action="sidebar#toggleDesktop"
+          class="hidden <%= btn %> absolute top-3 left-3 z-30 h-9 w-9"
+          aria-label="Expandir menu lateral"
+          title="Expandir menu">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
+<% else %>
+  <% collapse_btn = "inline-flex items-center justify-center h-8 w-8 shrink-0 rounded-lg border border-slate-600/80 bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white transition-colors hidden lg:inline-flex" %>
+  <button type="button"
+          data-sidebar-target="collapseButton"
+          data-action="sidebar#toggleDesktop"
+          class="<%= collapse_btn %>"
+          aria-label="Recolher menu lateral"
+          title="Recolher menu">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+    </svg>
+  </button>
+<% end %>

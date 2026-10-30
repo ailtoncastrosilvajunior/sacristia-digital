@@ -10,7 +10,47 @@ module Financeiro
       @registro = registro
     end
 
+    def sync_from_lote!(lote)
+      return nil unless lote.status == "pago"
+
+      existing = LancamentoCaixa.find_by(lote_pagamento_esportula_id: lote.id)
+      return existing if existing&.status == "confirmado"
+
+      existing&.destroy! if existing&.estornado?
+
+      conta_esportula = PlanoConta.find_by!(codigo: "2.1")
+      conta_corrente = ContaCorrente.padrao
+      nome = lote.nome_destinatario
+      qtd = lote.evento_escalas.count
+
+      LancamentoCaixa.create!(
+        conta_corrente: conta_corrente,
+        natureza: "saida",
+        data: lote.data_pagamento || Date.current,
+        status: "confirmado",
+        lote_pagamento_esportula: lote,
+        fornecedor: nome,
+        observacoes: "Espórtulas acumuladas — #{lote.competencia_mensal.label} · #{qtd} evento(s) · #{nome}",
+        itens_lancamento_attributes: [
+          {
+            plano_conta: conta_esportula,
+            descricao: "Espórtulas acumuladas (#{lote.competencia_mensal.label})",
+            quantidade: 1,
+            preco_unitario: lote.valor,
+            valor: lote.valor,
+            ordem: 0
+          }
+        ]
+      )
+    end
+
+    def self.sync_from_lote!(lote)
+      new(nil).sync_from_lote!(lote)
+    end
+
     def sync!
+      return nil if @registro.lote_pagamento_esportula_id.present?
+
       existing = LancamentoCaixa.find_by(registro_esportula_id: @registro.id)
 
       unless @registro.status == "pago"

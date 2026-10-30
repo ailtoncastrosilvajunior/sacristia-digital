@@ -4,6 +4,7 @@
 <% tipo_nome = ev.tipo_servico.nome.to_s %>
 <% flags = esportula_tipo_flags(tipo_nome) %>
 <% turno_cls = esportula_turno_class(ev.horario) %>
+<% lc_esportula = pago ? ev.esportula_lancamento_caixa : nil %>
 <tr id="<%= dom_id(ev, :esportula_row) %>"
     data-controller="esportula-pago-row"
     class="border-b border-stone-100/90 <%= idx.zero? && group_idx.positive? ? 'border-t-2 border-t-stone-300/80' : '' %> <%= pago ? 'bg-emerald-50/35' : 'hover:bg-stone-50/70' %> group">
@@ -24,6 +25,18 @@
   <td class="px-2 py-1.5 min-w-0">
     <% if ev.sacerdote %>
       <span class="font-medium text-stone-800 leading-snug"><%= ev.sacerdote.nome %></span>
+      <div class="mt-0.5 flex flex-wrap gap-1">
+        <% if ev.esportula_acumulado? %>
+          <span class="text-[9px] font-semibold px-1 py-px rounded bg-slate-200/80 text-slate-800 ring-1 ring-slate-300/80" title="Pagamento acumulado">
+            Acum. <%= esportula_nome_curto_destinatario(ev) %>
+          </span>
+        <% else %>
+          <span class="text-[9px] font-medium text-stone-600 bg-stone-100 px-1 py-px rounded ring-1 ring-stone-200/80">Imediato</span>
+        <% end %>
+        <% if ev.esportula_substituto_no_slot? %>
+          <span class="text-[9px] font-medium text-amber-800 bg-amber-50 px-1 rounded ring-1 ring-amber-200/80">Substituto</span>
+        <% end %>
+      </div>
     <% else %>
       <span class="text-amber-700 font-medium">—</span>
     <% end %>
@@ -46,6 +59,9 @@
       <%= link_to edit_evento_from_esportulas_path(ev), class: "shrink-0 p-0.5 rounded text-stone-400 hover:text-sky-700 hover:bg-sky-50", title: "Editar evento" do %>
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
       <% end %>
+      <% if lc_esportula %>
+        <%= esportula_link_lancamento_caixa(lc_esportula, competencia_mensal_id: ev.competencia_mensal_id) %>
+      <% end %>
     </div>
   </td>
   <td class="px-1.5 py-1.5 text-right whitespace-nowrap tabular-nums font-bold text-stone-900">
@@ -54,6 +70,8 @@
   <td class="px-1 py-1.5 text-center">
     <% if sem_sacerdote %>
       <span class="inline-block h-4 w-4 rounded border border-dashed border-stone-300" title="Sem sacerdote"></span>
+    <% elsif ev.esportula_acumulado? && !pago %>
+      <span class="inline-flex min-w-[2.25rem] justify-center rounded-md bg-violet-100 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-900 ring-1 ring-violet-200/80" title="Pagamento via lote — card Destinatários acumulados">Lote</span>
     <% else %>
       <%= form_with url: toggle_evento_pago_admin_registros_esportula_index_path, method: :patch,
             class: "inline-flex justify-center",
@@ -61,7 +79,7 @@
         <%= hidden_field_tag :evento_escala_id, ev.id %>
         <%= hidden_field_tag :competencia_mensal_id, ev.competencia_mensal_id %>
         <%= hidden_field_tag :pago, "0" %>
-        <label class="inline-flex cursor-pointer">
+        <label class="inline-flex cursor-pointer" title="<%= ev.esportula_acumulado? ? 'Desmarque se o pagamento foi registrado por engano' : '' %>">
           <%= check_box_tag :pago, "1", pago,
               data: {
                 esportula_pago_row_target: "checkbox",

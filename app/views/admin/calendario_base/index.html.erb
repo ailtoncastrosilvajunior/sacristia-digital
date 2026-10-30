@@ -42,6 +42,11 @@
                   </span>
                 </div>
                 <p class="mt-1 text-xs text-stone-600 truncate" title="<%= cb.sacerdote&.nome %>"><%= cb.sacerdote&.nome || "Sem sacerdote" %></p>
+                <% if cb.esportula_acumulado? %>
+                  <p class="mt-0.5 text-[10px] font-semibold text-violet-800 truncate" title="<%= cb.destinatario_esportula&.nome %>">
+                    Acum.<%= " · #{cb.destinatario_esportula.nome}" if cb.destinatario_esportula %>
+                  </p>
+                <% end %>
                 <div class="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between gap-2 whitespace-nowrap">
                   <span class="inline-flex items-center gap-1 text-xs text-stone-600" title="<%= pluralize(cb.quantidade_ministros, 'ministro') %>">
                     <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>

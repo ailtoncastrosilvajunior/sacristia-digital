@@ -1,0 +1,32 @@
+<% ld = @cartaz.liturgia %>
+<% igmr = @cartaz.igmr_paragrafo %>
+<% filename = "escala-MESC-#{ld.data.strftime('%d-%m-%Y')}-igmr-#{@cartaz.igmr_numero}.png" %>
+
+<% content_for :title, "Liturgia · #{l(ld.data)}" %>
+<% content_for :toolbar do %>
+  <div class="cartaz-toolbar-inner">
+    <%= link_to "← Liturgia", admin_liturgia_dia_path(ld), class: "cartaz-toolbar-link" %>
+    <% unless igmr %>
+      <%= link_to "Cadastrar IGMR #{@cartaz.igmr_numero}", new_admin_igmr_paragrafo_path(numero: @cartaz.igmr_numero), class: "cartaz-toolbar-link", style: "color:#92400e;font-weight:700" %>
+    <% end %>
+    <%= button_to "Gerar e salvar PNG", gerar_cartaz_admin_liturgia_dia_path(ld), method: :post, class: "cartaz-toolbar-btn", data: { turbo: false }, disabled: !igmr %>
+    <% if ld.cartaz_whatsapp.attached? %>
+      <%= link_to "Baixar salvo", rails_blob_path(ld.cartaz_whatsapp, disposition: "attachment"), class: "cartaz-toolbar-btn cartaz-toolbar-btn--ghost", style: "text-decoration:none;display:inline-block" %>
+    <% end %>
+    <button type="button" id="cartaz-baixar-png" class="cartaz-toolbar-btn cartaz-toolbar-btn--ghost" data-filename="<%= filename %>" data-label-default="Baixar preview">Baixar preview</button>
+    <span class="cartaz-toolbar-hint">
+      Pré-visualização no tamanho do WhatsApp (576×1024). “Baixar preview” gera PNG no navegador; “Gerar e salvar” usa Grover no servidor.
+      <% if igmr && !igmr.texto_conferido? %> · IGMR ainda não marcado como conferido.<% end %>
+    </span>
+  </div>
+<% end %>
+
+<% content_for :head do %>
+  <%= render "admin/liturgia_dias/cartaz_moldura_styles" %>
+<% end %>
+
+<div class="lm-preview-stage">
+  <div class="lm-preview-wrap">
+    <%= render "admin/liturgia_dias/cartaz_moldura_poster", ld: ld, cartaz: @cartaz %>
+  </div>
+</div>

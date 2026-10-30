@@ -13,10 +13,15 @@
         <%= form_with url: competencia_admin_registros_esportula_index_path, method: :get, local: true, class: "min-w-[12rem]" do %>
           <label for="competencia_mensal_id" class="block text-[10px] font-semibold uppercase tracking-wider text-stone-500 mb-1">Competência</label>
           <%= select_tag :competencia_mensal_id,
-                options_from_collection_for_select(@competencias, :id, :label, @competencia.id),
+                options_from_collection_for_select(@competencias, :id, :label_curto, @competencia.id),
                 id: "competencia_mensal_id",
                 class: "w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500",
                 onchange: "this.form.requestSubmit()" %>
+        <% end %>
+        <%= link_to admin_destinatarios_esportula_index_path,
+            class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50 transition-colors whitespace-nowrap" do %>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Instituições
         <% end %>
         <%= link_to new_admin_registros_esportula_path(competencia_ano: @competencia.ano, competencia_mes: @competencia.mes),
             class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50 transition-colors" do %>
@@ -38,8 +43,14 @@
   <% else %>
     <%= render "admin/registros_esportula/competencia/totais", competencia: @competencia, resumo_totais: @resumo_totais %>
 
-    <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,36rem)_minmax(0,1fr)] gap-4 xl:gap-5 items-start">
-      <%# Lista de eventos — agrupada por dia %>
+    <div data-controller="drawer esportula-acumulado-pagar">
+      <div data-drawer-target="overlay" class="fixed inset-0 z-40 bg-stone-900/30 transition-opacity duration-300 invisible opacity-0 pointer-events-none" data-action="click->drawer#closeOverlay"></div>
+      <div data-drawer-target="panel" class="fixed top-0 right-0 z-50 h-full w-full sm:w-[min(100%,28rem)] bg-white shadow-2xl shadow-stone-900/10 transform transition-transform duration-300 ease-out translate-x-full border-l border-stone-200 flex flex-col">
+        <%= render "admin/registros_esportula/competencia/acumulado_pagar_drawer", competencia: @competencia %>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] gap-4 xl:gap-5 items-start">
+      <%# Lista de eventos — coluna principal, mais larga %>
       <div class="rounded-2xl border border-stone-200/90 bg-white shadow-md shadow-stone-900/5 overflow-hidden min-w-0 ring-1 ring-stone-100">
         <div class="px-4 py-2.5 border-b border-stone-100 bg-gradient-to-b from-white to-stone-50/90 flex items-center justify-between gap-3">
           <div>
@@ -48,15 +59,15 @@
           </div>
         </div>
         <% if @eventos.any? %>
-          <div class="overflow-x-hidden overflow-y-auto max-h-[min(72vh,680px)]">
+          <div class="overflow-x-hidden overflow-y-auto max-h-[min(80vh,780px)]">
             <table class="w-full table-fixed text-xs">
               <colgroup>
-                <col class="w-10" />
-                <col class="w-12" />
-                <col class="w-[26%]" />
-                <col class="w-[32%]" />
-                <col class="w-12" />
-                <col class="w-8" />
+                <col class="w-11" />
+                <col class="w-14" />
+                <col class="w-[28%]" />
+                <col class="w-[36%]" />
+                <col class="w-14" />
+                <col class="w-9" />
               </colgroup>
               <thead class="sticky top-0 z-20 bg-stone-100/95 backdrop-blur-sm border-b border-stone-200">
                 <tr class="text-[10px] font-bold uppercase tracking-wider text-stone-500">
@@ -81,8 +92,9 @@
         <% end %>
       </div>
 
-      <%# Resumo por sacerdote — largura fixa, só scroll vertical %>
-      <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden xl:sticky xl:top-4 ring-1 ring-slate-100 min-w-0 w-full max-w-full"
+      <%# Coluna lateral: resumo + acumulados (mesma largura 36rem) %>
+      <div class="flex flex-col gap-4 min-w-0 w-full xl:sticky xl:top-4">
+      <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden ring-1 ring-slate-100 min-w-0 w-full"
            data-controller="esportula-resumo-filter"
            data-esportula-resumo-filter-total-value="<%= @resumo_por_sacerdote.size %>"
            data-esportula-resumo-filter-horarios-value="<%= esportula_horarios_filtro(@eventos).to_json %>">
@@ -142,6 +154,12 @@
         <% else %>
           <p class="px-4 py-10 text-center text-sm text-stone-500">Sem dados para resumir.</p>
         <% end %>
+      </div>
+
+      <%= render "admin/registros_esportula/competencia/acumulado_card",
+            competencia: @competencia,
+            linhas: @resumo_acumulado %>
+      </div>
       </div>
     </div>
   <% end %>

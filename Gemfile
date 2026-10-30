@@ -49,3 +49,6 @@ end
 
 # Importação da planilha financeira (.xlsx)
 gem "roo", "~> 2.10"
+
+# Cartaz liturgia → PNG (Chrome headless)
+gem "grover", "~> 1.2"

@@ -1,0 +1,45 @@
+<div class="space-y-6 max-w-3xl">
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <%= link_to "← Liturgia", admin_liturgia_dias_path, class: "text-sm text-slate-500 hover:text-slate-800" %>
+      <h1 class="text-2xl font-semibold text-stone-800 mt-1">Textos IGMR (cartaz)</h1>
+      <p class="text-stone-500 mt-1 text-sm">
+        Sequência diária a partir de 31/10/2026 = n.º 51. Hoje o cartaz pede o parágrafo <strong><%= @proximo_numero %></strong>.
+        Confira cada texto com o livro impresso antes de marcar como conferido.
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <%= link_to "Importar CSV", importar_admin_igmr_paragrafos_path, class: "px-4 py-2 rounded-lg border border-stone-300 text-sm font-medium text-stone-700 hover:bg-stone-50" %>
+      <%= link_to "Novo parágrafo", new_admin_igmr_paragrafo_path(numero: @proximo_numero), class: "px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800" %>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-600 flex flex-wrap gap-x-6 gap-y-1">
+    <span><strong class="text-stone-900"><%= @total_cadastrados %></strong> / <%= @limite %> parágrafos cadastrados</span>
+    <span>Hoje o cartaz usa o n.º <strong class="text-stone-900"><%= @proximo_numero %></strong></span>
+    <% unless IgmrParagrafo.exists?(numero: @proximo_numero) %>
+      <span class="text-amber-800 font-medium">Falta cadastrar o parágrafo de hoje</span>
+    <% end %>
+  </div>
+
+  <% if @paragrafos.any? %>
+    <ul class="divide-y divide-stone-200 rounded-xl border border-stone-200 bg-white overflow-hidden">
+      <% @paragrafos.each do |p| %>
+        <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <div class="min-w-0">
+            <p class="font-semibold text-stone-900">IGMR n.º <%= p.numero %></p>
+            <p class="text-sm text-stone-600 truncate max-w-xl"><%= truncate(p.texto, length: 100) %></p>
+            <% if p.texto_conferido? %>
+              <span class="text-xs text-emerald-700 font-medium">Conferido com o livro</span>
+            <% else %>
+              <span class="text-xs text-amber-700">Aguardando conferência</span>
+            <% end %>
+          </div>
+          <%= link_to "Editar", edit_admin_igmr_paragrafo_path(p), class: "text-sm font-medium text-sky-700 hover:underline shrink-0" %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-stone-500 text-sm">Nenhum parágrafo cadastrado ainda.</p>
+  <% end %>
+</div>

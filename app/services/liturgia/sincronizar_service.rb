@@ -4,7 +4,8 @@ require "stringio"
 
 module Liturgia
   # Busca a liturgia do dia na fonte principal (Canção Nova), confere com uma segunda
-  # fonte e grava como RASCUNHO. Nada chega ao ministro sem validação do administrador.
+  # fonte e grava. Se leituras concordam, santo informado e não há divergências, valida
+  # automaticamente; caso contrário fica em rascunho para conferência manual.
   class SincronizarService
     # Parte do texto da fonte menor que precisa existir na maior (as fontes diferem em
     # cabeçalhos e respostas litúrgicas, mas o corpo da leitura deve coincidir).
@@ -12,7 +13,7 @@ module Liturgia
 
     Resposta = Struct.new(:liturgia_dia, :status, :mensagem, keyword_init: true) do
       def ok?
-        status.in?(%i[criada atualizada ignorada])
+        status.in?(%i[criada atualizada ignorada validada_automaticamente])
       end
     end
 
@@ -50,8 +51,10 @@ module Liturgia
         validado_em: nil
       )
       aplicar_santo(registro)
+      auto_validada = aplicar_auto_validacao(registro)
       registro.save!
-      Resposta.new(liturgia_dia: registro, status: novo ? :criada : :atualizada)
+      status = auto_validada ? :validada_automaticamente : (novo ? :criada : :atualizada)
+      Resposta.new(liturgia_dia: registro, status: status)
     rescue Erro, ActiveRecord::RecordInvalid => e
       Resposta.new(liturgia_dia: registro, status: :erro, mensagem: e.message)
     end
@@ -71,6 +74,16 @@ module Liturgia
       anexar_imagem_santo(registro, santo.imagem_url) if santo.imagem_url.present?
     rescue Erro => e
       Rails.logger.warn("[Liturgia] Santo do dia #{@data}: #{e.message}")
+    end
+
+    def aplicar_auto_validacao(registro)
+      return false unless registro.pode_validar?
+      return false if registro.divergente?
+
+      registro.status = "validada"
+      registro.validado_por = nil
+      registro.validado_em = Time.current
+      true
     end
 
     def anexar_imagem_santo(registro, url)

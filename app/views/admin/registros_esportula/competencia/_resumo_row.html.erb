@@ -1,6 +1,6 @@
 <%# locals: linha, resumo_eventos_map %>
 <% s = linha[:sacerdote] %>
-<% quitado = linha[:saldo].to_d.zero? && linha[:previsto].to_d.positive? %>
+<% quitado = linha[:saldo].to_d.zero? && linha[:previsto_imediato].to_d.positive? %>
 <% zebra = s.id.even? %>
 <% eventos = (resumo_eventos_map || {})[s.id] || [] %>
 <tr id="<%= dom_id(s, :esportula_resumo) %>"

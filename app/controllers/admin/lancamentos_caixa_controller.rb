@@ -20,6 +20,7 @@ module Admin
     end
 
     def show
+      @return_to = safe_return_to_path
       if request.headers["Turbo-Frame"] == "lancamento_drawer"
         render partial: "show_drawer", layout: false
       end
@@ -100,6 +101,8 @@ module Admin
       @lancamento = LancamentoCaixa.includes(
         :conta_corrente,
         { evento_escala: :tipo_servico },
+        { registro_esportula: { evento_escala: :tipo_servico } },
+        { lote_pagamento_esportula: [:competencia_mensal, :evento_escalas] },
         itens_lancamento: :plano_conta
       ).find(params[:id])
     end

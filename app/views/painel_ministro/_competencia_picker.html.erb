@@ -3,7 +3,8 @@
 <% idx = competencias.index { |c| c.id == comp.id } %>
 <% mais_antiga = idx && idx < competencias.size - 1 ? competencias[idx + 1] : nil %>
 <% mais_nova = idx && idx.positive? ? competencias[idx - 1] : nil %>
-<% abrev = ->(c) { "#{I18n.t('date.abbr_month_names')[c.mes]&.downcase}/#{c.ano}" } %>
+<% compacto = local_assigns.fetch(:compacto, false) %>
+<% abrev = ->(c) { "#{I18n.t('date.abbr_month_names')[c.mes]}/#{c.ano}" } %>
 <%# Sem competência liberada ao lado: mostra o mês do calendário, apagado e sem link. %>
 <% vizinho = ->(delta) { d = comp.periodo.advance(months: delta); [I18n.l(d, format: :month_year), "#{I18n.t('date.abbr_month_names')[d.month]&.downcase}/#{d.year}"] } %>
 <% btn = "flex min-w-0 items-center gap-1 rounded-full px-2 py-2 text-xs font-medium text-slate-600 active:bg-stone-100 sm:gap-1.5 sm:px-3 sm:text-sm" %>
@@ -16,36 +17,40 @@
     <% if mais_antiga %>
       <%= link_to rota.call(mais_antiga.id), class: btn, title: mais_antiga.label, aria: { label: "Mês anterior: #{mais_antiga.label}" } do %>
         <%= seta_esq %>
-        <span class="truncate sm:hidden"><%= abrev.call(mais_antiga) %></span>
-        <span class="hidden truncate sm:inline"><%= mais_antiga.label %></span>
+        <span class="truncate <%= compacto ? '' : 'sm:hidden' %>"><%= abrev.call(mais_antiga) %></span>
+        <% unless compacto %><span class="hidden truncate sm:inline"><%= mais_antiga.label %></span><% end %>
       <% end %>
     <% else %>
       <% cheio, curto = vizinho.call(-1) %>
       <span class="<%= btn_off %>" title="<%= cheio %> (sem escala liberada)">
         <%= seta_esq %>
-        <span class="truncate sm:hidden"><%= curto %></span>
-        <span class="hidden truncate sm:inline"><%= cheio %></span>
+        <span class="truncate <%= compacto ? '' : 'sm:hidden' %>"><%= curto %></span>
+        <% unless compacto %><span class="hidden truncate sm:inline"><%= cheio %></span><% end %>
       </span>
     <% end %>
   </div>
 
-  <h2 class="px-1 text-sm font-bold text-slate-900 sm:text-base">
-    <span class="sm:hidden"><%= abrev.call(comp) %></span>
-    <span class="hidden sm:inline"><%= comp.label %></span>
+  <h2 class="px-1 text-sm font-bold text-slate-900 sm:text-base" title="<%= comp.label %>">
+    <% if compacto %>
+      <span class="whitespace-nowrap"><%= abrev.call(comp) %></span>
+    <% else %>
+      <span class="sm:hidden"><%= abrev.call(comp) %></span>
+      <span class="hidden sm:inline"><%= comp.label %></span>
+    <% end %>
   </h2>
 
   <div class="flex justify-end">
     <% if mais_nova %>
       <%= link_to rota.call(mais_nova.id), class: btn, title: mais_nova.label, aria: { label: "Próximo mês: #{mais_nova.label}" } do %>
-        <span class="truncate sm:hidden"><%= abrev.call(mais_nova) %></span>
-        <span class="hidden truncate sm:inline"><%= mais_nova.label %></span>
+        <span class="truncate <%= compacto ? '' : 'sm:hidden' %>"><%= abrev.call(mais_nova) %></span>
+        <% unless compacto %><span class="hidden truncate sm:inline"><%= mais_nova.label %></span><% end %>
         <%= seta_dir %>
       <% end %>
     <% else %>
       <% cheio, curto = vizinho.call(1) %>
       <span class="<%= btn_off %>" title="<%= cheio %> (sem escala liberada)">
-        <span class="truncate sm:hidden"><%= curto %></span>
-        <span class="hidden truncate sm:inline"><%= cheio %></span>
+        <span class="truncate <%= compacto ? '' : 'sm:hidden' %>"><%= curto %></span>
+        <% unless compacto %><span class="hidden truncate sm:inline"><%= cheio %></span><% end %>
         <%= seta_dir %>
       </span>
     <% end %>

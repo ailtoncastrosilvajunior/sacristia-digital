@@ -2,7 +2,11 @@
 <% lc = @lancamento %>
 <% entrada = lc.entrada? %>
 <% cor = entrada ? "#059669" : "#dc2626" %>
-<% volta = admin_lancamentos_caixa_index_path(mes: lc.data.month, ano: lc.data.year) %>
+<% volta = @return_to.presence || admin_lancamentos_caixa_index_path(mes: lc.data.month, ano: lc.data.year) %>
+<% lote_esportula = lc.lote_pagamento_esportula %>
+<% competencia_esportula = lote_esportula&.competencia_mensal %>
+<% registro_esportula = lc.registro_esportula %>
+<% evento_esportula = lc.evento_escala || registro_esportula&.evento_escala %>
 <% campo = "rounded-xl border border-stone-200/90 bg-gradient-to-b from-white to-stone-50/90 px-4 py-3 shadow-sm" %>
 <% rotulo = "text-[10px] font-bold uppercase tracking-wider text-stone-400" %>
 <% valor_txt = "mt-1 text-sm font-semibold text-stone-900" %>
@@ -88,12 +92,44 @@
           <p class="<%= valor_txt %>"><%= lc.fornecedor %></p>
         </div>
       <% end %>
-      <% if lc.evento_escala.present? %>
+      <% if evento_esportula.present? %>
         <div class="<%= campo %> sm:col-span-2 lg:col-span-3">
           <p class="<%= rotulo %>">Evento da escala</p>
           <p class="<%= valor_txt %>">
-            <%= l(lc.evento_escala.data) %> <%= lc.evento_escala.horario.strftime("%H:%M") %>
-            — <%= lc.evento_escala.tipo_servico.nome %>
+            <%= l(evento_esportula.data) %> <%= evento_esportula.horario.strftime("%H:%M") %>
+            — <%= evento_esportula.tipo_servico.nome %>
+          </p>
+        </div>
+      <% end %>
+      <% if lote_esportula.present? && competencia_esportula.present? %>
+        <div class="<%= campo %> sm:col-span-2 lg:col-span-3">
+          <p class="<%= rotulo %>">Espórtulas acumuladas</p>
+          <p class="<%= valor_txt %>">
+            <%= lote_esportula.nome_destinatario %>
+            · <%= competencia_esportula.label_curto %>
+            · <%= lote_esportula.evento_escalas.size %> evento(s)
+          </p>
+          <p class="mt-2">
+            <%= link_to "Abrir competência de espórtulas",
+                  competencia_admin_registros_esportula_index_path(competencia_mensal_id: competencia_esportula.id),
+                  class: "text-sm font-semibold text-sky-700 hover:text-sky-900" %>
+            ·
+            <%= link_to "Extrato #{I18n.l(lc.data, format: '%b/%Y')}",
+                  admin_extrato_financeiro_path(mes: lc.data.month, ano: lc.data.year),
+                  class: "text-sm font-semibold text-sky-700 hover:text-sky-900" %>
+          </p>
+        </div>
+      <% elsif registro_esportula.present? && evento_esportula.present? %>
+        <div class="<%= campo %> sm:col-span-2 lg:col-span-3">
+          <p class="<%= rotulo %>">Espórtula imediata</p>
+          <p class="mt-2">
+            <%= link_to "Abrir competência de espórtulas",
+                  competencia_admin_registros_esportula_index_path(competencia_mensal_id: evento_esportula.competencia_mensal_id),
+                  class: "text-sm font-semibold text-sky-700 hover:text-sky-900" %>
+            ·
+            <%= link_to "Extrato #{I18n.l(lc.data, format: '%b/%Y')}",
+                  admin_extrato_financeiro_path(mes: lc.data.month, ano: lc.data.year),
+                  class: "text-sm font-semibold text-sky-700 hover:text-sky-900" %>
           </p>
         </div>
       <% end %>

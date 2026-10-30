@@ -2,7 +2,7 @@
 
 module Admin
   class LiturgiaDiasController < Admin::BaseController
-    before_action :set_liturgia_dia, only: [:show, :edit, :update, :validar, :reabrir, :sincronizar, :remover_imagem]
+    before_action :set_liturgia_dia, only: [:show, :edit, :update, :validar, :reabrir, :sincronizar, :remover_imagem, :cartaz, :gerar_cartaz]
 
     def index
       @mes = parse_mes(params[:mes])
@@ -17,6 +17,37 @@ module Admin
     end
 
     def show
+      @igmr_numero = Liturgia::IgmrRotacao.numero_para(@liturgia_dia.data)
+      @igmr_paragrafo = IgmrParagrafo.find_by(numero: @igmr_numero)
+    end
+
+    def cartaz
+      unless @liturgia_dia.validada?
+        redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: "Valide a liturgia antes de gerar o cartaz."
+        return
+      end
+
+      @cartaz = Liturgia::CartazBuilder.build(@liturgia_dia)
+      render :cartaz, layout: "cartaz_whatsapp"
+    end
+
+    def gerar_cartaz
+      unless @liturgia_dia.validada?
+        redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: "Valide a liturgia antes de gerar o cartaz."
+        return
+      end
+
+      cartaz = Liturgia::CartazBuilder.build(@liturgia_dia)
+      if cartaz.igmr_ausente?
+        redirect_to cartaz_admin_liturgia_dia_path(@liturgia_dia),
+                    alert: "Cadastre o IGMR n.º #{cartaz.igmr_numero} antes de gerar o PNG."
+        return
+      end
+
+      Liturgia::CartazPngGenerator.new(@liturgia_dia).attach!
+      redirect_to cartaz_admin_liturgia_dia_path(@liturgia_dia), notice: "Cartaz gerado e salvo no storage."
+    rescue Liturgia::CartazPngGenerator::Erro => e
+      redirect_to cartaz_admin_liturgia_dia_path(@liturgia_dia), alert: e.message
     end
 
     def edit
@@ -63,7 +94,12 @@ module Admin
     def sincronizar
       resposta = Liturgia::SincronizarService.call(@liturgia_dia.data, forcar: true)
       if resposta.ok?
-        redirect_to admin_liturgia_dia_path(@liturgia_dia), notice: "Leituras buscadas novamente. A liturgia voltou para rascunho."
+        notice = if resposta.status == :validada_automaticamente
+                   "Leituras buscadas novamente. As fontes concordaram — liturgia validada automaticamente."
+                 else
+                   "Leituras buscadas novamente. A liturgia ficou em rascunho para conferência."
+                 end
+        redirect_to admin_liturgia_dia_path(@liturgia_dia), notice: notice
       else
         redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: "Falha ao buscar: #{resposta.mensagem}"
       end
@@ -93,7 +129,7 @@ module Admin
     private
 
     def set_liturgia_dia
-      @liturgia_dia = LiturgiaDia.with_attached_imagem_santo.find(params[:id])
+      @liturgia_dia = LiturgiaDia.with_attached_imagem_santo.with_attached_cartaz_whatsapp.find(params[:id])
     end
 
     def parse_mes(raw)
@@ -103,8 +139,21 @@ module Admin
     end
 
     def mensagem_busca(resposta)
-      base = resposta.status == :ignorada ? resposta.mensagem : "Liturgia buscada (rascunho)."
-      resposta.liturgia_dia.divergente? ? "#{base} Atenção: há divergências entre as fontes." : base
+      case resposta.status
+      when :ignorada then resposta.mensagem
+      when :validada_automaticamente
+        "Liturgia validada automaticamente (fontes concordaram)."
+      else
+        base = "Liturgia buscada (rascunho)."
+        ld = resposta.liturgia_dia
+        if ld.divergente?
+          "#{base} Há divergências entre as fontes — confira antes de validar."
+        elsif ld.santo_nome.blank?
+          "#{base} Informe o nome do santo do dia para validar."
+        else
+          base
+        end
+      end
     end
 
     def liturgia_dia_params

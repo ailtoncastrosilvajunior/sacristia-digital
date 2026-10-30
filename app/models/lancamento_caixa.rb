@@ -11,6 +11,7 @@ class LancamentoCaixa < ApplicationRecord
   belongs_to :conta_corrente
   belongs_to :evento_escala, optional: true
   belongs_to :registro_esportula, optional: true
+  belongs_to :lote_pagamento_esportula, optional: true
   belongs_to :importacao_financeira, optional: true
 
   has_many :itens_lancamento, -> { order(:ordem, :id) },

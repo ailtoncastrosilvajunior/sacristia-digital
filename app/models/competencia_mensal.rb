@@ -6,6 +6,7 @@ class CompetenciaMensal < ApplicationRecord
   has_many :evento_escalas, dependent: :destroy
   has_many :plantao_periodos, dependent: :destroy
   has_many :oferta_apoios, dependent: :destroy
+  has_many :lote_pagamento_esportulas, dependent: :destroy
 
   validates :ano, presence: true, numericality: { in: 2020..2100 }
   validates :mes, presence: true, numericality: { in: 1..12 }

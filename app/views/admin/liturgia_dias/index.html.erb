@@ -3,7 +3,7 @@
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="text-2xl font-semibold text-stone-800">Liturgia do dia</h1>
-      <p class="text-stone-500 mt-1">Leituras, cor litúrgica e santo do dia. Só chegam ao ministro depois de validadas.</p>
+      <p class="text-stone-500 mt-1">Leituras, cor litúrgica e santo do dia. Validadas automaticamente quando as duas fontes concordam; demais casos ficam em rascunho para conferência.</p>
     </div>
     <%= button_to buscar_admin_liturgia_dias_path(mes: mes_param[@mes]), method: :post,
           data: { turbo_confirm: "Buscar na Canção Nova leituras e santo do dia (nome e imagem) para os dias que ainda não passaram neste mês? Dias já validados não são alterados." },
@@ -89,9 +89,19 @@
             <% end %>
           <% end %>
 
-          <div class="w-20 text-right text-sm">
+          <div class="flex shrink-0 items-center justify-end gap-1.5 text-sm">
             <% if reg %>
-              <%= link_to "#{reg.validada? ? 'Ver' : 'Revisar'} →", admin_liturgia_dia_path(reg), class: "font-medium #{reg.validada? ? 'text-stone-600' : 'text-sky-700'} hover:underline" %>
+              <% if reg.validada? %>
+                <%= link_to admin_liturgia_dia_path(reg), title: "Ver", aria: { label: "Ver liturgia" }, class: "p-1.5 rounded-lg text-stone-400 hover:text-slate-600 hover:bg-stone-100 transition-colors" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <% end %>
+              <% else %>
+                <%= link_to "Revisar", admin_liturgia_dia_path(reg),
+                      class: "inline-flex items-center rounded-lg border border-sky-600 bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 hover:border-sky-700 transition-colors" %>
+              <% end %>
+              <%= link_to edit_admin_liturgia_dia_path(reg), title: "Editar", aria: { label: "Editar liturgia" }, class: "p-1.5 rounded-lg text-stone-400 hover:text-sky-600 hover:bg-sky-50 transition-colors" do %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <% end %>
             <% else %>
               <%= button_to "Buscar", buscar_admin_liturgia_dias_path(data: data), method: :post, form: { class: "inline" },
                     class: "rounded-lg bg-white border border-stone-300 px-2.5 py-0.5 text-sm font-medium text-slate-700 hover:bg-stone-100 cursor-pointer" %>

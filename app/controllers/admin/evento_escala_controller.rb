@@ -34,6 +34,7 @@ module Admin
       @evento = @competencia.evento_escalas.build(evento_params)
       if @evento.save
         atualizar_coordenador(@evento)
+        aplicar_esportula_pos_save!(@evento, recalcular: true)
         redirect_to admin_competencia_mensal_path(@competencia, filter_params), notice: "Evento criado com sucesso."
       else
         if turbo_frame_request?
@@ -54,6 +55,7 @@ module Admin
     def update
       if @evento.update(evento_params)
         atualizar_coordenador(@evento)
+        aplicar_esportula_pos_save!(@evento, recalcular: params[:recalcular_esportula_regra].present?)
         RegistroEsportula.sync_from_evento!(@evento)
         redirect_with_return_to(
           default: admin_competencia_mensal_path(@evento.competencia_mensal, filter_params),
@@ -96,6 +98,7 @@ module Admin
       @evento.sacerdote_id = sacerdote_id
       @evento.ministro_ids = ministro_ids
       @evento.save!
+      EsportulaDestinatarioResolver.apply!(@evento) unless @evento.esportula_destinatario_manual?
 
       @evento.escala_ministros.update_all(coordenador: false, adoracao: false)
       if coord_id && ministro_ids.include?(coord_id)
@@ -144,6 +147,7 @@ module Admin
     def evento_params
       p = params.require(:evento_escala).permit(:competencia_mensal_id, :tipo_servico_id, :data, :horario,
         :quantidade_ministros, :local, :descricao, :observacoes, :sacerdote_id, :valor_esportula, :plantao_periodo_id, :status,
+        :esportula_modo, :esportula_destinatario_tipo, :esportula_destinatario_sacerdote_id, :destinatario_esportula_id,
         ministro_ids: [])
       p[:ministro_ids] = (p[:ministro_ids] || []).reject(&:blank?)
       p
@@ -159,6 +163,44 @@ module Admin
 
     def filter_params
       params.permit(:tipo_servico_id, :sacerdote_id, :ministro_id, :dia_semana, :vista, :aba, :vista_calendario, :data_ref).to_unsafe_h.compact_blank
+    end
+
+    def aplicar_esportula_pos_save!(evento, recalcular:)
+      if recalcular
+        evento.update!(esportula_destinatario_manual: false)
+        EsportulaDestinatarioResolver.apply!(evento, force: true)
+        return
+      end
+
+      if esportula_campos_no_form?
+        normalizar_destinatario_evento!(evento)
+        auto = EsportulaDestinatarioResolver.new(evento).compute_attributes
+        manual = evento.esportula_modo != auto[:esportula_modo] ||
+                 evento.esportula_destinatario_tipo != auto[:esportula_destinatario_tipo] ||
+                 evento.destinatario_esportula_id != auto[:destinatario_esportula_id] ||
+                 evento.esportula_destinatario_sacerdote_id != auto[:esportula_destinatario_sacerdote_id]
+        evento.update!(esportula_destinatario_manual: manual) if evento.esportula_destinatario_manual? != manual
+      elsif !evento.esportula_destinatario_manual?
+        EsportulaDestinatarioResolver.apply!(evento)
+      end
+    end
+
+    def esportula_campos_no_form?
+      p = params[:evento_escala]
+      return false unless p
+
+      %w[esportula_modo esportula_destinatario_tipo destinatario_esportula_id esportula_destinatario_sacerdote_id].any? { |k| p.key?(k) }
+    end
+
+    def normalizar_destinatario_evento!(evento)
+      if evento.esportula_destinatario_tipo == "instituicao"
+        evento.update!(esportula_destinatario_sacerdote_id: nil)
+      else
+        evento.update!(destinatario_esportula_id: nil)
+        if evento.esportula_destinatario_sacerdote_id.blank? && evento.sacerdote_id.present?
+          evento.update!(esportula_destinatario_sacerdote_id: evento.sacerdote_id)
+        end
+      end
     end
   end
 end

@@ -46,6 +46,12 @@ sacerdotes_data.each do |attrs|
 end
 puts "   ✓ #{Sacerdote.count} sacerdotes"
 
+DestinatarioEsportula.find_or_create_by!(nome: "Padres Eudistas") do |d|
+  d.ativo = true
+  d.observacoes = "Pagamento acumulado das missas do horário fixo (ex.: seg–sex 12:10)."
+end
+puts "   ✓ Destinatário espórtula: Padres Eudistas"
+
 # Ministros
 puts "\n👥 Criando ministros..."
 ministros_data = [
@@ -147,6 +153,17 @@ Financeiro::PlanoContaSeedService.call
 ContaCorrente.padrao
 FinanceiroConfiguracao.instancia
 puts "   ✓ #{PlanoConta.count} contas no plano · caixa: #{ContaCorrente.padrao.nome}"
+
+puts "\n📖 IGMR (cartaz liturgia) — parágrafo 51 (conferir com o livro)..."
+IgmrParagrafo.find_or_create_by!(numero: 51) do |p|
+  p.fonte = "Rascunho — conferir com o livro físico"
+  p.texto_conferido = false
+  p.texto = <<~TEXTO.squish
+    Em seguida, o sacerdote convida para o ato penitencial, que após breve pausa de silêncio
+    se realiza de acordo com uma das fórmulas previstas no Missal. A fórmula geral começa com
+    a invocação “Confessai-vos a Deus”, ou com outras palavras semelhantes.
+  TEXTO
+end
 
 puts "\n📆 Criando competência do mês atual..."
 hoje = Date.current

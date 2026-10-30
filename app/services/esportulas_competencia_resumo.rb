@@ -18,7 +18,8 @@ class EsportulasCompetenciaResumo
       total_servicos: linhas.sum { |l| l[:total_servicos] },
       previsto: linhas.sum { |l| l[:previsto] },
       realizado: linhas.sum { |l| l[:realizado] },
-      saldo: linhas.sum { |l| l[:saldo] }
+      saldo: linhas.sum { |l| l[:saldo] },
+      previsto_imediato: linhas.sum { |l| l[:previsto_imediato] }
     }
     [linhas, totais]
   end
@@ -44,7 +45,12 @@ class EsportulasCompetenciaResumo
           AND e2.sacerdote_id = evento_escala.sacerdote_id
           AND e2.status <> 'cancelado'
           AND e2.valor_esportula > 0
+          AND e2.esportula_modo = 'imediato'
       ), 0) AS realizado
+    SQL
+
+    previsto_imediato_sql = <<~SQL.squish
+      COALESCE(SUM(CASE WHEN evento_escala.esportula_modo = 'imediato' THEN evento_escala.valor_esportula ELSE 0 END), 0) AS previsto_imediato
     SQL
 
     agregados = base_scope
@@ -56,6 +62,7 @@ class EsportulasCompetenciaResumo
         Arel.sql("SUM(CASE WHEN tipo_servicos.nome ILIKE '%missa%' THEN 1 ELSE 0 END) AS missas"),
         Arel.sql("SUM(CASE WHEN tipo_servicos.nome ILIKE '%confiss%' THEN 1 ELSE 0 END) AS confissoes"),
         Arel.sql("COALESCE(SUM(evento_escala.valor_esportula), 0) AS previsto"),
+        Arel.sql(previsto_imediato_sql),
         Arel.sql(realizado_sql)
       )
 
@@ -67,6 +74,7 @@ class EsportulasCompetenciaResumo
       next unless sacerdote
 
       previsto = row.read_attribute("previsto").to_d
+      previsto_imediato = row.read_attribute("previsto_imediato").to_d
       realizado = row.read_attribute("realizado").to_d
       {
         sacerdote: sacerdote,
@@ -74,8 +82,9 @@ class EsportulasCompetenciaResumo
         confissoes: row.read_attribute("confissoes").to_i,
         total_servicos: row.read_attribute("total_servicos").to_i,
         previsto: previsto,
+        previsto_imediato: previsto_imediato,
         realizado: realizado,
-        saldo: previsto - realizado
+        saldo: previsto_imediato - realizado
       }
     end.sort_by { |l| l[:sacerdote].nome.to_s.downcase }
   end
