@@ -1,0 +1,82 @@
+<% ld = local_assigns[:ld] || @liturgia_dia %>
+<% cartaz = local_assigns[:cartaz] || @cartaz %>
+<% export_embed = local_assigns.fetch(:export_embed, false) %>
+<% santo_src = export_embed ? liturgia_cartaz_imagem_santo_data_uri(ld) : liturgia_cartaz_blob_url(ld.imagem_santo) %>
+<% cor = ld.cor.presence || "—" %>
+<% rotulo_cor = cor == "—" ? "—" : cor.upcase %>
+<% titulo_festa = ld.titulo.to_s.split("|").first.to_s.strip.presence || ld.titulo %>
+
+<article id="mesc-card-export" class="mesc-card" aria-label="MESC Liturgia do dia">
+  <div class="mesc-card-bg" aria-hidden="true">
+    <img src="<%= liturgia_mesc_moldura_data_uri %>" width="<%= LiturgiaCartazHelper::MESC_V2_WIDTH %>" height="<%= LiturgiaCartazHelper::MESC_V2_HEIGHT %>" alt="">
+  </div>
+  <% if santo_src.present? %>
+    <div class="mesc-layer mesc-foto" aria-hidden="true">
+      <%= image_tag santo_src, alt: "", crossorigin: export_embed ? nil : "anonymous" %>
+    </div>
+  <% end %>
+
+  <div class="mesc-layer mesc-caixa-festa">
+    <% if titulo_festa.present? %>
+      <div class="mesc-festa-principal"><%= titulo_festa.upcase %></div>
+    <% end %>
+  </div>
+
+  <div class="mesc-layer mesc-caixa-dia">
+    <div class="mesc-dia-linha">
+      <span class="mesc-dia-semana"><%= l(ld.data, format: "%A").upcase %></span>
+      <span class="mesc-dia-sep">·</span>
+      <span class="mesc-data-extenso"><%= l(ld.data, format: "%d de %B de %Y").upcase %></span>
+    </div>
+  </div>
+
+  <span class="mesc-layer mesc-cor-dot" style="background-color: <%= ld.cor_css %>;<%= cor.to_s.downcase.start_with?('branc') ? 'border:1px solid #94a3b8;' : '' %>"></span>
+  <span class="mesc-layer mesc-cor-valor"><%= rotulo_cor %></span>
+
+  <% if ld.santo_nome.present? || ld.santo_descricao.present? %>
+    <div class="mesc-layer mesc-santo">
+      <% if ld.santo_nome.present? %>
+        <div class="mesc-santo-nome"><%= ld.santo_nome %></div>
+      <% end %>
+      <% if ld.santo_descricao.present? %>
+        <div class="mesc-santo-desc"><%= ld.santo_descricao %></div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if cartaz.linhas_leitura.any? %>
+    <div class="mesc-layer mesc-leituras-mask" aria-hidden="true"></div>
+    <div class="mesc-layer mesc-leituras">
+      <% cartaz.linhas_leitura.each do |linha| %>
+        <% rotulo = linha.rotulo == "Responsório" ? "Salmo responsorial" : linha.rotulo %>
+        <div class="mesc-leitura-linha">
+          <div class="mesc-ref"><%= rotulo %> — <%= linha.referencia %></div>
+          <div class="mesc-trecho">“<%= linha.trecho %>”</div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mesc-layer mesc-igmr-mask" aria-hidden="true"></div>
+  <div class="mesc-layer mesc-igmr">
+    <% if cartaz.igmr_paragrafo %>
+      <p class="mesc-igmr-texto"><%= cartaz.igmr_paragrafo.texto_para_cartaz %></p>
+    <% else %>
+      <p class="mesc-igmr-pendente">Cadastre o IGMR n.º <%= cartaz.igmr_numero %>.</p>
+    <% end %>
+  </div>
+
+  <% if cartaz.linhas_escala.any? %>
+    <table class="mesc-layer mesc-escala">
+      <tbody>
+        <% cartaz.linhas_escala.each do |linha| %>
+          <tr>
+            <td class="mesc-col-hora"><%= linha.horario %></td>
+            <td class="mesc-col-pres"><%= linha.presidente %></td>
+            <td class="mesc-col-min"><%= linha.ministros_celula %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</article>

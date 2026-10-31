@@ -8,8 +8,12 @@ module Liturgia
 
     class Erro < StandardError; end
 
-    # Mesmas proporções do JPG-molde (576×1024); deviceScaleFactor 2 → PNG ~1152×2048.
-    VIEWPORT = { width: 576, height: 1024 }.freeze
+    # Canvas lógico 1152×2048 (moldura 2×); deviceScaleFactor 2 → PNG ~2304×4096, texto nítido no WhatsApp.
+    VIEWPORT = {
+      width: CANVAS_BASE_WIDTH * EXPORT_SCALE,
+      height: CANVAS_BASE_HEIGHT * EXPORT_SCALE,
+      deviceScaleFactor: 2
+    }.freeze
 
     def self.call(liturgia_dia)
       new(liturgia_dia).call
@@ -25,11 +29,14 @@ module Liturgia
       png = Grover.new(
         html,
         format: "png",
-        viewport: VIEWPORT.merge(deviceScaleFactor: 2),
+        viewport: VIEWPORT,
+        full_page: false,
+        selector: "#cartaz-poster-export",
         display_url: display_url,
-        launch_args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        launch_args: ["--no-sandbox", "--disable-setuid-sandbox", "--font-render-hinting=none"],
         wait_until: "load",
-        timeout: 90_000
+        timeout: 120_000,
+        delay: 800
       ).to_png
 
       raise Erro, "PNG vazio" if png.blank?
@@ -42,11 +49,14 @@ module Liturgia
     def attach!
       png = call
       filename = "escala-MESC-#{@liturgia.data.strftime('%d-%m-%Y')}-igmr-#{@cartaz.igmr_numero}.png"
+      # Substitui o arquivo anterior (sem isso alguns backends mantêm o blob antigo visível no cache).
+      @liturgia.cartaz_whatsapp.purge if @liturgia.cartaz_whatsapp.attached?
       @liturgia.cartaz_whatsapp.attach(
         io: StringIO.new(png),
         filename: filename,
         content_type: "image/png"
       )
+      @liturgia.touch
       @liturgia
     end
 

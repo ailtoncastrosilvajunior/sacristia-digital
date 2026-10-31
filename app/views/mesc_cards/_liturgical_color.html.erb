@@ -1,0 +1,6 @@
+<% ld = local_assigns[:ld] %>
+<% cor = ld.cor.presence || "—" %>
+<section class="mesc-cor" aria-label="Cor litúrgica">
+  <span class="mesc-cor-dot" style="background-color: <%= ld.cor_css %>;<%= cor.to_s.downcase.start_with?('branc') ? 'border:1px solid #94a3b8;' : '' %>"></span>
+  <span class="mesc-cor-label">Cor litúrgica: <%= cor %></span>
+</section>

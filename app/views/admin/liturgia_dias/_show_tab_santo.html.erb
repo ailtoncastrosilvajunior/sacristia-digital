@@ -1,0 +1,29 @@
+<div class="bg-white rounded-xl border p-4 flex gap-4 <%= liturgia_dia.santo_nome.blank? && !liturgia_dia.validada? ? 'border-amber-400 ring-1 ring-amber-200' : 'border-stone-200' %>">
+  <% if liturgia_dia.imagem_santo.attached? %>
+    <%= image_tag url_for(liturgia_dia.imagem_santo), class: "w-32 h-32 sm:w-40 sm:h-40 rounded-lg object-cover border border-stone-200 shrink-0", alt: liturgia_dia.santo_nome %>
+  <% else %>
+    <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-lg border border-dashed border-stone-300 bg-stone-50 flex items-center justify-center shrink-0">
+      <span class="text-xs text-center text-stone-400 px-2">Sem imagem</span>
+    </div>
+  <% end %>
+  <div class="min-w-0 flex-1 space-y-3">
+    <div>
+      <p class="text-xs uppercase tracking-wider text-stone-500">Santo do dia — conferência manual</p>
+      <% if liturgia_dia.santo_nome.blank? && !liturgia_dia.validada? %>
+        <p class="font-semibold text-amber-800 mt-1">Nome não informado — obrigatório para validar</p>
+      <% else %>
+        <p class="font-semibold text-stone-800 mt-1 text-lg"><%= liturgia_dia.santo_nome.presence || "Não informado" %></p>
+      <% end %>
+      <% if liturgia_dia.santo_descricao.present? %>
+        <p class="text-sm text-stone-600 mt-2 whitespace-pre-line leading-relaxed"><%= liturgia_dia.santo_descricao %></p>
+      <% end %>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <%= link_to "Editar santo e liturgia", edit_admin_liturgia_dia_path(liturgia_dia), class: "px-3 py-2 rounded-lg border border-stone-300 text-sm font-medium text-stone-700 hover:bg-stone-50" %>
+      <% if liturgia_dia.imagem_santo.attached? %>
+        <%= link_to "Baixar foto", rails_blob_path(liturgia_dia.imagem_santo, disposition: "attachment"), class: "px-3 py-2 rounded-lg border border-sky-300 text-sm font-medium text-sky-800 hover:bg-sky-50" %>
+      <% end %>
+    </div>
+    <p class="text-xs text-stone-500">Imagem e textos vêm da Canção Nova (Santo do Dia). Ajuste em Editar se necessário.</p>
+  </div>
+</div>

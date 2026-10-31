@@ -182,6 +182,7 @@ module Admin
 
     def eventos_esportula_da_competencia(competencia)
       lista = competencia.evento_escalas
+        .ordinarios
         .nao_cancelados
         .includes(
           :tipo_servico, :sacerdote, :destinatario_esportula, :calendario_base, :esportula_destinatario_sacerdote,

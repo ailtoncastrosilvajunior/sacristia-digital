@@ -2,7 +2,7 @@
 
 module Admin
   class LiturgiaDiasController < Admin::BaseController
-    before_action :set_liturgia_dia, only: [:show, :edit, :update, :validar, :reabrir, :sincronizar, :remover_imagem, :cartaz, :gerar_cartaz]
+    before_action :set_liturgia_dia, only: [:show, :edit, :update, :validar, :reabrir, :sincronizar, :remover_imagem, :cartaz, :cartaz_v2, :gerar_cartaz]
 
     def index
       @mes = parse_mes(params[:mes])
@@ -19,6 +19,7 @@ module Admin
     def show
       @igmr_numero = Liturgia::IgmrRotacao.numero_para(@liturgia_dia.data)
       @igmr_paragrafo = IgmrParagrafo.find_by(numero: @igmr_numero)
+      @aba = %w[liturgia santo igmr briefing].include?(params[:aba].to_s) ? params[:aba] : "liturgia"
     end
 
     def cartaz
@@ -29,6 +30,17 @@ module Admin
 
       @cartaz = Liturgia::CartazBuilder.build(@liturgia_dia)
       render :cartaz, layout: "cartaz_whatsapp"
+    end
+
+    def cartaz_v2
+      unless @liturgia_dia.validada?
+        redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: "Valide a liturgia antes de visualizar o cartaz."
+        return
+      end
+
+      @cartaz = Liturgia::CartazBuilder.build(@liturgia_dia, trecho_max: 140)
+      @layout_warnings = Liturgia::CartazV2LayoutValidator.validate(@liturgia_dia, @cartaz)
+      render :cartaz_v2, layout: "cartaz_whatsapp"
     end
 
     def gerar_cartaz
@@ -44,10 +56,15 @@ module Admin
         return
       end
 
-      Liturgia::CartazPngGenerator.new(@liturgia_dia).attach!
-      redirect_to cartaz_admin_liturgia_dia_path(@liturgia_dia), notice: "Cartaz gerado e salvo no storage."
+      Liturgia::CartazRenderer.attach!(@liturgia_dia)
+      @liturgia_dia.reload
+      blob = @liturgia_dia.cartaz_whatsapp.blob
+      tamanho = ActiveSupport::NumberHelper.number_to_human_size(blob.byte_size)
+      renderer = Liturgia::CartazRenderer.v2? ? "v2 (1080×1920)" : "v1 (moldura)"
+      redirect_to admin_liturgia_dia_path(@liturgia_dia),
+                  notice: "Cartaz #{renderer} regerado às #{I18n.l(blob.created_at, format: '%H:%M:%S')} (#{tamanho}). Baixe o PNG para ver em tela cheia."
     rescue Liturgia::CartazPngGenerator::Erro => e
-      redirect_to cartaz_admin_liturgia_dia_path(@liturgia_dia), alert: e.message
+      redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: e.message
     end
 
     def edit

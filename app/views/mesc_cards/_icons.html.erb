@@ -1,0 +1,17 @@
+<%# Ícones SVG discretos (dourado) — substituíveis por assets definitivos depois. %>
+<% case local_assigns[:kind] %>
+<% when :ostensorio %>
+<svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <path d="M32 4v8M32 52v8M24 12h16M28 20h8v24h-8V20z" stroke="#a67c00" stroke-width="2"/>
+  <circle cx="32" cy="36" r="10" stroke="#c9a227" stroke-width="2" fill="#fff8e7"/>
+  <path d="M20 56h24" stroke="#a67c00" stroke-width="2"/>
+</svg>
+<% when :leitura %>
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h7v14H4V5zm9 0h7v14h-7V5z" stroke="#a67c00" stroke-width="1.5" fill="#fff8e7"/></svg>
+<% when :salmo %>
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 18V6l8 6-8 6z" fill="#c9a227"/></svg>
+<% when :evangelho %>
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v16M8 8h8M8 12h8M8 16h5" stroke="#a67c00" stroke-width="1.5"/></svg>
+<% when :cross %>
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v18M8 7h8" stroke="#c9a227" stroke-width="2"/></svg>
+<% end %>

@@ -1,0 +1,44 @@
+<div class="max-w-3xl space-y-6">
+  <%= link_to "← Textos IGMR", admin_igmr_paragrafos_path, class: "text-sm text-slate-500 hover:text-slate-800" %>
+  <h1 class="text-2xl font-semibold text-stone-800">Referência para a IGMR no Sacristia Digital</h1>
+
+  <div class="prose prose-stone max-w-none text-sm space-y-4">
+    <p>
+      A base do app adota <strong>uma única edição brasileira</strong>: tradução oficial em português
+      adotada no Brasil pela <strong>CNBB</strong>. Cadastre o parágrafo integral, o trecho do cartaz à parte,
+      e marque como conferido só depois de comparar com o <strong>livro físico</strong>.
+    </p>
+    <p>
+      O briefing ChatGPT envia o trecho <strong>literal</strong> do PostgreSQL — a IA não deve inventar nem reescrever a IGMR.
+      Quando o ChatGPT “busca de novo”, ele não acessa o livro CNBB de forma garantida; use estas fontes para conferência humana:
+    </p>
+
+    <h2 class="text-lg font-semibold text-stone-900 mt-6">Onde consultar (conferência)</h2>
+    <ol class="list-decimal pl-5 space-y-2 text-stone-700">
+      <li>
+        <strong>Arquidiocese de Goiânia</strong> — Instrução Geral do Missal Romano (PDF), documento disponibilizado pela arquidiocese.
+      </li>
+      <li>
+        <strong>Veritatis Splendor</strong> — Instrução Geral sobre o Missal Romano (HTML), útil para localizar parágrafos.
+      </li>
+      <li>
+        <strong>Vaticano</strong> — Instrução Geral do Missal Romano (fonte institucional). A redação portuguesa pode
+        diferir da tradução brasileira; priorize CNBB para o cadastro no app.
+      </li>
+    </ol>
+
+    <h2 class="text-lg font-semibold text-stone-900 mt-6">Política de cadastro</h2>
+    <ul class="list-disc pl-5 space-y-1 text-stone-700">
+      <li>Edição padrão no formulário: <%= IgmrParagrafo::EDICAO_REFERENCIA %></li>
+      <li>Campo <strong>texto</strong>: parágrafo integral</li>
+      <li>Campo <strong>trecho para o cartaz</strong>: recorte usado no WhatsApp e no briefing</li>
+      <li>Use <strong>Sincronizar textos CNBB</strong> na listagem para carregar/atualizar a partir do fixture oficial; parágrafos já conferidos no livro não são sobrescritos</li>
+      <li><%= link_to "Importar CSV", importar_admin_igmr_paragrafos_path, class: "text-sky-700 font-medium hover:underline" %> — opcional, para planilhas de conferência em massa</li>
+    </ul>
+
+    <p class="text-xs text-stone-500 border-t border-stone-200 pt-4">
+      Versões portuguesas de Portugal ou do Vaticano podem divergir na pontuação e vocabulário — por isso o cadastro no app
+      é a fonte única para o cartaz MESC.
+    </p>
+  </div>
+</div>

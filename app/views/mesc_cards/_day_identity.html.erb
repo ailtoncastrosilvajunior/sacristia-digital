@@ -1,0 +1,23 @@
+<% ld = local_assigns[:ld] %>
+<% data = ld.data %>
+<% santo_src = local_assigns[:santo_src] %>
+<section class="mesc-identity">
+  <div class="mesc-identity-text">
+    <div class="mesc-weekday"><%= l(data, format: "%A").upcase %></div>
+    <div class="mesc-date"><%= l(data, format: "%d de %B de %Y").upcase %></div>
+    <% if ld.titulo.present? %>
+      <div class="mesc-titulo"><%= ld.titulo.upcase %></div>
+    <% end %>
+    <% if ld.santo_nome.present? %>
+      <div class="mesc-santo-nome"><%= ld.santo_nome %></div>
+    <% end %>
+    <% if ld.santo_descricao.present? %>
+      <div class="mesc-santo-desc"><%= ld.santo_descricao %></div>
+    <% end %>
+  </div>
+  <div class="mesc-photo-frame" style="--saint-focal-x: 50%; --saint-focal-y: 22%;">
+    <% if santo_src.present? %>
+      <%= image_tag santo_src, alt: "" %>
+    <% end %>
+  </div>
+</section>

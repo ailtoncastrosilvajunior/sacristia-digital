@@ -1,17 +1,15 @@
-<div class="space-y-6 max-w-3xl">
+<div class="space-y-6 max-w-6xl">
   <div class="flex flex-wrap items-start justify-between gap-3">
     <div>
       <%= link_to "← Liturgia", admin_liturgia_dias_path, class: "text-sm text-slate-500 hover:text-slate-800" %>
-      <h1 class="text-2xl font-semibold text-stone-800 mt-1">Textos IGMR (cartaz)</h1>
+      <h1 class="text-2xl font-semibold text-stone-800 mt-1">Textos IGMR</h1>
       <p class="text-stone-500 mt-1 text-sm">
         Sequência diária a partir de 31/10/2026 = n.º 51. Hoje o cartaz pede o parágrafo <strong><%= @proximo_numero %></strong>.
-        Confira cada texto com o livro impresso antes de marcar como conferido.
+        Edição de referência: <strong><%= IgmrParagrafo::EDICAO_REFERENCIA %></strong>.
+        <%= link_to "Referências para conferência", referencia_admin_igmr_paragrafos_path, class: "text-sky-700 font-medium hover:underline" %>.
       </p>
     </div>
-    <div class="flex flex-wrap gap-2">
-      <%= link_to "Importar CSV", importar_admin_igmr_paragrafos_path, class: "px-4 py-2 rounded-lg border border-stone-300 text-sm font-medium text-stone-700 hover:bg-stone-50" %>
-      <%= link_to "Novo parágrafo", new_admin_igmr_paragrafo_path(numero: @proximo_numero), class: "px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800" %>
-    </div>
+    <%= render "toolbar_acoes", igmr: nil, numero: @proximo_numero, return_to: admin_igmr_paragrafos_path %>
   </div>
 
   <div class="rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-600 flex flex-wrap gap-x-6 gap-y-1">
@@ -23,23 +21,46 @@
   </div>
 
   <% if @paragrafos.any? %>
-    <ul class="divide-y divide-stone-200 rounded-xl border border-stone-200 bg-white overflow-hidden">
+    <div data-controller="igmr-paragrafo-filter" class="space-y-2">
+      <div class="relative">
+        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>
+        <input type="search"
+               data-igmr-paragrafo-filter-target="input"
+               data-action="input->igmr-paragrafo-filter#filter"
+               placeholder="Buscar por n.º ou trecho do texto…"
+               autocomplete="off"
+               aria-label="Buscar parágrafos IGMR"
+               class="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-400">
+      </div>
+      <p data-igmr-paragrafo-filter-target="count" class="hidden text-xs text-stone-500 px-1"></p>
+      <div class="space-y-3 max-h-[calc(100dvh-19rem)] overflow-y-auto overscroll-contain pr-0.5">
       <% @paragrafos.each do |p| %>
-        <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <div class="min-w-0">
+        <% search_blob = [p.numero, p.texto, p.trecho_cartaz, p.texto_conferido? ? "conferido" : "aguardando"].compact.join(" ") %>
+        <%= tag.article class: "rounded-xl border border-stone-200 bg-white shadow-sm px-5 py-4 flex flex-wrap items-start justify-between gap-3",
+              data: { igmr_paragrafo_filter_target: "item", search: search_blob } do %>
+          <div class="min-w-0 flex-1">
             <p class="font-semibold text-stone-900">IGMR n.º <%= p.numero %></p>
-            <p class="text-sm text-stone-600 truncate max-w-xl"><%= truncate(p.texto, length: 100) %></p>
+            <p class="text-sm text-stone-600 line-clamp-2 mt-1"><%= truncate(p.texto, length: 220) %></p>
             <% if p.texto_conferido? %>
-              <span class="text-xs text-emerald-700 font-medium">Conferido com o livro</span>
+              <span class="inline-block mt-2 text-xs text-emerald-700 font-medium">Conferido com o livro</span>
             <% else %>
-              <span class="text-xs text-amber-700">Aguardando conferência</span>
+              <span class="inline-block mt-2 text-xs text-amber-700">Aguardando conferência</span>
             <% end %>
           </div>
-          <%= link_to "Editar", edit_admin_igmr_paragrafo_path(p), class: "text-sm font-medium text-sky-700 hover:underline shrink-0" %>
-        </li>
+          <%= render "lista_card_acoes", paragrafo: p, return_to: admin_igmr_paragrafos_path %>
+        <% end %>
       <% end %>
-    </ul>
+      </div>
+      <p data-igmr-paragrafo-filter-target="empty" class="hidden text-sm text-stone-500 text-center py-6 rounded-xl border border-dashed border-stone-200 bg-white">
+        Nenhum parágrafo corresponde à busca.
+      </p>
+    </div>
   <% else %>
-    <p class="text-stone-500 text-sm">Nenhum parágrafo cadastrado ainda.</p>
+    <p class="text-stone-500 text-sm">Nenhum parágrafo cadastrado ainda. Use <strong>Sincronizar textos CNBB</strong> para carregar os 399 parágrafos do fixture.</p>
   <% end %>
+
+  <p class="text-xs text-stone-500">
+    Importação manual por CSV (conferência em massa):
+    <%= link_to "Importar CSV", importar_admin_igmr_paragrafos_path, class: "text-sky-700 hover:underline" %>.
+  </p>
 </div>

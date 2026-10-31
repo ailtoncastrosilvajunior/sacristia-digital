@@ -1,0 +1,26 @@
+<% cartaz = local_assigns[:cartaz] %>
+<div class="mesc-escala-wrap">
+  <div class="mesc-escala-banner">Escala dos MESC | Servir é amor em ação</div>
+  <% if cartaz.linhas_escala.any? %>
+    <table class="mesc-escala-table">
+      <thead>
+        <tr>
+          <th class="col-hora">Horário</th>
+          <th class="col-pres">Presidente</th>
+          <th class="col-min">Ministros</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% cartaz.linhas_escala.each do |linha| %>
+          <tr>
+            <td class="col-hora"><%= linha.horario %></td>
+            <td class="col-pres"><%= linha.presidente %></td>
+            <td class="col-min"><%= linha.ministros_celula %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p style="text-align:center;padding:16px;color:var(--muted);font-weight:600;">Nenhuma celebração na escala deste dia.</p>
+  <% end %>
+</div>

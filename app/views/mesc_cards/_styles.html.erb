@@ -1,0 +1,260 @@
+<%# v2 fiel à moldura MESC aprovada: fundo 1080×1920 + camadas de texto (sem layout genérico). %>
+<style>
+  .mesc-card {
+    --s: <%= LiturgiaCartazHelper::MESC_V2_SCALE %>;
+    --fs: <%= ENV.fetch("LITURGIA_CARTAZ_FONT_SCALE", "1.1") %>;
+    position: relative;
+    width: <%= LiturgiaCartazHelper::MESC_V2_WIDTH %>px;
+    height: <%= LiturgiaCartazHelper::MESC_V2_HEIGHT %>px;
+    margin: 0 auto;
+    background: #fdfcfa;
+    overflow: hidden;
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    color: #0b2d5c;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+  .mesc-card-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .mesc-card-bg img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .mesc-layer {
+    position: absolute;
+    overflow: hidden;
+    z-index: 2;
+  }
+  .mesc-caixa-festa {
+    left: calc(38px * var(--s));
+    top: calc(256px * var(--s));
+    width: calc(262px * var(--s));
+    height: calc(50px * var(--s));
+    display: flex;
+    align-items: center;
+    padding: 0 calc(6px * var(--s));
+    background: rgba(255, 252, 245, 0.94);
+    border-radius: calc(6px * var(--s));
+  }
+  .mesc-festa-principal {
+    font-size: calc(10px * var(--s) * var(--fs));
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1.22;
+    text-transform: uppercase;
+    color: #1b6b3a;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mesc-caixa-dia {
+    left: calc(38px * var(--s));
+    top: calc(312px * var(--s));
+    width: calc(262px * var(--s));
+    height: calc(28px * var(--s));
+    display: flex;
+    align-items: center;
+    padding: 0 calc(6px * var(--s));
+    background: rgba(255, 252, 245, 0.94);
+    border-radius: calc(6px * var(--s));
+  }
+  .mesc-dia-linha {
+    font-size: calc(9.5px * var(--s) * var(--fs));
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 1.15;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mesc-dia-semana { color: #0b2d5c; font-size: calc(11px * var(--s) * var(--fs)); }
+  .mesc-dia-sep { margin: 0 calc(3px * var(--s)); opacity: 0.65; }
+  .mesc-data-extenso { color: #1b6b3a; }
+  /* Só preenche o círculo da moldura; o rótulo “COR LITÚRGICA:” já está na arte. */
+  .mesc-cor-dot {
+    left: calc(51px * var(--s));
+    top: calc(357px * var(--s));
+    width: calc(15px * var(--s));
+    height: calc(15px * var(--s));
+    border-radius: 50%;
+    z-index: 3;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+  }
+  .mesc-cor-valor {
+    left: calc(168px * var(--s));
+    top: calc(358px * var(--s));
+    width: calc(140px * var(--s));
+    height: calc(16px * var(--s));
+    font-size: calc(8.5px * var(--s) * var(--fs));
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #14532d;
+    line-height: calc(16px * var(--s));
+    z-index: 3;
+  }
+  .mesc-santo {
+    left: calc(38px * var(--s));
+    top: calc(382px * var(--s));
+    width: calc(292px * var(--s));
+    height: calc(62px * var(--s));
+  }
+  .mesc-santo-nome {
+    font-size: calc(11px * var(--s) * var(--fs));
+    font-weight: 800;
+    color: #b91c1c;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mesc-santo-desc {
+    margin-top: calc(2px * var(--s));
+    font-size: calc(8.5px * var(--s) * var(--fs));
+    font-weight: 600;
+    color: #334155;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mesc-foto {
+    z-index: 1;
+    left: calc(346px * var(--s));
+    top: calc(256px * var(--s));
+    width: calc(198px * var(--s));
+    height: calc(132px * var(--s));
+    clip-path: polygon(8% 6%, 92% 6%, 100% 22%, 100% 100%, 0 100%, 0 22%);
+    overflow: hidden;
+  }
+  .mesc-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--saint-focal-x, 50%) var(--saint-focal-y, 18%);
+    display: block;
+    image-rendering: auto;
+  }
+  /* Máscara sobre as linhas azuis de placeholder da moldura (só área de texto, ícones ficam visíveis). */
+  .mesc-leituras-mask {
+    left: calc(108px * var(--s));
+    top: calc(452px * var(--s));
+    width: calc(452px * var(--s));
+    height: calc(178px * var(--s));
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: calc(4px * var(--s));
+    z-index: 1;
+  }
+  .mesc-leituras {
+    left: calc(118px * var(--s));
+    top: calc(458px * var(--s));
+    width: calc(438px * var(--s));
+    height: calc(166px * var(--s));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: calc(2px * var(--s));
+    z-index: 2;
+  }
+  .mesc-leitura-linha {
+    flex: 0 0 auto;
+    overflow: hidden;
+    padding: calc(2px * var(--s)) 0;
+  }
+  .mesc-ref {
+    font-weight: 800;
+    font-size: calc(9.2px * var(--s) * var(--fs));
+    color: #0b2d5c;
+    line-height: 1.2;
+    margin-bottom: calc(1px * var(--s));
+  }
+  .mesc-trecho {
+    font-size: calc(8.8px * var(--s) * var(--fs));
+    font-weight: 600;
+    font-style: italic;
+    color: #1e3a5f;
+    line-height: 1.22;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mesc-igmr-mask {
+    left: calc(108px * var(--s));
+    top: calc(664px * var(--s));
+    width: calc(452px * var(--s));
+    height: calc(92px * var(--s));
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: calc(4px * var(--s));
+    z-index: 1;
+  }
+  .mesc-igmr {
+    left: calc(118px * var(--s));
+    top: calc(670px * var(--s));
+    width: calc(438px * var(--s));
+    height: calc(82px * var(--s));
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: calc(9.4px * var(--s) * var(--fs));
+    color: #1e3a5f;
+    line-height: 1.36;
+    z-index: 2;
+  }
+  .mesc-igmr-texto {
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mesc-igmr-pendente {
+    font-family: "Source Sans 3", sans-serif;
+    font-size: calc(8px * var(--s));
+    color: #9a3412;
+    margin: 0;
+  }
+  .mesc-escala {
+    left: calc(40px * var(--s));
+    /* Primeira linha de dados abaixo do cabeçalho desenhado na moldura */
+    top: calc(832px * var(--s));
+    width: calc(508px * var(--s));
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: calc(8.8px * var(--s) * var(--fs));
+  }
+  .mesc-escala td {
+    padding: calc(4px * var(--s)) calc(3px * var(--s));
+    vertical-align: middle;
+    font-weight: 700;
+    color: #0b2d5c;
+    text-align: center;
+    height: calc(21px * var(--s));
+    background: rgba(255, 255, 255, 0.92);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mesc-escala .mesc-col-hora { width: 16%; font-weight: 800; }
+  .mesc-escala .mesc-col-pres { width: 30%; font-size: calc(8.2px * var(--s) * var(--fs)); }
+  .mesc-escala .mesc-col-min {
+    width: 54%;
+    font-size: calc(8.2px * var(--s) * var(--fs));
+    text-align: left;
+    padding-left: calc(8px * var(--s));
+    white-space: normal;
+    line-height: 1.15;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+</style>

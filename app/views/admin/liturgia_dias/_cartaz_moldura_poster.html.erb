@@ -1,15 +1,17 @@
 <% ld = local_assigns[:ld] || @liturgia_dia %>
 <% cartaz = local_assigns[:cartaz] || @cartaz %>
+<% export_embed = local_assigns.fetch(:export_embed, false) %>
 <% data = ld.data %>
 <% igmr = cartaz.igmr_paragrafo %>
 <% max_min = cartaz.linhas_escala.map { |l| l.ministros.size }.max.to_i %>
 <% max_min = 3 if max_min < 1 %>
-<% festa = ld.titulo.presence || ld.santo_nome.to_s %>
+<% festa = ld.titulo.presence %>
+<% santo_src = export_embed ? liturgia_cartaz_imagem_santo_data_uri(ld) : liturgia_cartaz_blob_url(ld.imagem_santo) %>
 
 <article id="cartaz-poster-export" class="lm-canvas" aria-label="Cartaz liturgia do dia">
-  <% if ld.imagem_santo.attached? %>
+  <% if santo_src.present? %>
     <div class="lm-layer lm-foto" aria-hidden="true">
-      <%= image_tag liturgia_cartaz_blob_url(ld.imagem_santo), alt: "" %>
+      <%= image_tag santo_src, alt: "", crossorigin: export_embed ? nil : "anonymous" %>
     </div>
   <% end %>
 
@@ -28,7 +30,16 @@
   </div>
 
   <span class="lm-layer lm-cor-dot" style="background-color: <%= ld.cor_css %>;<%= ld.cor.to_s.downcase.start_with?('branc') ? 'border:1px solid #94a3b8;' : '' %>"></span>
-  <span class="lm-layer lm-cor-nome"><%= ld.cor.presence || "—" %></span>
+  <span class="lm-layer lm-cor-nome">COR LITÚRGICA: <%= (ld.cor.presence || "—").upcase %></span>
+
+  <% if ld.santo_nome.present? %>
+    <div class="lm-layer lm-santo">
+      <div class="lm-santo-nome"><%= ld.santo_nome %></div>
+      <% if ld.santo_descricao.present? %>
+        <div class="lm-santo-desc"><%= ld.santo_descricao %></div>
+      <% end %>
+    </div>
+  <% end %>
 
   <% if cartaz.linhas_leitura.any? %>
     <div class="lm-layer lm-leituras">
@@ -43,7 +54,8 @@
 
   <div class="lm-layer lm-igmr">
     <% if igmr %>
-      <p class="lm-igmr-texto"><strong><%= igmr.numero %>.</strong> <%= truncate(igmr.texto, length: 360) %></p>
+      <p class="lm-igmr-label">IGMR, n. <%= igmr.numero %> (trecho)</p>
+      <p class="lm-igmr-texto"><%= truncate(igmr.texto_para_cartaz, length: 420) %></p>
     <% else %>
       <p class="lm-igmr-pendente">Cadastre o parágrafo <%= cartaz.igmr_numero %> em Admin → IGMR.</p>
     <% end %>

@@ -1,0 +1,13 @@
+<% cartaz = local_assigns[:cartaz] %>
+<h2 class="mesc-section-title">Formação MESC | IGMR</h2>
+<div class="mesc-igmr-box">
+  <% igmr = cartaz.igmr_paragrafo %>
+  <% if igmr %>
+    <div class="mesc-igmr-label">IGMR, n. <%= igmr.numero %> (trecho)</div>
+    <p class="mesc-igmr-texto"><%= igmr.texto_para_cartaz %></p>
+  <% else %>
+    <p class="mesc-igmr-texto" style="color:#9a3412;font-family:inherit;font-size:16px;">
+      Cadastre o parágrafo <%= cartaz.igmr_numero %> em Admin → IGMR.
+    </p>
+  <% end %>
+</div>

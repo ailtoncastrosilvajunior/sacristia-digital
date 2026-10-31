@@ -1,4 +1,9 @@
 <div class="max-w-3xl space-y-4">
+  <% if @return_to.present? %>
+    <%= link_to "← Voltar à liturgia do dia", @return_to, class: "text-sm text-sky-700 font-medium hover:underline" %>
+  <% else %>
+    <%= link_to "← Textos IGMR", admin_igmr_paragrafos_path, class: "text-sm text-slate-500 hover:text-slate-800" %>
+  <% end %>
   <h1 class="text-2xl font-semibold text-stone-800">Cadastrar parágrafo IGMR</h1>
-  <%= render "form", paragrafo: @paragrafo %>
+  <%= render "form", paragrafo: @paragrafo, return_to: @return_to %>
 </div>

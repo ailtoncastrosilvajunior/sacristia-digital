@@ -1,0 +1,88 @@
+<% content_for :title, "IGMR n.º #{@paragrafo.numero} — Textos IGMR" %>
+<% show_path = admin_igmr_paragrafo_path(@paragrafo) %>
+<% back_path = @return_to.presence || admin_igmr_paragrafos_path %>
+
+<div class="space-y-6 max-w-6xl w-full">
+  <div>
+    <%= link_to "← Textos IGMR", back_path, class: "text-sm text-stone-500 hover:text-stone-800 mb-3 inline-block" %>
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div class="min-w-0">
+        <p class="text-xs font-medium uppercase tracking-wide text-stone-400">Parágrafo IGMR</p>
+        <h1 class="mt-1 text-2xl font-semibold text-stone-900 tracking-tight">IGMR n.º <%= @paragrafo.numero %></h1>
+        <p class="mt-1 text-sm text-stone-600"><%= @paragrafo.rotulo_edicao %></p>
+      </div>
+      <%= render "toolbar_acoes", igmr: @paragrafo, numero: @paragrafo.numero, return_to: show_path %>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-sky-50/80 via-white to-stone-50/80 p-6 shadow-sm ring-1 ring-stone-100/80">
+    <div class="flex flex-wrap items-center gap-2">
+      <% if @paragrafo.texto_conferido? %>
+        <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300">Conferido com o livro</span>
+      <% else %>
+        <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border bg-amber-100 text-amber-900 border-amber-300">Aguardando conferência</span>
+      <% end %>
+      <% if @paragrafo.numero == @numero_hoje %>
+        <span class="inline-flex px-3 py-1.5 text-xs font-semibold rounded-full border bg-sky-100 text-sky-800 border-sky-300">Cartaz de hoje</span>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden divide-y divide-stone-100">
+    <section class="p-6 sm:p-8">
+      <h2 class="text-sm font-semibold text-stone-900 mb-4">Cadastro</h2>
+      <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Número</dt>
+          <dd class="mt-1 text-stone-900 font-semibold tabular-nums"><%= @paragrafo.numero %></dd>
+        </div>
+        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Edição</dt>
+          <dd class="mt-1 text-stone-900"><%= @paragrafo.edicao.presence || "—" %></dd>
+        </div>
+        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3 sm:col-span-2">
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Onde conferiu</dt>
+          <dd class="mt-1 text-stone-900"><%= @paragrafo.fonte.presence || "—" %></dd>
+        </div>
+        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Atualizado em</dt>
+          <dd class="mt-1 text-stone-900 tabular-nums"><%= l(@paragrafo.updated_at, format: "%d/%m/%Y %H:%M") %></dd>
+        </div>
+        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Cadastrado em</dt>
+          <dd class="mt-1 text-stone-900 tabular-nums"><%= l(@paragrafo.created_at, format: "%d/%m/%Y %H:%M") %></dd>
+        </div>
+      </dl>
+    </section>
+
+    <% if @paragrafo.trecho_cartaz.present? %>
+      <section class="p-6 sm:p-8">
+        <h2 class="text-sm font-semibold text-stone-900 mb-2">Trecho para cartaz / briefing</h2>
+        <p class="text-xs text-stone-500 mb-3">Texto usado no WhatsApp e no briefing ChatGPT quando preenchido.</p>
+        <div class="rounded-xl border border-sky-100 bg-sky-50/40 px-4 py-4">
+          <p class="text-sm font-serif leading-relaxed text-stone-800 whitespace-pre-line"><%= @paragrafo.trecho_cartaz %></p>
+        </div>
+      </section>
+    <% end %>
+
+    <section class="p-6 sm:p-8">
+      <h2 class="text-sm font-semibold text-stone-900 mb-2">Texto integral do parágrafo</h2>
+      <% unless @paragrafo.trecho_cartaz.present? %>
+        <p class="text-xs text-stone-500 mb-3">Sem trecho separado — o cartaz usa este texto completo.</p>
+      <% end %>
+      <div class="rounded-xl border border-stone-100 bg-stone-50/30 px-4 py-4">
+        <p class="text-sm font-serif leading-relaxed text-stone-800 whitespace-pre-line"><%= @paragrafo.texto %></p>
+      </div>
+    </section>
+
+    <section class="p-6 sm:p-8 bg-stone-50/40">
+      <h2 class="text-sm font-semibold text-stone-900 mb-2">Prévia no cartaz</h2>
+      <p class="text-xs text-stone-500 mb-3">Como entra em <code class="text-xs bg-stone-100 px-1 rounded">texto_para_cartaz</code>.</p>
+      <div class="rounded-xl border border-dashed border-stone-200 bg-white px-4 py-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-sky-800 mb-2">IGMR, n. <%= @paragrafo.numero %> (trecho)</p>
+        <p class="text-sm font-serif leading-relaxed text-stone-800 whitespace-pre-line"><%= @paragrafo.texto_para_cartaz %></p>
+      </div>
+    </section>
+  </div>
+</div>

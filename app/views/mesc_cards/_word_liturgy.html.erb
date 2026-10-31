@@ -1,0 +1,20 @@
+<% cartaz = local_assigns[:cartaz] %>
+<h2 class="mesc-section-title">Liturgia da palavra</h2>
+<div class="mesc-leituras">
+  <% cartaz.linhas_leitura.each do |linha| %>
+    <% icon = case linha.rotulo
+              when /1ª/i then :leitura
+              when /2ª/i then :leitura
+              when /espons/i then :salmo
+              else :evangelho
+              end %>
+    <% rotulo_exib = linha.rotulo == "Responsório" ? "Salmo responsorial" : linha.rotulo %>
+    <article class="mesc-leitura">
+      <div class="mesc-leitura-icon"><%= render "mesc_cards/icons", kind: icon %></div>
+      <div>
+        <div class="mesc-leitura-ref"><%= rotulo_exib %> — <%= linha.referencia %></div>
+        <div class="mesc-leitura-trecho">“<%= linha.trecho %>”</div>
+      </div>
+    </article>
+  <% end %>
+</div>

@@ -48,6 +48,7 @@ Rails.application.routes.draw do
       collection { post :buscar }
       member do
         get :cartaz
+        get :cartaz_v2
         post :gerar_cartaz
         post :validar
         post :reabrir
@@ -55,10 +56,12 @@ Rails.application.routes.draw do
         delete :remover_imagem
       end
     end
-    resources :igmr_paragrafos, path: "igmr", only: %i[index new create edit update] do
+    resources :igmr_paragrafos, path: "igmr", only: %i[index show new create edit update] do
       collection do
+        get :referencia
         get :importar
         post :importar
+        post :sincronizar_cnbb
       end
     end
     resources :destinatarios_esportula, path: "destinatarios-esportula", except: [:show]

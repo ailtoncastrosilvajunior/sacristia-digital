@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Source+Sans+3:wght@600;700;800&display=swap" rel="stylesheet">
-    <%= render "admin/liturgia_dias/cartaz_moldura_styles" %>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Source+Sans+3:wght@600;700;800&display=block" rel="stylesheet">
+    <%= render "admin/liturgia_dias/cartaz_moldura_styles", cartaz_scale: LiturgiaCartazHelper::EXPORT_SCALE %>
   </head>
-  <body style="margin:0;padding:0;background:#111;">
+  <body style="margin:0;padding:0;background:#111;width:<%= liturgia_cartaz_canvas_width(LiturgiaCartazHelper::EXPORT_SCALE) %>px;">
     <%= yield %>
   </body>
 </html>

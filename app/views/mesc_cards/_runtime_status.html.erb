@@ -1,0 +1,16 @@
+<% s = liturgia_cartaz_runtime_status %>
+<div class="mesc-runtime-status no-export" style="max-width:1080px;margin:0.75rem auto;padding:0.65rem 1rem;border-radius:10px;background:#eff6ff;border:1px solid #93c5fd;font-size:12px;color:#1e3a5f;line-height:1.45;">
+  <strong>Pipeline cartaz</strong>
+  renderizador <code><%= s[:renderer] %></code>,
+  moldura <code><%= s[:moldura] %></code> (<%= s[:moldura_mtime] %>),
+  canvas <%= s[:canvas] %>,
+  fontes ×<%= s[:font_scale] %>,
+  export DPR <%= s[:export_dpr] %>.
+  Esta página (<code>cartaz_v2</code>) é só <strong>pré-visualização HTML</strong> — não gera arquivo.
+  Use o botão <strong>Gerar PNG v2</strong> e depois <strong>Baixar PNG</strong> na liturgia.
+  <% if s[:renderer] == "v2" %>
+    Renderizador v2 ativo no servidor.
+  <% else %>
+    <span style="color:#b45309">Renderizador ainda é v1 — confira <code>LITURGIA_CARTAZ_RENDERER=v2</code> no .env e reinicie o Docker.</span>
+  <% end %>
+</div>

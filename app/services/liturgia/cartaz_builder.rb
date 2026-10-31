@@ -2,17 +2,22 @@
 
 module Liturgia
   class CartazBuilder
-    LinhaEscala = Struct.new(:horario, :presidente, :ministros, keyword_init: true)
+    LinhaEscala = Struct.new(:horario, :presidente, :ministros, keyword_init: true) do
+      def ministros_celula
+        Array(ministros).join(" | ")
+      end
+    end
     LinhaLeitura = Struct.new(:rotulo, :referencia, :trecho, keyword_init: true)
 
     attr_reader :liturgia, :igmr, :eventos, :linhas_escala, :linhas_leitura
 
-    def self.build(liturgia)
-      new(liturgia).tap(&:load!)
+    def self.build(liturgia, trecho_max: 95)
+      new(liturgia, trecho_max: trecho_max).tap(&:load!)
     end
 
-    def initialize(liturgia)
+    def initialize(liturgia, trecho_max: 95)
       @liturgia = liturgia
+      @trecho_max = trecho_max
       @igmr = IgmrRotacao.new(liturgia.data)
       @eventos = []
       @linhas_escala = []
@@ -89,11 +94,11 @@ module Liturgia
       end
     end
 
-    def trecho(texto, max: 95)
+    def trecho(texto)
       t = texto.to_s.gsub(/\s+/, " ").strip
       return "—" if t.blank?
 
-      t.length > max ? "#{t[0, max].strip}…" : t
+      t.length > @trecho_max ? "#{t[0, @trecho_max].strip}…" : t
     end
   end
 end

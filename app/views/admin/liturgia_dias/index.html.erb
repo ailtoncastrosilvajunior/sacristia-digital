@@ -19,92 +19,107 @@
     <%= link_to "#{l(@mes.next_month, format: :month_year)} →", admin_liturgia_dias_path(mes: mes_param[@mes.next_month]), class: "text-sm text-slate-600 hover:text-slate-900" %>
   </div>
 
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
     <% [
-      [@resumo[:validadas], "Validadas", "border-emerald-200 bg-emerald-50", "text-emerald-700", "text-emerald-800", "M5 13l4 4L19 7"],
-      [@resumo[:rascunhos], "Aguardando validação", "border-amber-200 bg-amber-50", "text-amber-700", "text-amber-800", "M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"],
-      [@resumo[:divergentes], "Com divergência", "border-red-200 bg-red-50", "text-red-700", "text-red-800", "M12 9v2m0 4h.01M10.3 3.9L2.4 17.5A2 2 0 004.1 20.5h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"],
-      [@resumo[:faltando], "Sem busca", "border-stone-200 bg-stone-50", "text-stone-600", "text-stone-700", "M20 12H4"]
-    ].each do |valor, rotulo, caixa, cor_icone, cor_valor, icone| %>
-      <div class="flex items-center gap-3 rounded-2xl border <%= caixa %> px-4 py-3">
-        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 <%= cor_icone %>">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= icone %>"/></svg>
-        </span>
-        <div>
-          <p class="text-2xl font-semibold leading-none <%= cor_valor %>"><%= valor %></p>
-          <p class="mt-1 text-xs <%= cor_icone %>"><%= rotulo %></p>
+      [@resumo[:validadas], "Validadas", "Liberadas aos ministros", "emerald", "M5 13l4 4L19 7"],
+      [@resumo[:rascunhos], "Aguardando validação", "Conferência pendente", "amber", "M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"],
+      [@resumo[:divergentes], "Com divergência", "Fontes em desacordo", "red", "M12 9v2m0 4h.01M10.3 3.9L2.4 17.5A2 2 0 004.1 20.5h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"],
+      [@resumo[:faltando], "Sem busca", "Ainda não importados", "stone", "M20 12H4"]
+    ].each do |valor, rotulo, descricao, tom, icone| %>
+      <% ring = { "emerald" => "hover:ring-emerald-200/70", "amber" => "hover:ring-amber-200/70", "red" => "hover:ring-red-200/70", "stone" => "hover:ring-stone-300/80" }[tom] %>
+      <% icon_wrap = { "emerald" => "bg-emerald-100 text-emerald-700", "amber" => "bg-amber-100 text-amber-800", "red" => "bg-red-100 text-red-700", "stone" => "bg-stone-100 text-stone-600" }[tom] %>
+      <% numero = { "emerald" => "text-emerald-800", "amber" => "text-amber-900", "red" => "text-red-800", "stone" => "text-stone-800" }[tom] %>
+      <div class="group rounded-xl bg-white px-2.5 py-2 sm:px-3 shadow-sm ring-1 ring-stone-200/80 <%= ring %> transition-all" title="<%= descricao %>">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg <%= icon_wrap %>">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= icone %>"/></svg>
+          </span>
+          <div class="min-w-0 leading-tight">
+            <p class="text-xl font-bold tabular-nums <%= numero %>"><%= valor %></p>
+            <p class="text-[10px] font-semibold text-stone-500 truncate"><%= rotulo %></p>
+          </div>
         </div>
       </div>
     <% end %>
   </div>
 
-  <div class="flex flex-col gap-2">
+  <div class="space-y-2 max-h-[calc(100dvh-19rem)] overflow-y-auto overscroll-contain pr-0.5 min-h-0">
     <% @dias.each do |data, reg| %>
       <% hoje = data == Date.current %>
       <% passado = data < Date.current %>
-      <article class="group flex items-center gap-3 overflow-hidden rounded-xl border bg-white px-3 py-2 transition hover:shadow-sm
-                      <%= hoje ? 'border-sky-400 ring-1 ring-sky-200' : 'border-stone-200' %> <%= 'opacity-75 hover:opacity-100' if passado && !reg&.rascunho? %>">
+      <article class="group flex flex-col sm:flex-row sm:items-stretch gap-3 shrink-0 rounded-xl border bg-white p-3 shadow-sm ring-1 ring-stone-100/80 transition
+                      hover:shadow-md hover:ring-stone-200/90
+                      <%= hoje ? 'border-sky-300/80 ring-sky-100 bg-gradient-to-r from-sky-50/40 to-white' : 'border-stone-200/90' %>
+                      <%= 'opacity-80 hover:opacity-100' if passado && !reg&.rascunho? %>">
         <% if reg %>
-          <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg border border-stone-300" style="background-color: <%= reg.cor_css %>; color: <%= reg.cor_texto_css %>">
+          <div class="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg border border-black/10 shadow-sm"
+               style="background-color: <%= reg.cor_css %>; color: <%= reg.cor_texto_css %>">
             <span class="text-lg font-bold leading-none tabular-nums"><%= data.day %></span>
-            <span class="mt-0.5 text-[9px] font-semibold uppercase tracking-wider"><%= t("date.abbr_day_names")[data.wday] %></span>
+            <span class="mt-0.5 text-[9px] font-bold uppercase tracking-wider opacity-90"><%= t("date.abbr_day_names")[data.wday] %></span>
           </div>
         <% else %>
-          <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-stone-100 text-stone-500">
+          <div class="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg border border-stone-200 bg-stone-50 text-stone-500">
             <span class="text-lg font-bold leading-none tabular-nums"><%= data.day %></span>
-            <span class="mt-0.5 text-[9px] font-semibold uppercase tracking-wider"><%= t("date.abbr_day_names")[data.wday] %></span>
+            <span class="mt-0.5 text-[9px] font-bold uppercase tracking-wider"><%= t("date.abbr_day_names")[data.wday] %></span>
           </div>
         <% end %>
 
         <div class="min-w-0 flex-1">
           <% if reg %>
-            <div class="flex items-baseline gap-2">
-              <%= link_to (reg.titulo.presence || "Sem título"), admin_liturgia_dia_path(reg), class: "truncate text-sm font-semibold text-stone-900 group-hover:text-sky-800" %>
-              <span class="shrink-0 text-xs text-stone-400"><%= reg.cor %></span>
-              <% if reg.santo_nome.present? %><span class="hidden truncate text-xs font-medium text-amber-800 lg:inline">✦ <%= reg.santo_nome %></span><% end %>
-            </div>
-            <div class="mt-1 flex flex-wrap gap-1">
-              <% reg.leituras_ordenadas.each do |lei| %>
-                <span class="inline-flex items-center rounded-md bg-stone-50 border border-stone-200 px-1.5 py-0.5 text-[11px] text-stone-600" title="<%= reg.rotulo_leitura(lei) %>">
-                  <span class="mr-1 font-semibold text-stone-500"><%= reg.rotulo_leitura(lei).sub("ª Leitura", "ª L.").sub("Evangelho", "Ev.") %></span>
-                  <%= lei["referencia"].to_s.sub(/\s*\(R\..*\)/, "").truncate(22) %>
-                </span>
-              <% end %>
-            </div>
+            <%= link_to (reg.titulo.presence || "Sem título"), admin_liturgia_dia_path(reg),
+                  class: "block text-sm font-semibold text-stone-900 group-hover:text-sky-800 transition-colors leading-snug" %>
+            <% if reg.santo_nome.present? %>
+              <p class="mt-1 text-xs font-medium text-amber-900/90 flex items-center gap-1">
+                <span class="text-amber-600" aria-hidden="true">✦</span>
+                <span class="line-clamp-1"><%= reg.santo_nome %></span>
+              </p>
+            <% end %>
+            <% if reg.leituras_ordenadas.any? %>
+              <div class="mt-1.5 flex flex-wrap gap-1">
+                <% reg.leituras_ordenadas.each do |lei| %>
+                  <% rotulo_curto = reg.rotulo_leitura(lei).sub("ª Leitura", "ª L.").sub("Evangelho", "Ev.") %>
+                  <span class="inline-flex max-w-full items-center rounded-md border border-stone-200/90 bg-stone-50/80 px-1.5 py-0.5 text-[10px] text-stone-600"
+                        title="<%= reg.rotulo_leitura(lei) %> · <%= lei["referencia"] %>">
+                    <span class="mr-1.5 shrink-0 font-semibold text-stone-500"><%= rotulo_curto %></span>
+                    <span class="truncate"><%= lei["referencia"].to_s.sub(/\s*\(R\..*\)/, "").truncate(28) %></span>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
           <% else %>
-            <p class="text-sm text-stone-400">Liturgia ainda não buscada</p>
+            <p class="text-sm text-stone-500 py-2">Liturgia ainda não buscada para este dia.</p>
           <% end %>
         </div>
 
-        <div class="flex shrink-0 items-center gap-2 text-[11px] font-medium">
-          <% if hoje %><span class="rounded-full bg-sky-100 px-2 py-0.5 text-sky-800">Hoje</span><% end %>
+        <div class="flex items-center sm:items-center justify-end gap-1.5 sm:pl-3 sm:border-l sm:border-stone-100 shrink-0">
+          <% if hoje %>
+            <span class="sm:hidden inline-flex items-center rounded-full border border-sky-200 bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-900">Hoje</span>
+          <% end %>
           <% if reg.nil? %>
-            <span class="hidden rounded-full bg-stone-200 px-2 py-0.5 text-stone-600 sm:inline">Não buscada</span>
-          <% elsif reg.validada? %>
-            <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-800">✓ Validada</span>
-          <% else %>
-            <span class="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800">Rascunho</span>
+            <span class="inline-flex items-center rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">Não buscada</span>
+          <% elsif !reg.validada? %>
+            <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-900">Rascunho</span>
             <% if reg.divergente? %>
-              <span class="rounded-full bg-red-100 px-2 py-0.5 text-red-800" title="<%= reg.divergencias.join(' | ') %>">⚠ <%= reg.divergencias.size %></span>
+              <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-800" title="<%= reg.divergencias.join(' | ') %>">⚠ <%= reg.divergencias.size %></span>
             <% end %>
           <% end %>
 
-          <div class="flex shrink-0 items-center justify-end gap-1.5 text-sm">
+          <div class="flex shrink-0 items-center justify-end gap-0.5">
             <% if reg %>
               <% if reg.validada? %>
-                <%= link_to admin_liturgia_dia_path(reg), title: "Ver", aria: { label: "Ver liturgia" }, class: "p-1.5 rounded-lg text-stone-400 hover:text-slate-600 hover:bg-stone-100 transition-colors" do %>
+                <%= link_to admin_liturgia_dia_path(reg), title: "Ver", aria: { label: "Ver liturgia" }, class: "p-1.5 rounded-lg text-stone-400 hover:text-slate-700 hover:bg-stone-100 transition-colors" do %>
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 <% end %>
               <% else %>
                 <%= link_to "Revisar", admin_liturgia_dia_path(reg),
-                      class: "inline-flex items-center rounded-lg border border-sky-600 bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 hover:border-sky-700 transition-colors" %>
+                      class: "inline-flex items-center rounded-xl border border-sky-600 bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-700 transition-colors" %>
               <% end %>
               <%= link_to edit_admin_liturgia_dia_path(reg), title: "Editar", aria: { label: "Editar liturgia" }, class: "p-1.5 rounded-lg text-stone-400 hover:text-sky-600 hover:bg-sky-50 transition-colors" do %>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
               <% end %>
             <% else %>
               <%= button_to "Buscar", buscar_admin_liturgia_dias_path(data: data), method: :post, form: { class: "inline" },
-                    class: "rounded-lg bg-white border border-stone-300 px-2.5 py-0.5 text-sm font-medium text-slate-700 hover:bg-stone-100 cursor-pointer" %>
+                    class: "rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-stone-50 cursor-pointer" %>
             <% end %>
           </div>
         </div>

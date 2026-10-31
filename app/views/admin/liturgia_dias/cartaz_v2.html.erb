@@ -1,0 +1,98 @@
+<% ld = @cartaz.liturgia %>
+<% igmr = @cartaz.igmr_paragrafo %>
+<% filename = "escala-MESC-#{ld.data.strftime('%d-%m-%Y')}-v2.png" %>
+<% v2_ativo = Liturgia::CartazRenderer.v2? %>
+
+<% content_for :title, "Cartaz v2 · #{l(ld.data)}" %>
+<%= render "mesc_cards/runtime_status" %>
+
+<% content_for :toolbar do %>
+  <div class="cartaz-toolbar-inner">
+    <%= link_to "← Liturgia", admin_liturgia_dia_path(ld), class: "cartaz-toolbar-link" %>
+    <%= link_to "Cartaz v1 (moldura)", cartaz_admin_liturgia_dia_path(ld), class: "cartaz-toolbar-link" %>
+    <% unless igmr %>
+      <%= link_to "Cadastrar IGMR #{@cartaz.igmr_numero}", new_admin_igmr_paragrafo_path(numero: @cartaz.igmr_numero), class: "cartaz-toolbar-link", style: "color:#92400e;font-weight:700" %>
+    <% end %>
+    <% if v2_ativo %>
+      <%= button_to "Gerar PNG v2", gerar_cartaz_admin_liturgia_dia_path(ld), method: :post, class: "cartaz-toolbar-btn", data: { turbo: false }, disabled: !igmr %>
+    <% else %>
+      <span class="cartaz-toolbar-hint" style="color:#92400e;font-weight:700">
+        Para gerar PNG v2, defina <code>LITURGIA_CARTAZ_RENDERER=v2</code> no .env e reinicie o servidor.
+      </span>
+    <% end %>
+    <span class="cartaz-toolbar-hint">
+      Experimento: fundo <code>liturgia-moldura-1080.png</code>, fontes +10% (<code>LITURGIA_CARTAZ_FONT_SCALE</code>), export nítido (<code>LITURGIA_CARTAZ_EXPORT_DPR=2</code>).
+      Moldura: <code>bin/rails liturgia:cartaz:prepare_moldura</code>.
+    </span>
+  </div>
+<% end %>
+
+<% content_for :head do %>
+  <%= render "mesc_cards/styles" %>
+  <style>
+    .mesc-v2-preview-stage {
+      padding: 0.65rem;
+      border-radius: 28px;
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+    }
+    .mesc-v2-preview-wrap {
+      --mesc-scale: min(0.55, calc((100vh - 280px) / 1920), calc((100vw - 48px) / 1080));
+      width: calc(1080px * var(--mesc-scale));
+      height: calc(1920px * var(--mesc-scale));
+      overflow: hidden;
+      border-radius: 18px;
+      margin: 0 auto;
+    }
+    .mesc-v2-preview-wrap .mesc-card {
+      transform: scale(var(--mesc-scale));
+      transform-origin: top left;
+    }
+    .mesc-v2-warnings {
+      max-width: 1080px;
+      margin: 1rem auto 0;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      font-size: 0.875rem;
+      color: #92400e;
+    }
+    .mesc-v2-warnings ul { margin: 0.35rem 0 0 1.1rem; }
+    .mesc-v2-fullscreen .mesc-v2-preview-wrap {
+      --mesc-scale: 1;
+      width: 1080px;
+      height: 1920px;
+      margin: 1rem auto;
+    }
+    .mesc-v2-fullscreen .mesc-v2-preview-wrap .mesc-card { transform: none; }
+    .mesc-v2-fullscreen .mesc-v2-preview-stage {
+      overflow: auto;
+      max-height: calc(100vh - 120px);
+    }
+  </style>
+<% end %>
+
+<% fullscreen = params[:fullscreen].present? %>
+<div class="no-export" style="text-align:center;margin-bottom:0.5rem;">
+  <% if fullscreen %>
+    <%= link_to "Voltar à preview reduzida", cartaz_v2_admin_liturgia_dia_path(ld), class: "text-sm font-semibold text-sky-700 underline" %>
+  <% else %>
+    <%= link_to "Ver em tamanho real (1080px, rolar)", cartaz_v2_admin_liturgia_dia_path(ld, fullscreen: 1), class: "text-sm font-semibold text-sky-700 underline" %>
+  <% end %>
+</div>
+
+<% if @layout_warnings.present? %>
+  <div class="mesc-v2-warnings no-export">
+    <strong>Revisão sugerida antes de publicar</strong>
+    <ul>
+      <% @layout_warnings.each do |w| %><li><%= w %></li><% end %>
+    </ul>
+  </div>
+<% end %>
+
+<div class="mesc-v2-preview-stage<%= " mesc-v2-fullscreen" if fullscreen %>">
+  <div class="mesc-v2-preview-wrap">
+    <%= render "mesc_cards/poster", ld: ld, cartaz: @cartaz, export_embed: false %>
+  </div>
+</div>

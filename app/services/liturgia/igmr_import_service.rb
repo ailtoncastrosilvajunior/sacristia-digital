@@ -64,7 +64,13 @@ module Liturgia
       end
 
       reg ||= IgmrParagrafo.new(numero: attrs[:numero])
-      reg.assign_attributes(texto: attrs[:texto], fonte: attrs[:fonte], texto_conferido: attrs[:texto_conferido])
+      reg.assign_attributes(
+        texto: attrs[:texto],
+        trecho_cartaz: attrs[:trecho_cartaz],
+        fonte: attrs[:fonte],
+        edicao: attrs[:edicao],
+        texto_conferido: attrs[:texto_conferido]
+      )
       if reg.new_record?
         reg.save ? @criados += 1 : registrar_erro(linha_planilha, reg)
       elsif reg.changed?
@@ -79,11 +85,15 @@ module Liturgia
       numero = h["numero"].to_s.strip.presence || h["n"].to_s.strip.presence
       texto = h["texto"].to_s.strip.presence || h["paragrafo"].to_s.strip.presence
       fonte = h["fonte"].to_s.strip.presence
+      edicao = h["edicao"].to_s.strip.presence
+      trecho = h["trecho_cartaz"].to_s.strip.presence || h["trecho"].to_s.strip.presence
       conferido = parse_bool(h["texto_conferido"] || h["conferido"])
       {
         numero: numero&.to_i,
         texto: texto,
+        trecho_cartaz: trecho,
         fonte: fonte,
+        edicao: edicao,
         texto_conferido: conferido
       }
     end

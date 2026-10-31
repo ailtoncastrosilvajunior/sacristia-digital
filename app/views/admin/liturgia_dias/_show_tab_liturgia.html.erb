@@ -1,0 +1,61 @@
+<% conferencia = liturgia_dia.leituras_conferencia.group_by { |l| l["tipo"] } %>
+
+<% if liturgia_dia.validada? %>
+  <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+    <% if liturgia_dia.validacao_automatica? %>
+      Validada <strong>automaticamente</strong> (leituras concordaram entre as fontes)
+      em <%= l(liturgia_dia.validado_em, format: "%d/%m/%Y %H:%M") if liturgia_dia.validado_em %>.
+    <% else %>
+      Validada por <strong><%= liturgia_dia.validado_por&.nome.presence || liturgia_dia.validado_por&.email || "—" %></strong>
+      em <%= l(liturgia_dia.validado_em, format: "%d/%m/%Y %H:%M") if liturgia_dia.validado_em %>.
+    <% end %>
+    Visível aos ministros.
+  </div>
+<% else %>
+  <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+    Rascunho: ainda <strong>não</strong> aparece para os ministros. Dias com divergência entre fontes ou sem nome do santo exigem conferência manual; quando tudo concorda na busca, a validação pode ser automática.
+  </div>
+<% end %>
+
+<% if liturgia_dia.divergente? %>
+  <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+    <p class="font-semibold mb-1">Pontos de atenção na conferência entre fontes (leituras)</p>
+    <ul class="list-disc pl-5 space-y-0.5">
+      <% liturgia_dia.divergencias.each do |d| %><li><%= d %></li><% end %>
+    </ul>
+  </div>
+<% elsif liturgia_dia.fonte_conferencia.present? %>
+  <div class="rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-emerald-800">As duas fontes concordam nas leituras (referências e textos). O santo não é comparado automaticamente.</div>
+<% end %>
+
+<% idx = Hash.new(0) %>
+<% liturgia_dia.leituras_ordenadas.each do |leitura| %>
+  <% outra = Array(conferencia[leitura["tipo"]])[idx[leitura["tipo"]]]; idx[leitura["tipo"]] += 1 %>
+  <section class="bg-white rounded-xl border border-stone-200 overflow-hidden">
+    <header class="px-4 py-3 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+      <h2 class="font-semibold text-stone-800"><%= liturgia_dia.rotulo_leitura(leitura) %> <span class="font-normal text-stone-500">· <%= leitura["referencia"] %></span></h2>
+      <% if outra && outra["referencia"].to_s.squish != leitura["referencia"].to_s.squish %>
+        <span class="text-xs text-red-700">2ª fonte: <%= outra["referencia"] %></span>
+      <% end %>
+    </header>
+    <div class="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-stone-200">
+      <div class="p-4">
+        <p class="text-xs uppercase tracking-wider text-stone-400 mb-2"><%= liturgia_dia.fonte %></p>
+        <p class="text-sm leading-relaxed text-stone-800 whitespace-pre-line"><%= leitura["texto"] %></p>
+      </div>
+      <div class="p-4 bg-stone-50/60">
+        <p class="text-xs uppercase tracking-wider text-stone-400 mb-2"><%= liturgia_dia.fonte_conferencia.presence || "Segunda fonte" %></p>
+        <% if outra %>
+          <p class="text-sm leading-relaxed text-stone-600 whitespace-pre-line"><%= outra["texto"] %></p>
+        <% else %>
+          <p class="text-sm text-stone-400">Sem conferência.</p>
+        <% end %>
+      </div>
+    </div>
+  </section>
+<% end %>
+
+<p class="text-xs text-stone-400">
+  Fonte: <%= link_to liturgia_dia.fonte, liturgia_dia.fonte_url, target: "_blank", rel: "noopener", class: "underline" if liturgia_dia.fonte_url.present? %>
+  <% if liturgia_dia.buscado_em %>· buscado em <%= l(liturgia_dia.buscado_em, format: "%d/%m/%Y %H:%M") %><% end %>
+</p>

@@ -18,6 +18,7 @@ class EsportulasDestinatarioAcumuladoResumo
   def call
     eventos = EventoEscala
       .where(competencia_mensal_id: @competencia.id)
+      .ordinarios
       .nao_cancelados
       .where(esportula_modo: "acumulado")
       .where("evento_escala.valor_esportula > 0")

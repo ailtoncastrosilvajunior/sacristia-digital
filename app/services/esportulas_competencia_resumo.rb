@@ -29,6 +29,7 @@ class EsportulasCompetenciaResumo
   def base_scope
     EventoEscala
       .where(competencia_mensal_id: @competencia.id)
+      .ordinarios
       .nao_cancelados
       .where("evento_escala.valor_esportula > 0")
       .where.not(sacerdote_id: nil)
@@ -42,6 +43,7 @@ class EsportulasCompetenciaResumo
         FROM evento_escala e2
         INNER JOIN registro_esportulas r ON r.evento_escala_id = e2.id AND r.status = 'pago'
         WHERE e2.competencia_mensal_id = #{comp_id}
+          AND e2.tipo_escala = 'ordinaria'
           AND e2.sacerdote_id = evento_escala.sacerdote_id
           AND e2.status <> 'cancelado'
           AND e2.valor_esportula > 0

@@ -2,13 +2,38 @@
 
 module Admin
   class IgmrParagrafosController < Admin::BaseController
-    before_action :set_paragrafo, only: %i[edit update]
+    include Admin::ReturnToRedirect
+
+    before_action :set_paragrafo, only: %i[show edit update]
+
+    def referencia
+    end
 
     def index
       @paragrafos = IgmrParagrafo.ordenados
       @proximo_numero = Liturgia::IgmrRotacao.numero_para(Date.current)
       @total_cadastrados = IgmrParagrafo.count
       @limite = IgmrParagrafo::LIMITE_ROTACAO
+    end
+
+    def sincronizar_cnbb
+      default = admin_igmr_paragrafos_path
+      fixture = Liturgia::IgmrFixtureImportService::FIXTURE_PATH
+      unless File.file?(fixture)
+        redirect_with_return_to(
+          default: default,
+          alert: "Fixture não encontrado (#{fixture.basename}). Rode o pipeline do PDF CNBB ou use bin/rails igmr:import_fixture em deploy."
+        )
+        return
+      end
+
+      res = Liturgia::IgmrFixtureImportService.call(update_existing: true, preserve_conferidos: true)
+      redirect_with_return_to(default: default, notice: "Textos CNBB sincronizados: #{resumo_fixture(res)}.")
+    end
+
+    def show
+      @return_to = safe_return_to_path
+      @numero_hoje = Liturgia::IgmrRotacao.numero_para(Date.current)
     end
 
     def importar
@@ -34,24 +59,37 @@ module Admin
     end
 
     def new
-      @paragrafo = IgmrParagrafo.new(numero: params[:numero].presence)
+      @return_to = safe_return_to_path
+      @paragrafo = IgmrParagrafo.new(
+        numero: params[:numero].presence,
+        edicao: IgmrParagrafo::EDICAO_REFERENCIA
+      )
     end
 
     def create
+      @return_to = safe_return_to_path
       @paragrafo = IgmrParagrafo.new(paragrafo_params)
       if @paragrafo.save
-        redirect_to admin_igmr_paragrafos_path, notice: "IGMR n.º #{@paragrafo.numero} cadastrado."
+        redirect_with_return_to(
+          default: admin_igmr_paragrafos_path,
+          notice: "IGMR n.º #{@paragrafo.numero} cadastrado."
+        )
       else
         render :new, status: :unprocessable_entity
       end
     end
 
     def edit
+      @return_to = safe_return_to_path
     end
 
     def update
+      @return_to = safe_return_to_path
       if @paragrafo.update(paragrafo_params)
-        redirect_to admin_igmr_paragrafos_path, notice: "IGMR n.º #{@paragrafo.numero} atualizado."
+        redirect_with_return_to(
+          default: admin_igmr_paragrafos_path,
+          notice: "IGMR n.º #{@paragrafo.numero} atualizado."
+        )
       else
         render :edit, status: :unprocessable_entity
       end
@@ -64,7 +102,15 @@ module Admin
     end
 
     def paragrafo_params
-      params.require(:igmr_paragrafo).permit(:numero, :texto, :fonte, :texto_conferido)
+      params.require(:igmr_paragrafo).permit(:numero, :texto, :trecho_cartaz, :fonte, :edicao, :texto_conferido)
+    end
+
+    def resumo_fixture(res)
+      parts = []
+      parts << "#{res.criados} criado(s)" if res.criados.positive?
+      parts << "#{res.atualizados} atualizado(s)" if res.atualizados.positive?
+      parts << "#{res.ignorados} ignorado(s)" if res.ignorados.positive?
+      parts.presence&.join(", ") || "Nenhuma alteração"
     end
   end
 end
