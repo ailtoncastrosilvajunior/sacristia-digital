@@ -70,6 +70,21 @@
           <dd class="mt-1 text-stone-900 font-medium tabular-nums"><%= @calendario_base.valor_esportula_override ? number_to_currency(@calendario_base.valor_esportula_override) : "—" %></dd>
         </div>
         <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Modo de pagamento</dt>
+          <dd class="mt-1 text-stone-900 font-medium"><%= esportula_modo_rotulo(@calendario_base.esportula_modo) %></dd>
+        </div>
+        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Instituição destinatária</dt>
+          <dd class="mt-1 text-stone-900 font-medium">
+            <% if @calendario_base.esportula_acumulado? %>
+              <%= @calendario_base.destinatario_esportula&.nome || "—" %>
+            <% else %>
+              <span class="text-stone-500 font-normal">—</span>
+              <span class="block text-xs text-stone-500 font-normal mt-0.5">Só se aplica ao modo acumulado</span>
+            <% end %>
+          </dd>
+        </div>
+        <div class="rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-3">
           <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Status</dt>
           <dd class="mt-1">
             <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full border <%= @calendario_base.ativo? ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-stone-100 text-stone-600 border-stone-200" %>">

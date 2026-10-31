@@ -1,0 +1,21 @@
+<%# locals: raizes, contas_por_pai, total_contas, filtro_ativo: false, index_params: {} %>
+<% index_params = local_assigns[:index_params] || {} %>
+<%= turbo_frame_tag "plano_contas_arvore" do %>
+  <div class="rounded-2xl border border-slate-200/90 bg-white shadow-md shadow-slate-900/5 overflow-hidden ring-1 ring-slate-100">
+    <% if raizes.empty? %>
+      <p class="px-6 py-12 text-center text-slate-500 text-sm">Nenhuma conta encontrada.</p>
+    <% else %>
+      <div class="px-2 py-2 sm:px-3 border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/90">
+        <div class="hidden sm:grid grid-cols-[1fr_auto] gap-4 px-10 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <span>Conta</span>
+          <span class="w-24 text-right">Ações</span>
+        </div>
+      </div>
+      <div class="px-1 py-2 sm:px-2 max-h-[calc(100dvh-20rem)] overflow-y-auto overscroll-contain">
+        <% raizes.each do |raiz| %>
+          <%= render "no_arvore", conta: raiz, contas_por_pai: contas_por_pai, depth: 0, filtro_ativo: filtro_ativo, index_params: index_params %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

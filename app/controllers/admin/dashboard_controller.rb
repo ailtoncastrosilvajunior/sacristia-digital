@@ -75,7 +75,7 @@ module Admin
 
     def load_esportulas_resumo(competencia)
       registros = RegistroEsportula
-        .includes(:sacerdote)
+        .includes(:sacerdote, :evento_escala)
         .por_competencia(competencia.ano, competencia.mes)
         .order(data: :desc, created_at: :desc)
         .to_a
@@ -93,7 +93,7 @@ module Admin
         valor_previsto: @eventos.sum { |e| e.valor_esportula.to_d },
         eventos_com_valor: @eventos.count { |e| e.valor_esportula.to_d.positive? }
       }
-      @esportulas_recentes = registros.first(8)
+      @esportulas_recentes = registros.first(10)
     end
 
     def build_heatmap(competencia, eventos)

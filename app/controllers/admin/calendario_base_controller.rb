@@ -55,7 +55,7 @@ module Admin
     private
 
     def set_calendario_base
-      @calendario_base = CalendarioBase.find(params[:id])
+      @calendario_base = CalendarioBase.includes(:sacerdote, :destinatario_esportula).find(params[:id])
     end
 
     def calendario_base_params

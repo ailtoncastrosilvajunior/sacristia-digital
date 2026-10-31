@@ -2,7 +2,7 @@
 
 module Admin
   class DestinatariosEsportulaController < Admin::BaseController
-    before_action :set_destinatario, only: [:edit, :update]
+    before_action :set_destinatario, only: [:edit, :update, :destroy]
 
     def index
       @destinatarios = DestinatarioEsportula.order(:nome)
@@ -29,6 +29,14 @@ module Admin
         redirect_to admin_destinatarios_esportula_index_path, notice: "Destinatário atualizado."
       else
         render :edit, status: :unprocessable_entity
+      end
+    end
+
+    def destroy
+      if @destinatario.destroy
+        redirect_to admin_destinatarios_esportula_index_path, notice: "Destinatário removido."
+      else
+        redirect_to admin_destinatarios_esportula_index_path, alert: @destinatario.errors.full_messages.to_sentence
       end
     end
 

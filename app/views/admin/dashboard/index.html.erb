@@ -171,78 +171,150 @@
         <% end %>
       </div>
 
-      <%# Heatmap + legenda %>
-      <div class="xl:col-span-5 space-y-4">
-        <div class="flex flex-col gap-1">
-          <div class="flex items-center justify-between gap-2">
-            <h3 class="text-lg font-semibold text-stone-900">Intensidade no mês</h3>
-            
-          </div>
-          <p class="text-xs text-stone-600 leading-relaxed">Clique em um <strong class="text-stone-800">dia</strong> para filtrar a lista de próximos serviços a partir dessa data.</p>
-        </div>
-        <div class="rounded-2xl border border-stone-200/80 bg-white p-4 sm:p-5 shadow-sm space-y-4">
-          <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-stone-400 mb-2">
-            <% I18n.t("date.abbr_day_names").each do |nome| %><span class="truncate"><%= nome.first(3) %></span><% end %>
-          </div>
-          <% lead = comp.periodo.wday %>
-          <div class="grid grid-cols-7 gap-1">
-            <% lead.times do %>
-              <div class="aspect-square rounded-lg bg-transparent min-h-[2rem]" aria-hidden="true"></div>
-            <% end %>
-            <% @heatmap.each do |cell| %>
-              <% c = cell[:count] %>
-              <% d = cell[:data] %>
-              <% intensity = c.zero? ? 0 : [c, 4].min %>
-              <% bg = case intensity
-                      when 0 then "bg-stone-100"
-                      when 1 then "bg-sky-200"
-                      when 2 then "bg-sky-400"
-                      when 3 then "bg-sky-600"
-                      else "bg-sky-800"
-                      end %>
-              <% txt = intensity >= 2 ? "text-white" : "text-stone-700" %>
-              <% selected = @lista_desde == d %>
-              <%= link_to admin_root_path(competencia_mensal_id: comp.id, lista_desde: d.strftime("%Y-%m-%d")),
-                    class: "aspect-square rounded-lg #{bg} overflow-hidden flex flex-col items-center justify-start text-[10px] font-bold #{txt} shadow-sm ring-1 ring-black/5 min-h-[2rem] transition-transform hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 #{selected ? "ring-2 ring-sky-600 ring-offset-2 z-[1] scale-[1.02]" : ""}",
-                    title: "#{l(d)}: #{cell[:padrao]} da escala padrão, #{cell[:extra]} da escala extra — filtrar lista" do %>
-                <span class="w-full text-center tabular-nums text-[10px] font-bold leading-none py-1 border-b <%= intensity >= 2 ? "border-white/40 text-white" : "border-stone-400/40 text-stone-700" %>"><%= l(d, format: :short) %></span>
-                <% if c > 0 %><span class="flex-1 flex items-center tabular-nums text-sm font-extrabold leading-none"><%= cell[:padrao] %><span class="opacity-70 font-bold">/</span><%= cell[:extra] %></span><% end %>
+      <%# Heatmap — legenda integrada; ajuda extra no botão ? %>
+      <div class="xl:col-span-5">
+        <div class="rounded-2xl border border-stone-200/80 bg-white shadow-sm overflow-visible">
+          <div class="relative flex flex-wrap items-start justify-between gap-2 px-4 py-3 border-b border-stone-100 bg-gradient-to-b from-slate-50/80 to-white rounded-t-2xl">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-lg font-semibold text-stone-900">Intensidade no mês</h3>
+                <details>
+                  <summary class="list-none cursor-pointer inline-flex h-6 w-6 items-center justify-center rounded-full bg-stone-100 text-[11px] font-bold text-stone-500 ring-1 ring-stone-200/80 hover:bg-stone-200 hover:text-stone-800 [&::-webkit-details-marker]:hidden" aria-label="Ajuda sobre o mapa do mês">?</summary>
+                  <div class="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-2xl border border-stone-200/90 bg-white text-stone-600 shadow-xl shadow-stone-900/10 ring-1 ring-black/5">
+                    <div class="border-b border-stone-100 bg-gradient-to-br from-slate-50 via-white to-sky-50/70 px-4 py-2.5 sm:px-5">
+                      <p class="text-sm font-semibold text-stone-900">Como ler o mapa</p>
+                    </div>
+
+                    <div class="space-y-4 px-4 py-4 sm:px-5">
+                      <div>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Intensidade no dia</p>
+                        <div class="mt-2 grid grid-cols-5 gap-2" role="list" aria-label="Escala de cores por quantidade de serviços">
+                          <div class="flex flex-col items-center gap-1 text-center" role="listitem" title="Nenhum serviço">
+                            <span class="h-9 w-full max-w-[3rem] rounded-lg bg-stone-100 shadow-sm ring-1 ring-stone-200/80"></span>
+                            <span class="text-[11px] font-bold tabular-nums text-stone-600">0</span>
+                          </div>
+                          <div class="flex flex-col items-center gap-1 text-center" role="listitem" title="1 serviço">
+                            <span class="h-9 w-full max-w-[3rem] rounded-lg bg-sky-200 shadow-sm ring-1 ring-black/5"></span>
+                            <span class="text-[11px] font-bold tabular-nums text-stone-600">1</span>
+                          </div>
+                          <div class="flex flex-col items-center gap-1 text-center" role="listitem" title="2 serviços">
+                            <span class="h-9 w-full max-w-[3rem] rounded-lg bg-sky-400 shadow-sm ring-1 ring-black/5"></span>
+                            <span class="text-[11px] font-bold tabular-nums text-stone-600">2</span>
+                          </div>
+                          <div class="flex flex-col items-center gap-1 text-center" role="listitem" title="3 serviços">
+                            <span class="h-9 w-full max-w-[3rem] rounded-lg bg-sky-600 shadow-sm ring-1 ring-black/5"></span>
+                            <span class="text-[11px] font-bold tabular-nums text-stone-600">3</span>
+                          </div>
+                          <div class="flex flex-col items-center gap-1 text-center" role="listitem" title="4 ou mais serviços">
+                            <span class="h-9 w-full max-w-[3rem] rounded-lg bg-sky-800 shadow-sm ring-1 ring-black/5"></span>
+                            <span class="text-[11px] font-bold tabular-nums text-stone-600">4+</span>
+                          </div>
+                        </div>
+                        <p class="mt-2.5 text-xs leading-relaxed text-stone-500">A cor de fundo de cada dia no mapa segue esta escala.</p>
+                      </div>
+
+                      <div class="rounded-xl border border-stone-200/80 bg-gradient-to-b from-stone-50 to-white p-4">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Exemplo de um dia</p>
+                        <div class="mt-3 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 sm:gap-4">
+                          <span class="inline-flex h-[4.25rem] w-[4.25rem] shrink-0 flex-col overflow-hidden rounded-xl bg-sky-600 text-white shadow-md ring-1 ring-sky-900/10" aria-hidden="true">
+                            <span class="border-b border-white/35 py-1 text-center text-[11px] font-bold tabular-nums">31/10</span>
+                            <span class="flex flex-1 items-center justify-center text-lg font-extrabold tabular-nums leading-none">
+                              3<span class="mx-0.5 opacity-60">/</span><span class="text-amber-300">1</span>
+                            </span>
+                          </span>
+                          <div class="min-w-0 space-y-1.5 text-sm leading-snug">
+                            <p>
+                              <span class="font-bold tabular-nums text-sky-700">3</span>
+                              <span class="text-stone-600"> na escala </span><span class="font-medium text-stone-800">padrão</span>
+                            </p>
+                            <p>
+                              <span class="font-bold tabular-nums text-amber-600">1</span>
+                              <span class="text-stone-600"> na escala </span><span class="font-medium text-stone-800">extra</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="border-t border-stone-100 bg-sky-50/40 px-4 py-3 sm:px-5">
+                      <p class="text-[10px] font-bold uppercase tracking-wider text-sky-900/80 mb-2">Como usar</p>
+                      <ol class="space-y-2 text-xs sm:text-sm leading-relaxed text-stone-700 list-none m-0 p-0">
+                        <li class="flex gap-2"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-600 text-[10px] font-bold text-white">1</span><span>Clique em um dia para a lista à esquerda começar naquela data.</span></li>
+                        <li class="flex gap-2"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-600 text-[10px] font-bold text-white">2</span><span>Abaixo do mapa aparecem os horários da data escolhida.</span></li>
+                        <li class="flex gap-2"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-600 text-[10px] font-bold text-white">3</span><span>Dia cinza sem números = nenhuma celebração na escala.</span></li>
+                      </ol>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </div>
+            <% if @lista_desde %>
+              <%= link_to admin_root_path(competencia_mensal_id: comp.id),
+                    class: "inline-flex shrink-0 items-center gap-1 rounded-lg bg-sky-100 px-2 py-1 text-[11px] font-semibold text-sky-900 ring-1 ring-sky-200/80 hover:bg-sky-200/80 transition-colors",
+                    title: "Limpar filtro por dia" do %>
+                <span class="tabular-nums"><%= l(@lista_desde, format: :short) %></span>
+                <span aria-hidden="true">×</span>
               <% end %>
             <% end %>
           </div>
-          <div class="flex flex-wrap items-center gap-3 text-xs text-stone-500 pt-1 border-t border-stone-100">
-            <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-stone-100 ring-1 ring-stone-200"></span> Sem</span>
-            <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-sky-200"></span> 1</span>
-            <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-sky-400"></span> 2</span>
-            <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded bg-sky-600"></span> 3+</span>
-          </div>
 
-
-          <% if @lista_desde && @eventos_dia_filtro.any? %>
-            <div class="rounded-xl bg-sky-50/80 border border-sky-100 p-3">
-              <p class="text-[10px] font-bold uppercase tracking-wider text-sky-800 mb-2">Neste dia · <span class="tabular-nums"><%= l(@lista_desde, format: :short) %></span> <span class="normal-case tracking-normal font-semibold">(<%= l(@lista_desde, format: "%A") %>)</span></p>
-              <ul class="space-y-2 max-h-40 overflow-y-auto">
-                <% @eventos_dia_filtro.each do |ev| %>
-                  <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
-                  <li class="flex items-start gap-2 text-xs">
-                    <span class="tabular-nums font-semibold text-stone-600 shrink-0 w-12"><%= l(ev.horario, format: :time) %></span>
-                    <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-semibold border leading-tight" style="background-color: <%= cor %>22; border-color: <%= cor %>55; color: #1e293b;"><%= ev.tipo_servico.nome %></span>
-                  </li>
-                <% end %>
-              </ul>
+          <div class="p-4 sm:p-5 space-y-4">
+            <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-stone-400">
+              <% I18n.t("date.abbr_day_names").each do |nome| %><span class="truncate"><%= nome.first(3) %></span><% end %>
             </div>
-          <% elsif @lista_desde %>
-            <p class="text-xs text-stone-500 italic">Nenhum serviço agendado exatamente neste dia.</p>
-          <% end %>
-        </div>
+            <% lead = comp.periodo.wday %>
+            <div class="grid grid-cols-7 gap-1">
+              <% lead.times do %>
+                <div class="aspect-square rounded-lg bg-transparent min-h-[2.25rem]" aria-hidden="true"></div>
+              <% end %>
+              <% @heatmap.each do |cell| %>
+                <% c = cell[:count] %>
+                <% d = cell[:data] %>
+                <% intensity = c.zero? ? 0 : [c, 4].min %>
+                <% bg = case intensity
+                        when 0 then "bg-stone-100"
+                        when 1 then "bg-sky-200"
+                        when 2 then "bg-sky-400"
+                        when 3 then "bg-sky-600"
+                        else "bg-sky-800"
+                        end %>
+                <% txt = intensity >= 2 ? "text-white" : "text-stone-700" %>
+                <% extra_num_cls = intensity >= 2 ? "text-amber-300" : "text-amber-600" %>
+                <% selected = @lista_desde == d %>
+                <% aria = c.zero? ? "#{l(d)}: sem serviços" : "#{l(d)}: #{c} serviços (#{cell[:padrao]} padrão, #{cell[:extra]} extra)" %>
+                <%= link_to admin_root_path(competencia_mensal_id: comp.id, lista_desde: d.strftime("%Y-%m-%d")),
+                      class: "aspect-square rounded-lg #{bg} overflow-hidden flex flex-col items-center justify-start text-[10px] font-bold #{txt} shadow-sm ring-1 ring-black/5 min-h-[2.25rem] transition-transform hover:scale-[1.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 #{selected ? "ring-2 ring-sky-600 ring-offset-2 z-[1] scale-[1.02]" : ""}",
+                      title: "#{aria} — filtrar lista",
+                      aria: { label: "#{aria}. Filtrar próximos serviços a partir desta data." } do %>
+                  <span class="w-full text-center tabular-nums text-[10px] font-bold leading-none py-0.5 border-b <%= intensity >= 2 ? "border-white/40 text-white" : "border-stone-400/40 text-stone-700" %>"><%= l(d, format: :short) %></span>
+                  <% if c > 0 %>
+                    <span class="flex-1 flex items-center tabular-nums text-sm font-extrabold leading-none">
+                      <%= cell[:padrao] %><span class="opacity-70 font-bold">/</span><span class="<%= extra_num_cls %>"><%= cell[:extra] %></span>
+                    </span>
+                  <% end %>
+                <% end %>
+              <% end %>
+            </div>
 
-        <div class="rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-5 shadow-lg">
-          <p class="text-sm font-medium text-slate-300">Como ler o calendário</p>
-          <ul class="mt-2 space-y-1.5 text-sm leading-relaxed text-slate-200 list-disc pl-4">
-            <li>Cada quadrado é um dia. O número grande é <strong class="text-white">padrão/extra</strong>: serviços da escala padrão / serviços da escala extra (ex.: <strong class="text-white">3/1</strong>).</li>
-            <li>Quanto mais escura a cor, mais serviços no dia (cinza = nenhum, azul claro = 1, médio = 2, escuro = 3 ou mais).</li>
-            <li>Clique em um dia para listar os próximos serviços a partir dele; o detalhe do dia aparece abaixo do calendário.</li>
-          </ul>
+            <% if @lista_desde && @eventos_dia_filtro.any? %>
+              <div class="rounded-xl bg-sky-50/80 border border-sky-100 p-3">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-sky-800 mb-2">Neste dia · <span class="tabular-nums"><%= l(@lista_desde, format: :short) %></span> <span class="normal-case tracking-normal font-semibold">(<%= l(@lista_desde, format: "%A") %>)</span></p>
+                <ul class="space-y-2 max-h-48 overflow-y-auto">
+                  <% @eventos_dia_filtro.each do |ev| %>
+                    <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
+                    <li class="flex items-start gap-2 text-xs">
+                      <span class="tabular-nums font-semibold text-stone-600 shrink-0 w-12"><%= l(ev.horario, format: :time) %></span>
+                      <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-semibold border leading-tight" style="background-color: <%= cor %>22; border-color: <%= cor %>55; color: #1e293b;"><%= ev.tipo_servico.nome %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            <% elsif @lista_desde %>
+              <p class="text-xs text-stone-500 italic px-0.5">Nenhum serviço agendado exatamente neste dia — a lista à esquerda começa a partir desta data.</p>
+            <% else %>
+              <p class="text-[11px] text-stone-500 px-0.5">Selecione um dia no mapa para ver horários daquela data e reordenar os próximos serviços.</p>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
@@ -301,24 +373,30 @@
       <% if @esportulas_recentes.any? %>
         <div class="px-4 pb-3 sm:px-5">
           <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">Últimos lançamentos</p>
-          <ul class="divide-y divide-sky-100/80 rounded-xl border border-sky-100 bg-white/80 overflow-hidden">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
             <% @esportulas_recentes.each do |reg| %>
-              <li>
-                <%= link_to admin_registros_esportula_path(reg), class: "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-3 py-2 hover:bg-sky-50/60 transition-colors group" do %>
-                  <div class="min-w-0">
-                    <p class="text-sm font-medium text-stone-900 group-hover:text-sky-900"><%= reg.sacerdote.nome %></p>
-                    <p class="text-xs text-stone-500 tabular-nums"><%= l(reg.data) %></p>
-                  </div>
-                  <div class="flex items-center gap-3 shrink-0">
-                    <span class="text-sm font-semibold tabular-nums text-stone-800"><%= number_to_currency(reg.valor) %></span>
-                    <span class="inline-flex px-2 py-0.5 text-[10px] font-bold uppercase rounded-full <%= reg.status == "pago" ? "bg-sky-100 text-sky-800" : "bg-indigo-100 text-indigo-800" %>">
-                      <%= reg.status %>
-                    </span>
-                  </div>
-                <% end %>
-              </li>
+              <%= link_to admin_registros_esportula_path(reg),
+                    class: "flex min-h-0 flex-col rounded-xl border border-sky-100 bg-white/90 px-2.5 py-2 shadow-sm hover:border-sky-200 hover:bg-sky-50/70 transition-colors group" do %>
+                <div class="flex items-start justify-between gap-1.5 min-w-0">
+                  <p class="text-sm font-medium text-stone-900 group-hover:text-sky-900 truncate leading-snug"><%= reg.sacerdote.nome %></p>
+                  <span class="inline-flex shrink-0 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-full <%= reg.status == "pago" ? "bg-sky-100 text-sky-800" : "bg-indigo-100 text-indigo-800" %>">
+                    <%= reg.status %>
+                  </span>
+                </div>
+                <% horario_missa = reg.evento_escala&.horario %>
+                <div class="mt-0.5 flex items-baseline justify-between gap-2 min-w-0">
+                  <p class="text-[11px] text-stone-500 tabular-nums min-w-0 truncate">
+                    <%= l(reg.data) %>
+                    <% if horario_missa.present? %>
+                      <span class="text-stone-400">·</span>
+                      <span class="font-semibold text-stone-600"><%= horario_missa.strftime("%H:%M") %></span>
+                    <% end %>
+                  </p>
+                  <p class="text-sm font-semibold tabular-nums text-stone-800 shrink-0 text-right"><%= number_to_currency(reg.valor) %></p>
+                </div>
+              <% end %>
             <% end %>
-          </ul>
+          </div>
         </div>
       <% else %>
         <div class="px-4 pb-3 sm:px-5 text-center">

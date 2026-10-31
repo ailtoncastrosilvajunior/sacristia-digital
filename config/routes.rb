@@ -61,7 +61,7 @@ Rails.application.routes.draw do
         post :importar
       end
     end
-    resources :destinatarios_esportula, path: "destinatarios-esportula", except: [:show, :destroy]
+    resources :destinatarios_esportula, path: "destinatarios-esportula", except: [:show]
     resources :registros_esportula, path: "esportulas" do
       collection do
         get :competencia
@@ -71,7 +71,7 @@ Rails.application.routes.draw do
         post :estornar_lote_acumulado
       end
     end
-    resources :plano_contas, path: "plano-contas", except: [:destroy]
+    resources :plano_contas, path: "plano-contas"
     resources :lancamentos_caixa, path: "lancamentos-caixa" do
       member { post :estornar }
       collection { get :eventos }

@@ -59,4 +59,23 @@ RSpec.describe EsportulaDestinatarioResolver do
     expect(evento.esportula_modo).to eq("acumulado")
     expect(evento.esportula_destinatario_sacerdote_id).to eq(mensal.id)
   end
+
+  it "prioriza instituição do calendário base sobre sacerdote por_periodo titular" do
+    mensal.update!(forma_esportula: "por_periodo")
+    calendario.update!(sacerdote: mensal)
+    evento = build_evento(sacerdote: mensal)
+    described_class.apply!(evento, calendario_base: calendario)
+
+    expect(evento.esportula_modo).to eq("acumulado")
+    expect(evento.destinatario_esportula_id).to eq(instituicao.id)
+  end
+
+  it "aplica acumulado institucional sem sacerdote no evento" do
+    evento = build_evento(sacerdote: titular)
+    evento.update_columns(sacerdote_id: nil)
+    described_class.apply!(evento, calendario_base: calendario)
+
+    expect(evento.esportula_modo).to eq("acumulado")
+    expect(evento.destinatario_esportula_id).to eq(instituicao.id)
+  end
 end
