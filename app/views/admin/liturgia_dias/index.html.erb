@@ -97,7 +97,9 @@
           <% end %>
           <% if reg.nil? %>
             <span class="inline-flex items-center rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">Não buscada</span>
-          <% elsif !reg.validada? %>
+          <% elsif reg.validada? %>
+            <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">Validada</span>
+          <% else %>
             <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-900">Rascunho</span>
             <% if reg.divergente? %>
               <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-800" title="<%= reg.divergencias.join(' | ') %>">⚠ <%= reg.divergencias.size %></span>
