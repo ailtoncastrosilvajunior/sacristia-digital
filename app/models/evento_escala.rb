@@ -131,6 +131,14 @@ class EventoEscala < ApplicationRecord
     "#{tipo_servico.nome} - #{I18n.l(data)}"
   end
 
+  # Atualiza a escala só na tabela de junção (evita re-save acidental de Ministro via ministro_ids=).
+  def sync_escala_ministros!(ids)
+    ids = Array(ids).reject(&:blank?).map(&:to_i).uniq
+    escala_ministros.where.not(ministro_id: ids).delete_all
+    faltando = ids - escala_ministros.pluck(:ministro_id)
+    faltando.each { |mid| escala_ministros.create!(ministro_id: mid) }
+  end
+
   def ministros_nomes_com_coordenador
     ems = escala_ministros.select { |em| em.ministro.present? }
     return "—" if ems.empty?

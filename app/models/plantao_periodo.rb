@@ -30,6 +30,17 @@ class PlantaoPeriodo < ApplicationRecord
     "Dias #{format('%02d', dia_inicio)} a #{format('%02d', dia_fim)}"
   end
 
+  def sync_ministros!(ids)
+    ids = Array(ids).reject(&:blank?).map(&:to_i).uniq
+    plantao_periodo_ministros.where.not(ministro_id: ids).delete_all
+    existentes = plantao_periodo_ministros.pluck(:ministro_id)
+    ids.each_with_index do |mid, ordem|
+      next if existentes.include?(mid)
+
+      plantao_periodo_ministros.create!(ministro_id: mid, ordem: ordem)
+    end
+  end
+
   def nomes_ministros
     ministros.map(&:nome).join(" | ")
   end

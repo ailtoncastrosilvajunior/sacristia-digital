@@ -15,7 +15,7 @@ class Ministro < ApplicationRecord
   SEXOS = %w[Masculino Feminino].freeze
 
   validates :nome, presence: true
-  # validates :email, presence: true, uniqueness: true
+  validates :email, uniqueness: { case_sensitive: false, allow_nil: true }
   validates :sexo, inclusion: { in: SEXOS }, allow_blank: true
   # Dia e mês obrigatórios em novos cadastros (e se forem alterados), sem travar
   # a edição de ministros antigos que ainda não informaram.

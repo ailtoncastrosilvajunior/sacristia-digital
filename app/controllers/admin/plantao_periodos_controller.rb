@@ -27,8 +27,11 @@ module Admin
     end
 
     def create
-      @plantao = @competencia.plantao_periodos.new(plantao_params)
+      attrs = plantao_params
+      ministro_ids = attrs.delete(:ministro_ids)
+      @plantao = @competencia.plantao_periodos.new(attrs)
       if @plantao.save
+        @plantao.sync_ministros!(ministro_ids)
         redirect_to admin_competencia_mensal_plantao_periodos_path(@competencia), notice: "Bloco de plantão criado."
       else
         render :new, status: :unprocessable_entity
@@ -39,7 +42,10 @@ module Admin
     end
 
     def update
-      if @plantao.update(plantao_params)
+      attrs = plantao_params
+      ministro_ids = attrs.key?(:ministro_ids) ? attrs.delete(:ministro_ids) : nil
+      if @plantao.update(attrs)
+        @plantao.sync_ministros!(ministro_ids) unless ministro_ids.nil?
         redirect_to admin_competencia_mensal_plantao_periodos_path(@competencia), notice: "Bloco de plantão atualizado."
       else
         render :edit, status: :unprocessable_entity

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -266,7 +266,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_150000) do
   create_table "ministros", force: :cascade do |t|
     t.boolean "ativo", default: true, null: false
     t.datetime "created_at", null: false
-    t.string "email", null: false
+    t.string "email"
     t.boolean "exibir_ano_nascimento", default: false, null: false
     t.integer "nascimento_ano"
     t.integer "nascimento_dia"
@@ -277,6 +277,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_150000) do
     t.string "sexo"
     t.string "telefone"
     t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_ministros_on_email_unique", unique: true, where: "(email IS NOT NULL)"
     t.index ["nascimento_mes", "nascimento_dia"], name: "index_ministros_on_nascimento_mes_and_nascimento_dia"
   end
 

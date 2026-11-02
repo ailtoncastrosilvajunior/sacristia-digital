@@ -31,8 +31,11 @@ module Admin
     end
 
     def create
-      @evento = @competencia.evento_escalas.build(evento_params)
+      attrs = evento_params
+      ministro_ids = attrs.delete(:ministro_ids)
+      @evento = @competencia.evento_escalas.build(attrs)
       if @evento.save
+        @evento.sync_escala_ministros!(ministro_ids)
         atualizar_coordenador(@evento)
         aplicar_esportula_pos_save!(@evento, recalcular: true)
         redirect_to admin_competencia_mensal_path(@competencia, filter_params), notice: "Evento criado com sucesso."
@@ -53,7 +56,10 @@ module Admin
     end
 
     def update
-      if @evento.update(evento_params)
+      attrs = evento_params
+      ministro_ids = attrs.key?(:ministro_ids) ? attrs.delete(:ministro_ids) : nil
+      if @evento.update(attrs)
+        @evento.sync_escala_ministros!(ministro_ids) unless ministro_ids.nil?
         atualizar_coordenador(@evento)
         aplicar_esportula_pos_save!(@evento, recalcular: params[:recalcular_esportula_regra].present?)
         RegistroEsportula.sync_from_evento!(@evento)
@@ -96,8 +102,8 @@ module Admin
       sacerdote_id = sacerdote_id.to_i if sacerdote_id.present?
 
       @evento.sacerdote_id = sacerdote_id
-      @evento.ministro_ids = ministro_ids
       @evento.save!
+      @evento.sync_escala_ministros!(ministro_ids)
       EsportulaDestinatarioResolver.apply!(@evento) unless @evento.esportula_destinatario_manual?
 
       @evento.escala_ministros.update_all(coordenador: false, adoracao: false)
