@@ -47,6 +47,7 @@
           <% if detalhe.present? %>
             <p class="text-[10px] text-slate-500 mt-0.5 line-clamp-2 whitespace-pre-wrap break-words" title="<%= detalhe %>"><%= detalhe %></p>
           <% end %>
+          <%= extrato_documentacao_saida(lc) %>
         </div>
       </td>
       <td class="px-2 py-1.5 text-right tabular-nums whitespace-nowrap align-middle text-[13px] font-medium <%= linha.valor_com_sinal.positive? ? "text-emerald-700" : "text-red-700" %>">

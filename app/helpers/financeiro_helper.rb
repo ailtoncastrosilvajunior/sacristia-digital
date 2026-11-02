@@ -327,4 +327,32 @@ module FinanceiroHelper
       tag.span "Saída", class: "inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-900"
     end
   end
+
+  # Indicadores discretos de documentação no extrato (apenas saídas).
+  def extrato_documentacao_saida(lancamento)
+    return unless lancamento.saida?
+
+    tag.div(
+      class: "mt-1 inline-flex flex-wrap items-center gap-1 rounded-md border border-slate-200/70 bg-slate-50/60 px-2 py-0.5",
+      role: "group",
+      aria: { label: "Documentação da saída" }
+    ) do
+      safe_join([
+        extrato_sim_nao_documento("Nota fiscal", lancamento.tem_documento_fiscal?),
+        tag.span("|", class: "text-[9px] text-slate-300/90 select-none px-0.5", aria: { hidden: true }),
+        extrato_sim_nao_documento("Recibo", lancamento.tem_recibo?)
+      ])
+    end
+  end
+
+  def extrato_sim_nao_documento(label, sim)
+    valor = sim ? "Sim" : "Não"
+    valor_cls = sim ? "text-emerald-700" : "text-red-600"
+    tag.span(class: "inline-flex items-center gap-1 text-[10px] leading-tight") do
+      safe_join([
+        tag.span(label, class: "text-slate-500 font-medium"),
+        tag.span(valor, class: "#{valor_cls} font-semibold tabular-nums")
+      ])
+    end
+  end
 end
