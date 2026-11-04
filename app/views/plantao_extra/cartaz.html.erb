@@ -8,9 +8,9 @@
     <% else %>
       <%= link_to "← Plantão", admin_competencia_mensal_plantao_periodos_path(@competencia), class: "cartaz-toolbar-link" %>
     <% end %>
-    <button type="button" id="cartaz-baixar-png" class="cartaz-toolbar-btn" data-filename="<%= filename %>">Baixar PNG</button>
+    <button type="button" id="cartaz-baixar-png" class="cartaz-toolbar-btn" data-filename="<%= filename %>" data-label-default="Baixar preview">Baixar preview</button>
     <button type="button" id="cartaz-copiar-link" class="cartaz-toolbar-btn cartaz-toolbar-btn--ghost">Copiar link</button>
-    <span class="cartaz-toolbar-hint">Baixe o PNG ou copie o link para abrir no celular e salvar a imagem.</span>
+    <span class="cartaz-toolbar-hint">Baixe o PNG (450px de largura; altura conforme os eventos do período) ou copie o link para abrir no celular.</span>
   </div>
 <% end %>
 

@@ -43,7 +43,7 @@ RSpec.describe "Perfil escala_extra", type: :request do
       get escala_extra_plantao_cartaz_path(plantao)
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("ESCALA")
-      expect(response.body).to include("Baixar PNG")
+      expect(response.body).to include("Baixar preview")
     end
 
     it "é barrado em admin, coordenador e ministro sem loop de redirect" do

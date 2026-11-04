@@ -23,42 +23,153 @@
       (function () {
         var btn = document.getElementById("cartaz-baixar-png");
         if (!btn || typeof html2canvas === "undefined") return;
+        function triggerPngDownload(canvas, filename) {
+          var link = document.createElement("a");
+          link.download = filename;
+          if (canvas.toBlob) {
+            canvas.toBlob(function (blob) {
+              if (!blob) return;
+              link.href = URL.createObjectURL(blob);
+              link.click();
+              URL.revokeObjectURL(link.href);
+            }, "image/png");
+          } else {
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+          }
+        }
+
+        /** Recorta margens brancas extras que o html2canvas às vezes inclui no PNG. */
+        function trimCanvasWhitespace(canvas) {
+          var ctx = canvas.getContext("2d");
+          if (!ctx) return canvas;
+          var w = canvas.width;
+          var h = canvas.height;
+          if (w < 2 || h < 2) return canvas;
+          var data = ctx.getImageData(0, 0, w, h);
+          var px = data.data;
+          function rowMostlyEmpty(y) {
+            var empty = 0;
+            for (var x = 0; x < w; x++) {
+              var i = (y * w + x) * 4;
+              var a = px[i + 3];
+              if (a < 12) { empty++; continue; }
+              if (px[i] > 248 && px[i + 1] > 248 && px[i + 2] > 248) empty++;
+            }
+            return empty / w > 0.995;
+          }
+          function colMostlyEmpty(x) {
+            var empty = 0;
+            for (var y = 0; y < h; y++) {
+              var i = (y * w + x) * 4;
+              var a = px[i + 3];
+              if (a < 12) { empty++; continue; }
+              if (px[i] > 248 && px[i + 1] > 248 && px[i + 2] > 248) empty++;
+            }
+            return empty / h > 0.995;
+          }
+          var top = 0;
+          var bottom = h - 1;
+          var left = 0;
+          var right = w - 1;
+          while (top < bottom && rowMostlyEmpty(top)) top++;
+          while (bottom > top && rowMostlyEmpty(bottom)) bottom--;
+          while (left < right && colMostlyEmpty(left)) left++;
+          while (right > left && colMostlyEmpty(right)) right--;
+          var cw = right - left + 1;
+          var ch = bottom - top + 1;
+          if (cw <= 0 || ch <= 0 || (cw === w && ch === h)) return canvas;
+          var trimmed = document.createElement("canvas");
+          trimmed.width = cw;
+          trimmed.height = ch;
+          trimmed.getContext("2d").drawImage(canvas, left, top, cw, ch, 0, 0, cw, ch);
+          return trimmed;
+        }
+
+        /** Cartaz plantão extra: largura fixa, altura conforme dias/eventos no DOM. */
+        function preparePlantaoPosterExport(node) {
+          node.style.boxShadow = "none";
+          node.style.width = "450px";
+          node.style.maxWidth = "450px";
+          node.style.height = "auto";
+        }
+
+        function plantaoPosterOnClone(clonedDoc) {
+          var cloned = clonedDoc.getElementById("cartaz-poster-export");
+          if (!cloned) return;
+          cloned.style.transform = "none";
+          cloned.style.boxShadow = "none";
+          cloned.style.width = "450px";
+          cloned.style.maxWidth = "450px";
+          cloned.style.height = "auto";
+          cloned.style.margin = "0";
+        }
+
         btn.addEventListener("click", function () {
           var node = document.getElementById("cartaz-poster-export");
           if (!node) return;
           btn.disabled = true;
           btn.textContent = "Gerando…";
-          var wrap = node.closest(".lm-preview-wrap");
+
+          var isLiturgiaMoldura = node.classList.contains("lm-canvas");
+          var wrap = isLiturgiaMoldura ? node.closest(".lm-preview-wrap") : null;
           var prevTransform = node.style.transform;
           var prevWrapW = wrap && wrap.style.width;
           var prevWrapH = wrap && wrap.style.height;
-          node.style.transform = "none";
-          if (wrap) {
-            wrap.style.width = "576px";
-            wrap.style.height = "1024px";
-          }
-          html2canvas(node, {
+          var prevWidth = node.style.width;
+          var prevMaxWidth = node.style.maxWidth;
+          var prevHeight = node.style.height;
+          var prevBoxShadow = node.style.boxShadow;
+
+          var options = {
             scale: 2,
             useCORS: true,
             allowTaint: false,
-            backgroundColor: null,
             logging: false,
-            width: 576,
-            height: 1024
-          }).then(function (canvas) {
-            var link = document.createElement("a");
-            link.download = btn.dataset.filename || "escala-extra.png";
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-          }).finally(function () {
+            scrollX: 0,
+            scrollY: -window.scrollY
+          };
+
+          if (isLiturgiaMoldura) {
+            node.style.transform = "none";
+            if (wrap) {
+              wrap.style.width = "576px";
+              wrap.style.height = "1024px";
+            }
+            options.backgroundColor = null;
+            options.width = 576;
+            options.height = 1024;
+          } else {
+            preparePlantaoPosterExport(node);
+            options.backgroundColor = "#ffffff";
+            options.onclone = plantaoPosterOnClone;
+          }
+
+          function restoreUi() {
             node.style.transform = prevTransform;
+            node.style.width = prevWidth;
+            node.style.maxWidth = prevMaxWidth;
+            node.style.height = prevHeight;
+            node.style.boxShadow = prevBoxShadow;
             if (wrap) {
               wrap.style.width = prevWrapW || "";
               wrap.style.height = prevWrapH || "";
             }
             btn.disabled = false;
             btn.textContent = btn.dataset.labelDefault || "Baixar preview";
-          });
+          }
+
+          var fontsReady = document.fonts && document.fonts.ready
+            ? document.fonts.ready
+            : Promise.resolve();
+
+          fontsReady.then(function () {
+            if (!isLiturgiaMoldura) preparePlantaoPosterExport(node);
+            return html2canvas(node, options);
+          }).then(function (canvas) {
+            if (!isLiturgiaMoldura) canvas = trimCanvasWhitespace(canvas);
+            triggerPngDownload(canvas, btn.dataset.filename || "escala-extra.png");
+          }).finally(restoreUi);
         });
 
         var copyBtn = document.getElementById("cartaz-copiar-link");
