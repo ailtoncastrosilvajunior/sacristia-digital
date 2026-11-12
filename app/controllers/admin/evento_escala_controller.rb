@@ -153,7 +153,7 @@ module Admin
     def evento_params
       p = params.require(:evento_escala).permit(:competencia_mensal_id, :tipo_servico_id, :data, :horario,
         :quantidade_ministros, :local, :descricao, :observacoes, :sacerdote_id, :valor_esportula, :plantao_periodo_id, :status,
-        :esportula_modo, :esportula_destinatario_tipo, :esportula_destinatario_sacerdote_id, :destinatario_esportula_id,
+        :proclamacao_palavra, :esportula_modo, :esportula_destinatario_tipo, :esportula_destinatario_sacerdote_id, :destinatario_esportula_id,
         ministro_ids: [])
       p[:ministro_ids] = (p[:ministro_ids] || []).reject(&:blank?)
       p
