@@ -18,26 +18,18 @@
                 class: "w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-800 focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500",
                 onchange: "this.form.requestSubmit()" %>
         <% end %>
-        <%= link_to admin_destinatarios_esportula_index_path,
-            class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50 transition-colors whitespace-nowrap" do %>
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-          Instituições
-        <% end %>
-        <%= link_to new_admin_registros_esportula_path(competencia_ano: @competencia.ano, competencia_mes: @competencia.mes),
-            class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50 transition-colors" do %>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          Lançamento avulso
-        <% end %>
-        <%= link_to admin_registros_esportula_index_path,
-            class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-800 text-white text-sm font-semibold hover:bg-stone-700 transition-colors" do %>
-          Todos os registros
-        <% end %>
-        <%= link_to conferencia_caixa_admin_registros_esportula_index_path(competencia_mensal_id: @competencia.id),
-              class: "inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-sky-200 bg-sky-50 text-sky-900 text-sm font-semibold hover:bg-sky-100 transition-colors",
-              data: { turbo_frame: "esportula_conferencia_caixa" } do %>
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          Conferir caixa
-        <% end %>
+        <div data-controller="drawer" class="contents">
+          <button type="button" data-action="click->drawer#open" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-800 text-sm font-semibold hover:bg-stone-50 transition-colors cursor-pointer whitespace-nowrap">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+            Ações
+          </button>
+          <div data-drawer-target="overlay" class="fixed inset-0 z-[54] bg-stone-900/30 transition-opacity duration-300 invisible opacity-0 pointer-events-none" data-action="click->drawer#closeOverlay"></div>
+          <div data-drawer-target="panel" class="fixed top-0 right-0 z-[55] h-full w-full sm:w-96 max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-out translate-x-full border-l border-stone-200 flex flex-col">
+            <%= render "admin/registros_esportula/competencia/acoes_drawer",
+                  competencia: @competencia,
+                  mostrar_recibos: @resumo_por_sacerdote&.any? %>
+          </div>
+        </div>
       <% end %>
     </div>
   </div>
@@ -61,6 +53,15 @@
       <p class="text-stone-600">Nenhuma competência cadastrada.</p>
     </div>
   <% else %>
+    <div data-controller="drawer" class="contents">
+      <div data-drawer-target="overlay" class="fixed inset-0 z-[55] bg-stone-900/30 transition-opacity duration-300 invisible opacity-0 pointer-events-none" data-action="click->drawer#closeOverlay"></div>
+      <div data-drawer-target="panel" class="fixed top-0 right-0 z-[56] h-full w-full sm:w-[min(100%,28rem)] bg-white shadow-2xl shadow-stone-900/10 transform transition-transform duration-300 ease-out translate-x-full border-l border-stone-200 flex flex-col">
+        <%= turbo_frame_tag "esportula_recibo_drawer",
+              data: { action: "turbo:frame-load->drawer#open" },
+              class: "flex flex-col h-full min-h-0" %>
+      </div>
+    </div>
+
     <%= render "admin/registros_esportula/competencia/totais", competencia: @competencia, resumo_totais: @resumo_totais %>
 
     <div data-controller="drawer esportula-acumulado-pagar">
@@ -126,7 +127,8 @@
               <p class="text-[11px] text-slate-400 mt-0.5" data-esportula-resumo-filter-target="count"><%= @resumo_por_sacerdote.size %> sacerdotes na competência</p>
             </div>
             <% if @resumo_por_sacerdote.any? %>
-              <div class="flex items-center gap-0.5 shrink-0 self-start sm:self-center rounded-md border border-white/10 bg-black/15 px-1 py-0.5"
+              <div class="flex flex-wrap items-center gap-1.5 shrink-0 self-start sm:self-center">
+              <div class="flex items-center gap-0.5 rounded-md border border-white/10 bg-black/15 px-1 py-0.5"
                    title="Filtro instantâneo — sem botão aplicar">
                 <label class="sr-only" for="esportula_resumo_filtro_nome">Nome do sacerdote</label>
                 <input type="text"
@@ -158,12 +160,14 @@
                   ×
                 </button>
               </div>
+              </div>
             <% end %>
           </div>
         </div>
         <% if @resumo_por_sacerdote.any? %>
           <div class="overflow-x-auto overflow-y-auto max-h-[min(72vh,680px)]">
             <%= render "admin/registros_esportula/competencia/resumo_table",
+                  competencia: @competencia,
                   resumo_por_sacerdote: @resumo_por_sacerdote,
                   resumo_totais: @resumo_totais,
                   resumo_eventos_map: @resumo_eventos_map %>

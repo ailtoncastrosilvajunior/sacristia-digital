@@ -5,7 +5,7 @@ module Admin
     before_action :set_user, only: [:show, :edit, :update, :destroy]
 
     def index
-      scope = busca_em(User.all, %w[email nome])
+      scope = busca_em(scoped(User), %w[email nome])
       scope = scope.com_perfil(params[:perfil]) if User::PERFIS_VALIDOS.include?(params[:perfil])
       @users = scope.order(:email)
     end
@@ -49,7 +49,7 @@ module Admin
     private
 
     def set_user
-      @user = User.find(params[:id])
+      @user = find_scoped!(User, params[:id])
     end
 
     def user_params

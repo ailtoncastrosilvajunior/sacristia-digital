@@ -10,9 +10,9 @@ module Financeiro
     end
 
     def self.anos_disponiveis
-      min_data = LancamentoCaixa.confirmados.minimum(:data)
+      min_data = LancamentoCaixa.da_instituicao_atual.confirmados.minimum(:data)
       min_ano = min_data&.year || Date.current.year
-      max_ano = [LancamentoCaixa.confirmados.maximum(:data)&.year, Date.current.year].compact.max
+      max_ano = [LancamentoCaixa.da_instituicao_atual.confirmados.maximum(:data)&.year, Date.current.year].compact.max
       (min_ano..max_ano).to_a.reverse
     end
 

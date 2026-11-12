@@ -2,6 +2,8 @@
 
 # Ministro que se oferece para apoiar o plantão (escala extra) de um dia. Vale na hora, sem aprovação.
 class OfertaApoio < ApplicationRecord
+  include InstituicaoScoped
+
   STATUSES = %w[ativa cancelada].freeze
 
   belongs_to :ministro

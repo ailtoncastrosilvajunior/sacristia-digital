@@ -12,6 +12,15 @@ class RegistroEsportula < ApplicationRecord
   validates :valor, numericality: { greater_than_or_equal_to: 0 }
   validates :status, inclusion: { in: STATUS }
 
+  scope :da_instituicao_atual, lambda {
+    if Current.instituicao
+      joins(evento_escala: :competencia_mensal)
+        .where(competencia_mensal: { instituicao_id: Current.instituicao.id })
+    else
+      none
+    end
+  }
+
   scope :pendentes, -> { where(status: "pendente") }
   scope :pagos, -> { where(status: "pago") }
   scope :por_competencia, ->(ano, mes) { where(competencia_ano: ano, competencia_mes: mes) }

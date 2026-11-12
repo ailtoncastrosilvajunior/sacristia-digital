@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class LancamentoCaixa < ApplicationRecord
+  include InstituicaoScoped
+
   self.table_name = "lancamentos_caixa"
 
   include Financeiro::Auditavel

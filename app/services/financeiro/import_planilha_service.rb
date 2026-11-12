@@ -34,7 +34,7 @@ module Financeiro
       @importacao.assign_attributes(arquivo_nome: File.basename(@path), status: "pendente", relatorio: {})
       @importacao.save!
 
-      @contas_analiticas = PlanoConta.analiticas.ordenadas.to_a
+      @contas_analiticas = PlanoConta.da_instituicao_atual.analiticas.ordenadas.to_a
       log "Abrindo planilha…"
       xlsx = Roo::Spreadsheet.open(@path)
 
@@ -48,7 +48,7 @@ module Financeiro
 
       @importacao.update!(status: "concluida", concluida_em: Time.current, relatorio: @relatorio)
       FinanceiroConfiguracao.marcar_migrado!
-      log "Concluído: #{LancamentoCaixa.count} lançamentos no banco."
+      log "Concluído: #{LancamentoCaixa.da_instituicao_atual.count} lançamentos no banco."
 
       @importacao
     rescue StandardError => e
@@ -121,9 +121,9 @@ module Financeiro
     end
 
     def importar_gerencial(_xlsx)
-      Financeiro::PlanoContaSeedService.call unless PlanoConta.exists?
+      Financeiro::PlanoContaSeedService.call unless PlanoConta.da_instituicao_atual.exists?
       @relatorio[:gerencial] = {
-        contas: PlanoConta.count,
+        contas: PlanoConta.da_instituicao_atual.count,
         nota: "Plano inicial via seed (espelha aba Gerencial)"
       }
     end
@@ -253,8 +253,8 @@ module Financeiro
       importados_coletas = 0
       importados_intencoes = 0
       intencoes_ignoradas = 0
-      conta_coleta = PlanoConta.find_by(codigo: "1.1")
-      conta_intencoes = PlanoConta.find_by(codigo: "1.2")
+      conta_coleta = PlanoConta.da_instituicao_atual.find_by(codigo: "1.1")
+      conta_intencoes = PlanoConta.da_instituicao_atual.find_by(codigo: "1.2")
       ultima_data_coleta = nil
       ultima_data_intencoes = nil
 
@@ -365,7 +365,7 @@ module Financeiro
     def intencao_ja_importada?(linha, conta_receita)
       return false if conta_receita.blank?
 
-      LancamentoCaixa.joins(:itens_lancamento)
+      LancamentoCaixa.da_instituicao_atual.joins(:itens_lancamento)
                      .where(natureza: "entrada", planilha_aba: "Entradas", planilha_linha: linha)
                      .exists?(itens_lancamento: { plano_conta_id: conta_receita.id })
     end
@@ -415,7 +415,7 @@ module Financeiro
     end
 
     def resolver_conta_despesa(descricao, flag_esportula)
-      return PlanoConta.find_by(codigo: "2.1") if flag_esportula || descricao.to_s.match?(/espórtula/i)
+      return PlanoConta.da_instituicao_atual.find_by(codigo: "2.1") if flag_esportula || descricao.to_s.match?(/espórtula/i)
 
       buscar_conta(descricao, "despesa")
     end
@@ -425,7 +425,7 @@ module Financeiro
 
       ref = ref.to_s.strip
       ref = "Álcool" if ref.match?(/alc[oó]ol/i)
-      pool = (@contas_analiticas || PlanoConta.analiticas.to_a).select { |c| c.natureza == natureza }
+      pool = (@contas_analiticas || PlanoConta.da_instituicao_atual.analiticas.to_a).select { |c| c.natureza == natureza }
       stem = ref.split(/[\(\-]/).first.to_s.strip.downcase
 
       pool.find { |c| c.codigo == ref } ||

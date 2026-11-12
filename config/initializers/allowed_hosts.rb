@@ -31,4 +31,15 @@ Rails.application.config.after_initialize do
   raw.compact.uniq.reject(&:blank?).each do |h|
     Rails.application.config.hosts << h
   end
+
+  base = ENV.fetch("INSTITUICAO_BASE_DOMAIN", "sacristia-digital.net.br").downcase
+  if ActiveRecord::Base.connection.table_exists?(:instituicoes)
+    Instituicao.ativas.find_each do |inst|
+      Rails.application.config.hosts << "#{inst.slug}.#{base}"
+      Rails.application.config.hosts << "#{inst.slug}.localhost"
+      Rails.application.config.hosts << "#{inst.slug}.lvh.me"
+    end
+  end
+rescue ActiveRecord::NoDatabaseError, ActiveRecord::StatementInvalid
+  # Boot sem banco (assets:precompile, etc.)
 end

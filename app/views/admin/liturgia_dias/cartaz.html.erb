@@ -10,8 +10,8 @@
       <%= link_to "Cadastrar IGMR #{@cartaz.igmr_numero}", new_admin_igmr_paragrafo_path(numero: @cartaz.igmr_numero), class: "cartaz-toolbar-link", style: "color:#92400e;font-weight:700" %>
     <% end %>
     <%= button_to "Gerar e salvar PNG", gerar_cartaz_admin_liturgia_dia_path(ld), method: :post, class: "cartaz-toolbar-btn", data: { turbo: false }, disabled: !igmr %>
-    <% if ld.cartaz_whatsapp.attached? %>
-      <%= link_to "Baixar salvo", rails_blob_path(ld.cartaz_whatsapp, disposition: "attachment"), class: "cartaz-toolbar-btn cartaz-toolbar-btn--ghost", style: "text-decoration:none;display:inline-block" %>
+    <% if ld.cartaz_whatsapp_instituicao_attached? %>
+      <%= link_to "Baixar salvo", rails_blob_path(ld.cartaz_whatsapp_instituicao, disposition: "attachment"), class: "cartaz-toolbar-btn cartaz-toolbar-btn--ghost", style: "text-decoration:none;display:inline-block" %>
     <% end %>
     <button type="button" id="cartaz-baixar-png" class="cartaz-toolbar-btn cartaz-toolbar-btn--ghost" data-filename="<%= filename %>" data-label-default="Baixar preview">Baixar preview</button>
     <span class="cartaz-toolbar-hint">

@@ -5,7 +5,7 @@ module Admin
     before_action :set_tipo_servico, only: [:show, :edit, :update, :destroy]
 
     def index
-      scope = busca_em(TipoServico.all, %w[nome])
+      scope = busca_em(scoped(TipoServico), %w[nome])
       scope = scope.where(ativo: params[:status] == "ativo") if %w[ativo inativo].include?(params[:status])
       scope = scope.where(tipo_escala: params[:tipo_escala]) if TipoServico::TIPOS_ESCALA.include?(params[:tipo_escala])
       @tipo_servicos = scope.order(:tipo_escala, :nome).page(params[:page])
@@ -46,7 +46,7 @@ module Admin
     private
 
     def set_tipo_servico
-      @tipo_servico = TipoServico.find(params[:id])
+      @tipo_servico = find_scoped!(TipoServico, params[:id])
     end
 
     def tipo_servico_params

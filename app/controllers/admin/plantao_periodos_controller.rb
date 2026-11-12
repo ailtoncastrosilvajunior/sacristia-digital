@@ -77,7 +77,7 @@ module Admin
     private
 
     def set_competencia
-      @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
+      @competencia = competencia_instituicao!(params[:competencia_mensal_id])
     end
 
     def set_plantao

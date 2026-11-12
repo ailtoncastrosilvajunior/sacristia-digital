@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class LotePagamentoEsportula < ApplicationRecord
+  include InstituicaoScoped
+
   belongs_to :competencia_mensal
   belongs_to :destinatario_esportula, optional: true
   belongs_to :destinatario_sacerdote, class_name: "Sacerdote", optional: true

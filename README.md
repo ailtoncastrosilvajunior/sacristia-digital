@@ -69,13 +69,37 @@ O Rails **não sobe** em `RAILS_ENV=production` sem chave de sessão/cookies. De
 
 Variáveis de exemplo para desenvolvimento local: [.env.example](.env.example).
 
+## Multi-instituição
+
+Cada cliente acessa por subdomínio (ex.: `facedecristo.sacristia-digital.net.br`). Em **localhost**, use `http://facedecristo.localhost:3000` / `http://saovicente.localhost:3000`, ou defina `INSTITUICAO_SLUG` no `.env` (fallback sem subdomínio: `facedecristo`).
+
+Módulos do menu e rotas admin respeitam o plano vigente (`Instituicao#recurso?`: `escala_mesc`, `liturgia_cartaz`, `financeiro_caixa`, `esportulas`, `escala_extra`, …).
+
+Roadmap de implementação: [docs/MULTI_INSTITUICAO_ROADMAP.md](docs/MULTI_INSTITUICAO_ROADMAP.md).
+
+Novo tenant (console):
+
+```bash
+bin/rails "instituicoes:provision[slug,\"Nome oficial\",escala_liturgia,admin@tenant.local]"
+```
+
+Códigos de plano: `completo`, `escala_liturgia`, etc. (catálogo em `planos`).
+
+Após atualizar o código:
+
+```bash
+bin/rails db:migrate
+bin/rails db:seed   # opcional, se precisar recriar dados demo
+```
+
 ## Usuários de demonstração (após seeds)
 
 | E-mail | Senha | Perfil |
 |--------|-------|--------|
-| admin@sacristiadigital.local | 123456 | Administrador |
+| admin@sacristiadigital.local | 123456 | Administrador (Face de Cristo — plano Completo) |
 | coordenador@sacristiadigital.local | 123456 | Coordenador |
 | ministro@sacristiadigital.local | 123456 | Ministro |
+| admin@saovicente.local | 123456 | Administrador (São Vicente — plano Escala e liturgia) |
 
 ## Stack
 

@@ -2,6 +2,8 @@
 
 module Admin
   class FinanceiroResumoController < Admin::BaseController
+    require_instituicao_modulo! :financeiro_caixa
+
     ABAS = %w[periodos plano_contas].freeze
 
     def show

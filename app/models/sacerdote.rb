@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Sacerdote < ApplicationRecord
+  include InstituicaoScoped
+
   has_one :user, dependent: :nullify
 
   has_many :calendario_base, dependent: :nullify

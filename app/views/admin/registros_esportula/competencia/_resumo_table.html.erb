@@ -1,4 +1,4 @@
-<%# locals: resumo_por_sacerdote, resumo_totais, resumo_eventos_map %>
+<%# locals: resumo_por_sacerdote, resumo_totais, resumo_eventos_map, competencia %>
 <div id="esportulas_competencia_resumo" class="bg-gradient-to-b from-slate-50/50 to-white">
   <table class="w-full text-xs">
     <thead class="sticky top-0 z-10 bg-slate-800 text-[9px] font-bold uppercase tracking-wide text-slate-300 border-b border-slate-700">
@@ -10,11 +10,12 @@
         <th class="px-2 py-2 text-right text-emerald-200/90 whitespace-nowrap">Previsto</th>
         <th class="px-2 py-2 text-right text-sky-200/90 whitespace-nowrap">Pago</th>
         <th class="px-2.5 py-2 text-right text-indigo-200/90 whitespace-nowrap">Saldo</th>
+        <th class="px-1 py-2 text-center w-[3.25rem] text-violet-200/90" title="Recibo para assinatura">Recibo</th>
       </tr>
     </thead>
     <tbody>
       <% resumo_por_sacerdote.each do |linha| %>
-        <%= render "admin/registros_esportula/competencia/resumo_row", linha: linha, resumo_eventos_map: resumo_eventos_map %>
+        <%= render "admin/registros_esportula/competencia/resumo_row", linha: linha, resumo_eventos_map: resumo_eventos_map, competencia: competencia %>
       <% end %>
     </tbody>
     <%= render "admin/registros_esportula/competencia/resumo_foot", resumo_totais: resumo_totais %>

@@ -2,6 +2,7 @@
 
 module Admin
   class LiturgiaDiasController < Admin::BaseController
+    require_instituicao_modulo! :liturgia_cartaz
     before_action :set_liturgia_dia, only: [:show, :edit, :update, :validar, :reabrir, :sincronizar, :remover_imagem, :cartaz, :cartaz_v2, :gerar_cartaz]
 
     def index
@@ -56,15 +57,16 @@ module Admin
         return
       end
 
-      Liturgia::CartazRenderer.attach!(@liturgia_dia)
-      @liturgia_dia.reload
-      blob = @liturgia_dia.cartaz_whatsapp.blob
+      registro = Liturgia::CartazRenderer.attach!(@liturgia_dia)
+      blob = registro.cartaz_whatsapp.blob
       tamanho = ActiveSupport::NumberHelper.number_to_human_size(blob.byte_size)
       renderer = Liturgia::CartazRenderer.v2? ? "v2 (1080×1920)" : "v1 (moldura)"
       redirect_to admin_liturgia_dia_path(@liturgia_dia),
                   notice: "Cartaz #{renderer} regerado às #{I18n.l(blob.created_at, format: '%H:%M:%S')} (#{tamanho}). Baixe o PNG para ver em tela cheia."
-    rescue Liturgia::CartazPngGenerator::Erro => e
+    rescue Liturgia::CartazPngGenerator::Erro, Liturgia::CartazV2PngGenerator::Erro => e
       redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: e.message
+    rescue Liturgia::CartazRegistroInstituicao::InstituicaoAusente
+      redirect_to admin_liturgia_dia_path(@liturgia_dia), alert: "Instituição não identificada. Acesse pelo subdomínio correto."
     end
 
     def edit
@@ -146,7 +148,9 @@ module Admin
     private
 
     def set_liturgia_dia
-      @liturgia_dia = LiturgiaDia.with_attached_imagem_santo.with_attached_cartaz_whatsapp.find(params[:id])
+      @liturgia_dia = LiturgiaDia.with_attached_imagem_santo
+                                 .includes(liturgia_cartazes: { cartaz_whatsapp_attachment: :blob })
+                                 .find(params[:id])
     end
 
     def parse_mes(raw)

@@ -21,5 +21,10 @@
     inflect.irregular "calendario_base", "calendario_base"
     inflect.irregular "competencia_mensal", "competencia_mensal"
     inflect.irregular "evento_escala", "evento_escalas"
+    inflect.irregular "instituicao", "instituicoes"
+    inflect.irregular "instituicao_plano", "instituicao_planos"
+    inflect.irregular "plano", "planos"
+    inflect.irregular "liturgia_cartaz", "liturgia_cartazes"
+    inflect.irregular "liturgia_dia", "liturgia_dias"
   end
 end

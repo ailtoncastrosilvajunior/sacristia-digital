@@ -16,6 +16,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     root "dashboard#index"
+    resource :configuracao_instituicao, path: "configuracao-instituicao", only: %i[show update]
     resources :users
     resources :ministros
     resources :solicitacao_cadastros, path: "solicitacoes-cadastro", only: [:index, :show] do
@@ -68,6 +69,8 @@ Rails.application.routes.draw do
     resources :registros_esportula, path: "esportulas" do
       collection do
         get :competencia
+        get :recibo_esportula
+        get :recibo_esportula_form
         get :conferencia_caixa
         patch :toggle_evento_pago
         post :pagar_lote_acumulado

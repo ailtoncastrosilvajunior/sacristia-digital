@@ -5,7 +5,7 @@ module Admin
     before_action :set_calendario_base, only: [:show, :edit, :update, :destroy]
 
     def index
-      scope = CalendarioBase.left_joins(:sacerdote).includes(:sacerdote, :destinatario_esportula)
+      scope = scoped(CalendarioBase).left_joins(:sacerdote).includes(:sacerdote, :destinatario_esportula)
       scope = busca_em(scope, %w[sacerdotes.nome])
       scope = case params[:status]
               when "inativo" then scope.where(ativo: false)
@@ -55,7 +55,7 @@ module Admin
     private
 
     def set_calendario_base
-      @calendario_base = CalendarioBase.includes(:sacerdote, :destinatario_esportula).find(params[:id])
+      @calendario_base = scoped(CalendarioBase).includes(:sacerdote, :destinatario_esportula).find(params[:id])
     end
 
     def calendario_base_params

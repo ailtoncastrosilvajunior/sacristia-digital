@@ -13,12 +13,12 @@ module Financeiro
     def sync_from_lote!(lote)
       return nil unless lote.status == "pago"
 
-      existing = LancamentoCaixa.find_by(lote_pagamento_esportula_id: lote.id)
+      existing = LancamentoCaixa.da_instituicao_atual.find_by(lote_pagamento_esportula_id: lote.id)
       return existing if existing&.status == "confirmado"
 
       existing&.destroy! if existing&.estornado?
 
-      conta_esportula = PlanoConta.find_by!(codigo: "2.1")
+      conta_esportula = PlanoConta.da_instituicao_atual.find_by!(codigo: "2.1")
       conta_corrente = ContaCorrente.padrao
       nome = lote.nome_destinatario
       qtd = lote.evento_escalas.count
@@ -51,7 +51,7 @@ module Financeiro
     def sync!
       return nil if @registro.lote_pagamento_esportula_id.present?
 
-      existing = LancamentoCaixa.find_by(registro_esportula_id: @registro.id)
+      existing = LancamentoCaixa.da_instituicao_atual.find_by(registro_esportula_id: @registro.id)
 
       unless @registro.status == "pago"
         if existing && lancamento_vinculado_ao_evento?(existing)
@@ -70,7 +70,7 @@ module Financeiro
     private
 
     def criar_novo!
-      conta_esportula = PlanoConta.find_by!(codigo: "2.1")
+      conta_esportula = PlanoConta.da_instituicao_atual.find_by!(codigo: "2.1")
       conta_corrente = ContaCorrente.padrao
       sacerdote_nome = @registro.sacerdote.nome
 

@@ -6,6 +6,7 @@ module EscalaExtra
     include Buscavel
 
     before_action :authorize_escala_extra!
+    before_action { require_instituicao_recurso!(:escala_extra) }
 
     layout "escala_extra"
 

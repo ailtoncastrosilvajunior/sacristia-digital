@@ -122,7 +122,7 @@ module Admin
       respond_to do |format|
         format.turbo_stream do
           @filter_params_hash = filter_params
-          @evento = EventoEscala.includes(:tipo_servico, :sacerdote, escala_ministros: :ministro).find(@evento.id)
+          @evento = EventoEscala.da_instituicao_atual.includes(:tipo_servico, :sacerdote, escala_ministros: :ministro).find(@evento.id)
           render :update_escalar_ministros
         end
         format.html do
@@ -135,19 +135,19 @@ module Admin
 
     # Carrega tudo o que o drawer/ficha exibe em 1 consulta + 1 por associação (sem N+1).
     def set_evento_completo
-      @evento = EventoEscala
+      @evento = EventoEscala.da_instituicao_atual
         .includes(:tipo_servico, :sacerdote, { plantao_periodo: :ministros }, :competencia_mensal, escala_ministros: :ministro)
         .find(params[:id])
     end
 
     def set_evento
-      @evento = EventoEscala.find(params[:id])
+      @evento = evento_instituicao!(params[:id])
     end
 
     def set_competencia
       # No "new" vem na raiz da URL; no "create" o formulário envia aninhado em evento_escala[...]
       id = params[:competencia_mensal_id].presence || params.dig(:evento_escala, :competencia_mensal_id)
-      @competencia = CompetenciaMensal.find(id)
+      @competencia = competencia_instituicao!(id)
     end
 
     def evento_params

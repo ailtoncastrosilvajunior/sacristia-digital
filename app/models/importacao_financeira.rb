@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ImportacaoFinanceira < ApplicationRecord
+  include InstituicaoScoped
+
   self.table_name = "importacoes_financeiras"
 
   STATUS = %w[pendente concluida falha].freeze

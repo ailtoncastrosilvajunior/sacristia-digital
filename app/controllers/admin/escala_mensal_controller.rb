@@ -11,7 +11,7 @@ module Admin
     private
 
     def carregar_escala
-      @competencias = CompetenciaMensal.ordenados.limit(48).to_a
+      @competencias = scoped(CompetenciaMensal).ordenados.limit(48).to_a
       @competencia = resolve_competencia
       return redirect_to(admin_root_path, alert: "Nenhuma competência cadastrada.") if @competencia.blank?
 

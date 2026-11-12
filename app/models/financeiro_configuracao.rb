@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 class FinanceiroConfiguracao < ApplicationRecord
+  include InstituicaoScoped
+
   self.table_name = "financeiro_configuracoes"
 
   def self.instancia
-    first || create!
+    da_instituicao_atual.first || da_instituicao_atual.create!
   end
 
   def self.migrado?

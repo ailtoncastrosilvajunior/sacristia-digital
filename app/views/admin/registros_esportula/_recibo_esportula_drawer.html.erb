@@ -1,0 +1,161 @@
+<%# locals: competencia, eventos, sacerdote, data_inicio, data_fim %>
+<% eventos = eventos.select { |e| e.sacerdote_id.present? && e.sacerdote.present? } %>
+<% missas_qtd = eventos.count { |e| e.tipo_servico.nome.to_s.match?(/missa/i) } %>
+<turbo-frame id="esportula_recibo_drawer" data-action="turbo:frame-load->drawer#open" class="flex flex-col h-full min-h-0 bg-white">
+  <div class="flex flex-col h-full min-h-0" data-controller="esportula-recibo-form">
+    <div class="shrink-0 px-4 py-3 border-b border-stone-200 bg-gradient-to-b from-violet-50/80 to-white flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <p class="text-[10px] font-semibold uppercase tracking-wider text-violet-600/90">Recibo de espórtulas</p>
+        <h3 class="text-base font-semibold text-stone-900 truncate">
+          <% if sacerdote.present? %>
+            <%= sacerdote.nome %>
+          <% else %>
+            <%= competencia.label_curto %> · um recibo por culto
+          <% end %>
+        </h3>
+        <p class="text-xs text-stone-500 mt-0.5">Ordem por data · cada evento marcado gera uma folha A5.</p>
+      </div>
+      <button type="button" data-action="drawer#close" class="shrink-0 p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100" aria-label="Fechar">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <%= form_with url: recibo_esportula_form_admin_path(competencia_mensal_id: competencia.id, sacerdote_id: sacerdote&.id),
+          method: :get,
+          local: true,
+          data: { turbo_frame: "esportula_recibo_drawer" },
+          class: "shrink-0 px-4 py-3 border-b border-stone-100 bg-stone-50/90 space-y-2" do %>
+      <p class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Período na competência</p>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label for="recibo_data_inicio" class="block text-[10px] font-medium text-stone-600 mb-0.5">De</label>
+          <%= date_field_tag :data_inicio, data_inicio,
+                id: "recibo_data_inicio",
+                min: competencia.periodo,
+                max: competencia.periodo_fim,
+                class: "w-full rounded-lg border border-stone-300 px-2 py-1.5 text-xs" %>
+        </div>
+        <div>
+          <label for="recibo_data_fim" class="block text-[10px] font-medium text-stone-600 mb-0.5">Até</label>
+          <%= date_field_tag :data_fim, data_fim,
+                id: "recibo_data_fim",
+                min: competencia.periodo,
+                max: competencia.periodo_fim,
+                class: "w-full rounded-lg border border-stone-300 px-2 py-1.5 text-xs" %>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <%= submit_tag "Aplicar período", class: "px-3 py-1.5 rounded-lg bg-stone-800 text-white text-xs font-semibold cursor-pointer hover:bg-stone-700" %>
+        <%= link_to "Mês inteiro",
+              recibo_esportula_form_admin_path(
+                competencia_mensal_id: competencia.id,
+                sacerdote_id: sacerdote&.id,
+                data_inicio: competencia.periodo,
+                data_fim: competencia.periodo_fim
+              ),
+              data: { turbo_frame: "esportula_recibo_drawer" },
+              class: "px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-semibold text-stone-700 hover:bg-white" %>
+        <%= link_to "De hoje",
+              recibo_esportula_form_admin_path(
+                competencia_mensal_id: competencia.id,
+                sacerdote_id: sacerdote&.id,
+                data_inicio: [Date.current, competencia.periodo].max,
+                data_fim: competencia.periodo_fim
+              ),
+              data: { turbo_frame: "esportula_recibo_drawer" },
+              class: "px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-semibold text-stone-700 hover:bg-white" %>
+      </div>
+    <% end %>
+
+    <% if eventos.blank? %>
+      <div class="flex-1 flex items-center justify-center p-6 text-sm text-stone-500 text-center">
+        Nenhuma espórtula neste período.<br />
+        <span class="text-xs">Ajuste as datas ou escolha «Mês inteiro».</span>
+      </div>
+    <% else %>
+      <%= form_with url: recibo_esportula_admin_registros_esportula_index_path(format: :pdf),
+            method: :get,
+            local: true,
+            html: { target: "_blank", class: "flex flex-col flex-1 min-h-0", data: { action: "submit->esportula-recibo-form#validateSubmit" } } do %>
+        <%= hidden_field_tag :competencia_mensal_id, competencia.id %>
+        <%= hidden_field_tag :sacerdote_id, sacerdote&.id if sacerdote.present? %>
+
+        <div class="shrink-0 px-4 py-2 border-b border-stone-100 flex flex-col gap-2 bg-white">
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <button type="button" data-action="esportula-recibo-form#selectMissas" class="text-[10px] font-bold uppercase tracking-wide text-sky-800 hover:text-sky-950">
+              Só missas<% if missas_qtd.positive? %> (<%= missas_qtd %>)<% end %>
+            </button>
+            <span class="text-stone-300 hidden sm:inline">·</span>
+            <button type="button" data-action="esportula-recibo-form#selectAll" class="text-[10px] font-bold uppercase tracking-wide text-violet-800 hover:text-violet-950">
+              Marcar todas
+            </button>
+            <span class="text-stone-300">·</span>
+            <button type="button" data-action="esportula-recibo-form#selectNone" class="text-[10px] font-bold uppercase tracking-wide text-stone-600 hover:text-stone-800">
+              Limpar
+            </button>
+          </div>
+          <p class="text-xs text-stone-600 tabular-nums">
+            <span class="font-medium text-stone-800"><%= l(data_inicio) %> — <%= l(data_fim) %></span>
+            · Selecionadas: <span data-esportula-recibo-form-target="selectedCount">0</span>/<%= eventos.size %>
+            · <span class="font-bold text-violet-900" data-esportula-recibo-form-target="selectedTotal">R$ 0,00</span>
+            · <span class="text-stone-500"><span data-esportula-recibo-form-target="selectedPages">0</span> recibo(s)</span>
+          </p>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          <% eventos.group_by(&:data).each do |dia, evs_dia| %>
+            <section>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-stone-500 sticky top-0 bg-white py-1 border-b border-stone-100 mb-1.5">
+                <%= l(dia, format: :long) %>
+              </p>
+              <ul class="space-y-1.5">
+                <% evs_dia.sort_by(&:horario).each do |ev| %>
+                  <% valor = ev.valor_esportula.to_d %>
+                  <% tipo_nome = ev.tipo_servico.nome.to_s %>
+                  <% missa = tipo_nome.match?(/missa/i) %>
+                  <% confissao = tipo_nome.match?(/confiss/i) %>
+                  <li>
+                    <label class="flex items-start gap-2 rounded-lg border border-stone-200/90 px-2 py-1.5 hover:bg-violet-50/50 cursor-pointer has-[:checked]:border-violet-300 has-[:checked]:bg-violet-50/60">
+                      <%= check_box_tag "evento_escala_ids[]", ev.id, missa,
+                            class: "mt-0.5 rounded border-stone-300 text-violet-700 focus:ring-violet-500/30 shrink-0",
+                            data: {
+                              esportula_recibo_form_target: "checkbox",
+                              valor: valor,
+                              missa: missa ? "1" : "0",
+                              action: "change->esportula-recibo-form#updateTotals"
+                            } %>
+                      <span class="min-w-0 flex-1 text-xs leading-tight">
+                        <span class="flex items-center justify-between gap-2">
+                          <span class="inline-flex flex-wrap items-center gap-1 min-w-0">
+                            <span class="font-semibold text-stone-900 tabular-nums"><%= ev.horario.strftime("%H:%M") %></span>
+                            <span class="text-stone-600 font-medium truncate max-w-[5.5rem]" title="<%= ev.sacerdote.nome %>"><%= esportula_nome_curto(ev.sacerdote) %></span>
+                            <% if missa %>
+                              <span class="rounded px-1 py-px text-[9px] font-bold uppercase bg-sky-100 text-sky-900 ring-1 ring-sky-200/80">Missa</span>
+                            <% elsif confissao %>
+                              <span class="rounded px-1 py-px text-[9px] font-bold uppercase bg-amber-100 text-amber-900 ring-1 ring-amber-200/80">Confissão</span>
+                            <% end %>
+                          </span>
+                          <span class="shrink-0 font-bold tabular-nums text-emerald-900 whitespace-nowrap"><%= number_to_currency(valor, precision: 2) %></span>
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                <% end %>
+              </ul>
+            </section>
+          <% end %>
+        </div>
+
+        <div class="shrink-0 p-4 border-t border-stone-200 bg-white flex gap-2">
+          <%= button_tag type: "submit", class: "flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-700 hover:bg-violet-800 text-white text-sm font-semibold cursor-pointer" do %>
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Gerar PDF
+          <% end %>
+          <button type="button" data-action="drawer#close" class="px-4 py-2.5 rounded-xl border border-stone-300 text-stone-700 text-sm font-medium hover:bg-stone-50">
+            Cancelar
+          </button>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</turbo-frame>

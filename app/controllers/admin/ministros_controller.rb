@@ -5,7 +5,7 @@ module Admin
     before_action :set_ministro, only: [:show, :edit, :update, :destroy]
 
     def index
-      scope = busca_em(Ministro.all, %w[nome nome_completo email telefone])
+      scope = busca_em(scoped(Ministro), %w[nome nome_completo email telefone])
       scope = scope.where(ativo: params[:status] == "ativo") if %w[ativo inativo].include?(params[:status])
       scope = scope.where(sexo: params[:sexo]) if Ministro::SEXOS.include?(params[:sexo])
       @ministros = scope.ordenados_por_nome
@@ -60,7 +60,7 @@ module Admin
     private
 
     def set_ministro
-      @ministro = Ministro.includes(:user).find(params[:id])
+      @ministro = scoped(Ministro).includes(:user).find(params[:id])
     end
 
     def ministro_params

@@ -3,6 +3,10 @@
 puts "🌿 Sacristia Digital - Seeds iniciais"
 puts "=" * 50
 
+instituicao = Instituicao.find_by!(slug: "facedecristo")
+Current.instituicao = instituicao
+puts "\n🏛️  Instituição: #{instituicao.nome} (#{instituicao.slug}) · plano: #{instituicao.plano_catalogo&.nome}"
+
 # Tipos de Serviço
 puts "\n📋 Criando tipos de serviço..."
 tipo_servicos = [
@@ -17,7 +21,7 @@ tipo_servicos = [
 ]
 
 tipo_servicos.each do |attrs|
-  TipoServico.find_or_create_by!(nome: attrs[:nome]) do |t|
+  TipoServico.find_or_create_by!(instituicao_id: instituicao.id, nome: attrs[:nome]) do |t|
     t.tipo_escala = attrs[:tipo_escala]
     t.cor_etiqueta = attrs[:cor_etiqueta]
     t.ativo = true
@@ -35,7 +39,7 @@ sacerdotes_data = [
 
 sacerdotes = []
 sacerdotes_data.each do |attrs|
-  s = Sacerdote.find_or_create_by!(nome: attrs[:nome]) do |sacerdote|
+  s = Sacerdote.find_or_create_by!(instituicao_id: instituicao.id, nome: attrs[:nome]) do |sacerdote|
     sacerdote.nome = attrs[:nome]
     sacerdote.telefone = attrs[:telefone]
     sacerdote.forma_esportula = attrs[:forma_esportula]
@@ -46,7 +50,7 @@ sacerdotes_data.each do |attrs|
 end
 puts "   ✓ #{Sacerdote.count} sacerdotes"
 
-DestinatarioEsportula.find_or_create_by!(nome: "Padres Eudistas") do |d|
+DestinatarioEsportula.find_or_create_by!(instituicao_id: instituicao.id, nome: "Padres Eudistas") do |d|
   d.ativo = true
   d.observacoes = "Pagamento acumulado das missas do horário fixo (ex.: seg–sex 12:10)."
 end
@@ -69,7 +73,7 @@ ministros_data = [
 
 ministros = []
 ministros_data.each do |attrs|
-  m = Ministro.find_or_create_by!(email: attrs[:email]) do |ministro|
+  m = Ministro.find_or_create_by!(instituicao_id: instituicao.id, email: attrs[:email]) do |ministro|
     ministro.nome = attrs[:nome]
     ministro.telefone = attrs[:telefone]
     ministro.sexo = attrs[:sexo]
@@ -98,6 +102,7 @@ calendario_base = [
 
 calendario_base.each do |attrs|
   CalendarioBase.find_or_create_by!(
+    instituicao_id: instituicao.id,
     dia_da_semana: attrs[:dia_da_semana],
     horario: attrs[:horario],
     tipo: attrs[:tipo] || "missa"
@@ -114,7 +119,7 @@ puts "   ✓ #{CalendarioBase.count} entradas no calendário base"
 puts "\n🔐 Criando usuários..."
 senha = "123456"
 
-admin_user = User.find_or_initialize_by(email: "admin@sacristiadigital.local")
+admin_user = User.find_or_initialize_by(instituicao_id: instituicao.id, email: "admin@sacristiadigital.local")
 admin_user.assign_attributes(
   nome: "Administrador",
   perfis: %w[admin],
@@ -123,7 +128,7 @@ admin_user.assign_attributes(
 )
 admin_user.save!
 
-coordenador_user = User.find_or_initialize_by(email: "coordenador@sacristiadigital.local")
+coordenador_user = User.find_or_initialize_by(instituicao_id: instituicao.id, email: "coordenador@sacristiadigital.local")
 coordenador_user.assign_attributes(
   nome: "Coordenador MESC",
   perfis: %w[coordenador],
@@ -132,7 +137,7 @@ coordenador_user.assign_attributes(
 )
 coordenador_user.save!
 
-ministro_user = User.find_or_initialize_by(email: "ministro@sacristiadigital.local")
+ministro_user = User.find_or_initialize_by(instituicao_id: instituicao.id, email: "ministro@sacristiadigital.local")
 ministro_user.assign_attributes(
   nome: ministros.first.nome,
   perfis: %w[ministro],
@@ -167,8 +172,62 @@ end
 
 puts "\n📆 Criando competência do mês atual..."
 hoje = Date.current
-competencia = CompetenciaMensal.find_or_create_by!(ano: hoje.year, mes: hoje.month)
+competencia = CompetenciaMensal.find_or_create_by!(instituicao_id: instituicao.id, ano: hoje.year, mes: hoje.month)
 puts "   ✓ Competência #{competencia.label}"
+
+# Piloto multi-instituição (plano enxuto — escala + liturgia, sem caixa/espórtulas/extra)
+puts "\n🏛️  Piloto: Paróquia São Vicente (plano Escala e liturgia)..."
+plano_enxuto = Plano.find_or_create_by!(codigo: "escala_liturgia") do |p|
+  p.nome = "Escala e liturgia"
+  p.descricao = "Competências MESC e cartaz litúrgico."
+  p.preco_mensal_centavos = 0
+  p.recursos = Plano::RECURSOS_ESCALA_LITURGIA
+end
+plano_enxuto.update!(recursos: Plano::RECURSOS_ESCALA_LITURGIA) if plano_enxuto.recursos != Plano::RECURSOS_ESCALA_LITURGIA
+
+piloto = Instituicao.find_or_create_by!(slug: "saovicente") do |i|
+  i.tipo = "paroquia"
+  i.nome = "Paróquia São Vicente"
+  i.nome_curto = "São Vicente"
+  i.slogan_rodape = "São Vicente resplandecei em nós"
+  i.nome_recibos = "Paróquia São Vicente"
+  i.ativa = true
+  i.assinatura_status = "ativa"
+end
+
+unless piloto.instituicao_plano_vigente
+  now = Time.current
+  InstituicaoPlano.create!(
+    instituicao: piloto,
+    plano: plano_enxuto,
+    vigencia_inicio: now,
+    modulos_vigencia_inicio: now,
+    preco_mensal_centavos: plano_enxuto.preco_mensal_centavos,
+    recursos_snapshot: plano_enxuto.recursos,
+    status: "vigente"
+  )
+end
+
+Current.instituicao = piloto
+CompetenciaMensal.find_or_create_by!(instituicao_id: piloto.id, ano: hoje.year, mes: hoje.month)
+TipoServico.find_or_create_by!(instituicao_id: piloto.id, nome: "Missa") do |t|
+  t.tipo_escala = "ordinaria"
+  t.cor_etiqueta = "#2563eb"
+  t.ativo = true
+end
+
+piloto_admin = User.find_or_initialize_by(instituicao_id: piloto.id, email: "admin@saovicente.local")
+piloto_admin.assign_attributes(
+  nome: "Admin São Vicente",
+  perfis: %w[admin],
+  password: senha,
+  password_confirmation: senha
+)
+piloto_admin.save!
+Current.instituicao = instituicao
+
+puts "   ✓ #{piloto.nome} (#{piloto.slug}) · admin@saovicente.local · senha: #{senha}"
+puts "   ✓ Acesse em dev: http://saovicente.localhost:3000 (ou INSTITUICAO_SLUG=saovicente)"
 
 puts "\n" + "=" * 50
 puts "✅ Seeds concluídos com sucesso!"

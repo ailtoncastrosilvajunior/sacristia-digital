@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class CalendarioBase < ApplicationRecord
+  include InstituicaoScoped
+
   self.table_name = "calendario_base"
 
   belongs_to :sacerdote, optional: true

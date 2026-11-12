@@ -43,7 +43,11 @@ class PreCadastrosController < ApplicationController
       return
     end
 
-    @solicitacao = SolicitacaoCadastro.find_by(id: dados["id"], email: dados["email"], status: "pendente")
+    @solicitacao = SolicitacaoCadastro.da_instituicao_atual.find_by(
+      id: dados["id"],
+      email: dados["email"],
+      status: "pendente"
+    )
     unless @solicitacao
       redirect_to novo_pre_cadastro_path,
                   alert: "Não encontramos essa solicitação. Se ainda não enviou, preencha o formulário novamente."

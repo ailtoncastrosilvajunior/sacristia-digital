@@ -2,10 +2,12 @@
 
 module Admin
   class DestinatariosEsportulaController < Admin::BaseController
+    require_instituicao_modulo! :esportulas
+
     before_action :set_destinatario, only: [:edit, :update, :destroy]
 
     def index
-      @destinatarios = DestinatarioEsportula.order(:nome)
+      @destinatarios = scoped(DestinatarioEsportula).order(:nome)
     end
 
     def new
@@ -43,7 +45,7 @@ module Admin
     private
 
     def set_destinatario
-      @destinatario = DestinatarioEsportula.find(params[:id])
+      @destinatario = find_scoped!(DestinatarioEsportula, params[:id])
     end
 
     def destinatario_params

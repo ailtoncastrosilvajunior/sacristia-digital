@@ -5,7 +5,7 @@ module PainelMinistro
   class OfertaApoiosController < PainelMinistro::BaseController
     def create
       data = Date.iso8601(params[:data].to_s)
-      competencia = CompetenciaMensal.liberadas_para_ministros.find_by(ano: data.year, mes: data.month)
+      competencia = CompetenciaMensal.da_instituicao_atual.liberadas_para_ministros.find_by(ano: data.year, mes: data.month)
       return voltar(data, competencia, alert: "Escala deste mês ainda não liberada.") if competencia.nil? || data < Date.current
 
       bloco = competencia.plantao_para_dia(data)

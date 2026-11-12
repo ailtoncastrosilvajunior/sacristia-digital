@@ -2,6 +2,7 @@
 
 module Admin
   class IgmrParagrafosController < Admin::BaseController
+    require_instituicao_modulo! :liturgia_cartaz
     include Admin::ReturnToRedirect
 
     before_action :set_paragrafo, only: %i[show edit update]

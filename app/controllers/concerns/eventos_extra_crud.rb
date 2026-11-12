@@ -10,7 +10,7 @@ module EventosExtraCrud
   end
 
   def index
-    scope = EventoEscala.extras.joins(:tipo_servico).includes(:tipo_servico, :sacerdote, escala_ministros: :ministro)
+    scope = EventoEscala.da_instituicao_atual.extras.joins(:tipo_servico).includes(:tipo_servico, :sacerdote, escala_ministros: :ministro)
     scope = busca_em(scope, %w[evento_escala.local tipo_servicos.nome])
     scope = scope.where(status: params[:status]) if EventoEscala::STATUS.include?(params[:status])
     scope = scope.where(tipo_servico_id: params[:tipo_servico_id]) if params[:tipo_servico_id].present?
@@ -32,7 +32,7 @@ module EventosExtraCrud
     @eventos_lista = scope.where(data: @periodo).por_data.to_a
     @eventos_contagem = @eventos_lista.size
 
-    @competencia_visivel = CompetenciaMensal.find_by(ano: @inicio_mes.year, mes: @inicio_mes.month)
+    @competencia_visivel = scoped(CompetenciaMensal).find_by(ano: @inicio_mes.year, mes: @inicio_mes.month)
     periodo_plantao = @inicio_mes..@fim_mes
     @plantoes_cartaz = @competencia_visivel&.plantao_periodos&.includes(:ministros)&.ordenados&.select { |pp| pp.sobrepoe_periodo?(periodo_plantao) } || []
   end
@@ -42,8 +42,12 @@ module EventosExtraCrud
 
   def new
     data = params[:data].presence&.then { |d| Date.parse(d) } || Date.current
-    competencia = params[:competencia_mensal_id].present? ? CompetenciaMensal.find_by(id: params[:competencia_mensal_id]) : competencia_mensal_atual
-    @evento = EventoEscala.new(tipo_escala: "extra", data: data, competencia_mensal_id: competencia[:id])
+    competencia = if params[:competencia_mensal_id].present?
+                    scoped(CompetenciaMensal).find_by(id: params[:competencia_mensal_id])
+                  else
+                    competencia_instituicao_atual_mes
+                  end
+    @evento = EventoEscala.new(tipo_escala: "extra", data: data, competencia_mensal_id: competencia&.id)
     @evento.plantao_periodo_id = competencia.plantao_para_dia(data)&.id
   end
 
@@ -81,14 +85,11 @@ module EventosExtraCrud
   end
 
   def set_evento
-    @evento = EventoEscala.extras.find(params[:id])
+    @evento = EventoEscala.da_instituicao_atual.extras.find(params[:id])
   end
 
   def evento_params
     params.require(:evento_escala).permit(*campos_permitidos)
   end
 
-  def competencia_mensal_atual
-    CompetenciaMensal.where(ano: Date.current.year, mes: Date.current.month).order(created_at: :desc).first
-  end
 end

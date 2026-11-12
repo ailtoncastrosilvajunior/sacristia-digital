@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class DestinatarioEsportula < ApplicationRecord
+  include InstituicaoScoped
+
   self.table_name = "destinatarios_esportula"
 
   has_many :calendario_base, dependent: :nullify

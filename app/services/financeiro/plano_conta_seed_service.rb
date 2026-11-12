@@ -55,7 +55,8 @@ module Financeiro
     private
 
     def upsert_node(node, natureza:, ordem:, pai:)
-      registro = PlanoConta.find_or_initialize_by(codigo: node[:codigo])
+      inst = Current.instituicao || raise("Current.instituicao ausente")
+      registro = PlanoConta.find_or_initialize_by(instituicao_id: inst.id, codigo: node[:codigo])
       registro.assign_attributes(
         nome: node[:nome],
         natureza: natureza,

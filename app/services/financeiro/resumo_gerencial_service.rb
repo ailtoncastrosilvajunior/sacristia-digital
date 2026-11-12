@@ -66,7 +66,7 @@ module Financeiro
         chaves = chaves_colunas
         ItemLancamento
           .joins(:lancamento_caixa, :plano_conta)
-          .merge(LancamentoCaixa.confirmados.where(data: periodo_historico))
+          .merge(LancamentoCaixa.da_instituicao_atual.confirmados.where(data: periodo_historico))
           .where(plano_contas: { sintetica: false })
           .pluck("plano_contas.id", "itens_lancamento.valor", "lancamentos_caixa.data")
           .each do |conta_id, valor, data|
@@ -80,13 +80,13 @@ module Financeiro
     end
 
     def contas_analiticas_ids_por_natureza
-      @contas_analiticas_ids_por_natureza ||= PlanoConta.analiticas.group_by(&:natureza).transform_values { |cs| cs.map(&:id) }
+      @contas_analiticas_ids_por_natureza ||= PlanoConta.da_instituicao_atual.analiticas.group_by(&:natureza).transform_values { |cs| cs.map(&:id) }
     end
 
     def movimentos_conta_corrente
       @movimentos_conta_corrente ||= begin
         conta = ContaCorrente.padrao
-        LancamentoCaixa.confirmados
+        LancamentoCaixa.da_instituicao_atual.confirmados
           .where(conta_corrente_id: conta.id)
           .where(data: conta.data_saldo_inicial..periodo_historico.end)
           .order(:data, :id)
@@ -160,13 +160,13 @@ module Financeiro
     end
 
     def filhos_por_pai
-      @filhos_por_pai ||= PlanoConta.ativas.ordenadas.group_by(&:conta_pai_id).transform_values do |contas|
+      @filhos_por_pai ||= PlanoConta.da_instituicao_atual.ativas.ordenadas.group_by(&:conta_pai_id).transform_values do |contas|
         contas.sort_by(&:codigo)
       end
     end
 
     def contas_raiz
-      @contas_raiz ||= PlanoConta.ativas.where(codigo: %w[1 2]).index_by(&:codigo)
+      @contas_raiz ||= PlanoConta.da_instituicao_atual.ativas.where(codigo: %w[1 2]).index_by(&:codigo)
     end
 
     def secao_receitas

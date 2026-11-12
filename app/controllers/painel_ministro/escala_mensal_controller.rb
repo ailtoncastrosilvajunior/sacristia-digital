@@ -13,10 +13,10 @@ module PainelMinistro
       @hoje = Date.current
       em_ids = @dias.flat_map { |d| d.eventos.flat_map { |e| e.escala_ministros.map(&:id) } }
       @trocas_pendentes = SolicitacaoTroca.pendentes.where(escala_ministro_id: em_ids).index_by(&:escala_ministro_id)
-      ofertas = OfertaApoio.ativas.where(competencia_mensal_id: @competencia.id).includes(:ministro).to_a
+      ofertas = OfertaApoio.da_instituicao_atual.ativas.where(competencia_mensal_id: @competencia.id).includes(:ministro).to_a
       @apoiadores_por_dia = ofertas.group_by(&:data)
       @apoios = ofertas.select { |o| o.ministro_id == @meu_id }.index_by(&:data)
-      @ministros_para_troca = Ministro.ativos.ordenados_por_nome.where.not(id: @meu_id).to_a
+      @ministros_para_troca = Ministro.da_instituicao_atual.ativos.ordenados_por_nome.where.not(id: @meu_id).to_a
       @trocas_recebidas = SolicitacaoTroca.pendentes.where(substituto_id: @meu_id)
                                           .includes(escala_ministro: [:ministro, { evento_escala: %i[tipo_servico sacerdote] }])
                                           .select { |t| !t.evento_escala.cancelado? && t.evento_escala.data >= @hoje }
@@ -54,6 +54,7 @@ module PainelMinistro
 
     def datas_plantao_do_ministro(competencia, ministro_id)
       blocos = PlantaoPeriodo
+        .da_instituicao_atual
         .joins(:plantao_periodo_ministros)
         .where(competencia_mensal_id: competencia.id, plantao_periodo_ministros: { ministro_id: ministro_id })
         .ordenados
@@ -68,7 +69,7 @@ module PainelMinistro
     end
 
     def carregar_escala
-      @competencias = CompetenciaMensal.liberadas_para_ministros.ordenados.limit(48).to_a
+      @competencias = CompetenciaMensal.da_instituicao_atual.liberadas_para_ministros.ordenados.limit(48).to_a
       @competencia = resolve_competencia
       return redirect_to(ministro_root_path, alert: "Nenhuma escala liberada ainda.") if @competencia.blank?
 

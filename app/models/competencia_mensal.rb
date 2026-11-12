@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class CompetenciaMensal < ApplicationRecord
+  include InstituicaoScoped
+
   self.table_name = "competencia_mensal"
 
   has_many :evento_escalas, dependent: :destroy
@@ -10,7 +12,7 @@ class CompetenciaMensal < ApplicationRecord
 
   validates :ano, presence: true, numericality: { in: 2020..2100 }
   validates :mes, presence: true, numericality: { in: 1..12 }
-  validates :mes, uniqueness: { scope: :ano }
+  validates :mes, uniqueness: { scope: %i[instituicao_id ano] }
 
   scope :ordenados, -> { order(ano: :desc, mes: :desc) }
   scope :liberadas_para_ministros, -> { where(escala_liberada: true) }
@@ -44,7 +46,7 @@ class CompetenciaMensal < ApplicationRecord
 
   def competencia_anterior
     ref = periodo.prev_month
-    self.class.find_by(ano: ref.year, mes: ref.month)
+    self.class.find_by(instituicao_id: instituicao_id, ano: ref.year, mes: ref.month)
   end
 
   # Copia os blocos de plantão (dias + ministros) de outra competência.
@@ -63,6 +65,7 @@ class CompetenciaMensal < ApplicationRecord
   end
 
   def self.para_mes(ano, mes)
-    find_or_create_by!(ano: ano, mes: mes)
+    inst = Current.instituicao || raise("Current.instituicao ausente")
+    find_or_create_by!(instituicao_id: inst.id, ano: ano, mes: mes)
   end
 end

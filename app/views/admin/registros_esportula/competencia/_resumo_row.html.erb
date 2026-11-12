@@ -1,4 +1,4 @@
-<%# locals: linha, resumo_eventos_map %>
+<%# locals: linha, resumo_eventos_map, competencia %>
 <% s = linha[:sacerdote] %>
 <% quitado = linha[:saldo].to_d.zero? && linha[:previsto].to_d.positive? %>
 <% zebra = s.id.even? %>
@@ -9,7 +9,7 @@
     data-eventos="<%= h(eventos.to_json) %>"
     class="group border-b border-slate-100/90 transition-colors <%= zebra ? 'bg-slate-50/35' : 'bg-white' %> hover:bg-sky-50/60">
   <td class="px-2.5 py-2 align-middle">
-    <%= link_to s.nome, admin_sacerdote_path(s), class: "font-semibold text-slate-800 group-hover:text-sky-800 leading-snug", title: s.nome %>
+    <%= link_to s.nome, admin_sacerdote_path(s), class: "font-semibold text-slate-800 group-hover:text-sky-800 leading-snug block truncate max-w-[9rem]", title: s.nome %>
   </td>
   <td class="px-1 py-2 text-center align-middle" data-esportula-resumo-missas>
     <% if linha[:missas].positive? %>
@@ -36,5 +36,14 @@
   </td>
   <td class="px-2.5 py-2 text-right align-middle tabular-nums font-bold whitespace-nowrap <%= quitado ? 'text-emerald-700' : 'text-indigo-800' %>" data-esportula-resumo-saldo>
     <%= number_to_currency(linha[:saldo], precision: 0) %>
+  </td>
+  <td class="px-1 py-2 text-center align-middle">
+    <%= link_to recibo_esportula_form_admin_path(competencia_mensal_id: competencia.id, sacerdote_id: s.id),
+          data: { turbo_frame: "esportula_recibo_drawer" },
+          class: "inline-flex items-center justify-center min-w-[2.5rem] rounded-md border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-900 hover:bg-violet-100 transition-colors",
+          title: "Escolher espórtulas e gerar recibo (A5) — #{s.nome}",
+          aria: { label: "Recibo de #{s.nome}" } do %>
+      Recibo
+    <% end %>
   </td>
 </tr>

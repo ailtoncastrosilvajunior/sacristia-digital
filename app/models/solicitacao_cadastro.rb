@@ -5,6 +5,7 @@ class SolicitacaoCadastro < ApplicationRecord
   STATUSES = %w[pendente aprovada rejeitada].freeze
   SENHA_MINIMA = 8
 
+  include InstituicaoScoped
   include NascimentoParcial
 
   belongs_to :ministro, optional: true
@@ -112,8 +113,8 @@ class SolicitacaoCadastro < ApplicationRecord
   def email_disponivel
     return if email.blank?
 
-    em_uso = User.where("LOWER(email) = ?", email).exists? ||
-             SolicitacaoCadastro.pendentes.where("LOWER(email) = ?", email).exists?
+    em_uso = User.where(instituicao_id: instituicao_id).where("LOWER(email) = ?", email).exists? ||
+             SolicitacaoCadastro.da_instituicao_atual.pendentes.where("LOWER(email) = ?", email).exists?
     return unless em_uso
 
     errors.add(:base, "Não foi possível registrar com este e-mail. Se você já tem cadastro, entre no sistema " \

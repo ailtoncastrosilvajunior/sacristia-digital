@@ -45,7 +45,7 @@ module Liturgia
     private
 
     def eventos_do_dia
-      comp = CompetenciaMensal.find_by(ano: liturgia.data.year, mes: liturgia.data.month)
+      comp = CompetenciaMensal.da_instituicao_atual.find_by(ano: liturgia.data.year, mes: liturgia.data.month)
       return [] unless comp
 
       comp.evento_escalas

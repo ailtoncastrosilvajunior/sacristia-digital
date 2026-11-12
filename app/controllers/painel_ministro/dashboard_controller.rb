@@ -33,6 +33,7 @@ module PainelMinistro
 
     def competencias_do_ministro(_ministro)
       CompetenciaMensal
+        .da_instituicao_atual
         .liberadas_para_ministros
         .ordenados
         .limit(48)
@@ -44,7 +45,7 @@ module PainelMinistro
         return c if c
       end
 
-      cur = CompetenciaMensal.find_by(ano: Date.current.year, mes: Date.current.month)
+      cur = CompetenciaMensal.da_instituicao_atual.find_by(ano: Date.current.year, mes: Date.current.month)
       return cur if cur && competencias.exists?(id: cur.id)
 
       competencias.first
@@ -97,6 +98,7 @@ module PainelMinistro
     # { Date => PlantaoPeriodo } dos dias em que o ministro está de plantão (escala extra).
     def build_plantao_por_dia(competencia, ministro)
       blocos = PlantaoPeriodo
+        .da_instituicao_atual
         .joins(:plantao_periodo_ministros)
         .where(competencia_mensal_id: competencia.id, plantao_periodo_ministros: { ministro_id: ministro.id })
         .includes(plantao_periodo_ministros: :ministro)

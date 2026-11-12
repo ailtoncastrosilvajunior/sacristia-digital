@@ -5,7 +5,7 @@ module Admin
     before_action :set_sacerdote, only: [:show, :edit, :update, :destroy]
 
     def index
-      scope = busca_em(Sacerdote.all, %w[nome email telefone])
+      scope = busca_em(scoped(Sacerdote), %w[nome email telefone])
       scope = scope.where(ativo: params[:status] == "ativo") if %w[ativo inativo].include?(params[:status])
       scope = scope.where(forma_esportula: params[:forma_esportula]) if Sacerdote::FORMAS_ESPORTULA.include?(params[:forma_esportula])
       @sacerdotes = scope.ordenados_por_nome.page(params[:page])
@@ -46,7 +46,7 @@ module Admin
     private
 
     def set_sacerdote
-      @sacerdote = Sacerdote.find(params[:id])
+      @sacerdote = find_scoped!(Sacerdote, params[:id])
     end
 
     def sacerdote_params

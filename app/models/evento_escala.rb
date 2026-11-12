@@ -50,6 +50,13 @@ class EventoEscala < ApplicationRecord
   scope :extras, -> { where(tipo_escala: "extra") }
   scope :por_data, -> { order(:data, :horario) }
   scope :nao_cancelados, -> { where.not(status: "cancelado") }
+  scope :da_instituicao_atual, lambda {
+    if Current.instituicao
+      joins(:competencia_mensal).where(competencia_mensal: { instituicao_id: Current.instituicao.id })
+    else
+      none
+    end
+  }
 
   def data_hora
     return nil unless data && horario

@@ -11,7 +11,7 @@ module Admin
     helper_method :pode_gerar_escala_competencia?
 
     def index
-      @competencias = CompetenciaMensal.ordenados
+      @competencias = scoped(CompetenciaMensal).ordenados
 
       @competencias = @competencias.where(ano: params[:ano]) if params[:ano].present?
       @competencias = @competencias.where(mes: params[:mes]) if params[:mes].present?
@@ -150,7 +150,7 @@ module Admin
     end
 
     def set_competencia
-      @competencia = CompetenciaMensal.find(params[:id])
+      @competencia = find_scoped!(CompetenciaMensal, params[:id])
     end
 
     def competencia_params

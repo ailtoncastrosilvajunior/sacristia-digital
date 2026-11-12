@@ -3,11 +3,11 @@
 module Coordenador
   class CompetenciaMensalController < Coordenador::BaseController
     def index
-      @competencias = CompetenciaMensal.ordenados.page(params[:page])
+      @competencias = scoped(CompetenciaMensal).ordenados.page(params[:page])
     end
 
     def show
-      @competencia = CompetenciaMensal.find(params[:id])
+      @competencia = find_scoped!(CompetenciaMensal, params[:id])
     end
   end
 end

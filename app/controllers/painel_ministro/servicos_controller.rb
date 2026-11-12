@@ -3,7 +3,7 @@
 module PainelMinistro
   class ServicosController < PainelMinistro::BaseController
     def index
-      @competencias = CompetenciaMensal.liberadas_para_ministros.ordenados.limit(48).to_a
+      @competencias = CompetenciaMensal.da_instituicao_atual.liberadas_para_ministros.ordenados.limit(48).to_a
       @competencia = resolve_competencia(@competencias)
       scope = eventos_do_ministro
       scope = scope.where(competencia_mensal_id: @competencia.id) if @competencia
@@ -44,8 +44,9 @@ module PainelMinistro
 
     def eventos_do_ministro
       EventoEscala
+        .da_instituicao_atual
         .joins(:competencia_mensal)
-        .merge(CompetenciaMensal.liberadas_para_ministros)
+        .merge(CompetenciaMensal.da_instituicao_atual.liberadas_para_ministros)
         .where(id: EscalaMinistro.where(ministro_id: current_user.ministro_id).select(:evento_escala_id))
         .includes(:tipo_servico, :sacerdote, :plantao_periodo, :competencia_mensal, escala_ministros: :ministro)
         .distinct

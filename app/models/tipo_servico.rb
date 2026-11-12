@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class TipoServico < ApplicationRecord
+  include InstituicaoScoped
+
   self.table_name = "tipo_servicos"
 
   has_many :evento_escalas, dependent: :restrict_with_error

@@ -2,6 +2,8 @@
 
 module Admin
   class ExtratoFinanceiroController < Admin::BaseController
+    require_instituicao_modulo! :financeiro_caixa
+
     def show
       @conta = ContaCorrente.padrao
       @ano = (params[:ano] || Date.current.year).to_i

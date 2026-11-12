@@ -3,6 +3,7 @@
 module Coordenador
   class BaseController < ApplicationController
     before_action :authorize_coordenador!
+    before_action { require_instituicao_recurso!(:escala_mesc) }
 
     layout "admin"
 

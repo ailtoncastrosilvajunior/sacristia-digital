@@ -17,7 +17,7 @@ class LiturgiaDia < ApplicationRecord
   serialize :divergencias, type: Array, coder: JSON
 
   has_one_attached :imagem_santo
-  has_one_attached :cartaz_whatsapp
+  has_many :liturgia_cartazes, dependent: :destroy
   belongs_to :validado_por, class_name: "User", optional: true
 
   validates :data, presence: true, uniqueness: true
@@ -93,6 +93,20 @@ class LiturgiaDia < ApplicationRecord
   # Texto legível sobre o fundo da cor litúrgica.
   def cor_texto_css
     cor.to_s.downcase.start_with?("branc") ? "#44403c" : "#ffffff"
+  end
+
+  def cartaz_instituicao_atual
+    return unless Current.instituicao
+
+    liturgia_cartazes.find_by(instituicao_id: Current.instituicao.id)
+  end
+
+  def cartaz_whatsapp_instituicao
+    cartaz_instituicao_atual&.cartaz_whatsapp
+  end
+
+  def cartaz_whatsapp_instituicao_attached?
+    cartaz_whatsapp_instituicao&.attached? == true
   end
 
   private

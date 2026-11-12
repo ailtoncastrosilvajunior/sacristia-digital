@@ -3,6 +3,7 @@
 module PainelMinistro
   class BaseController < ApplicationController
     before_action :authorize_ministro!
+    before_action { require_instituicao_recurso!(:escala_mesc) }
 
     layout "ministro"
 

@@ -1,0 +1,86 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-semibold text-stone-800">Configurações da instituição</h1>
+    <p class="text-stone-500 mt-1">Identidade no sistema, cartaz MESC e recibos de espórtula.</p>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm p-6 max-w-2xl">
+    <%= form_with model: @instituicao, url: admin_configuracao_instituicao_path, method: :patch, local: true, html: { class: "space-y-5" } do |f| %>
+      <% if @instituicao.errors.any? %>
+        <div class="rounded-lg bg-red-50 p-4 text-red-800 text-sm">
+          <p class="font-medium mb-2"><%= pluralize(@instituicao.errors.count, "erro") %> impediram a atualização:</p>
+          <ul class="list-disc list-inside">
+            <% @instituicao.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-stone-100 text-sm">
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Endereço do app</dt>
+          <dd class="mt-1 font-mono text-stone-800 break-all"><%= instituicao_url_publica(@instituicao) %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Identificador (slug)</dt>
+          <dd class="mt-1 font-mono text-stone-800"><%= @instituicao.slug %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Plano contratado</dt>
+          <dd class="mt-1 text-stone-800"><%= @instituicao.plano_catalogo&.nome.presence || "—" %></dd>
+        </div>
+        <div>
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Situação</dt>
+          <dd class="mt-1 text-stone-800"><%= @instituicao.assinatura_status.humanize %></dd>
+        </div>
+        <div class="sm:col-span-2">
+          <dt class="text-xs font-medium uppercase tracking-wide text-stone-500">Módulos ativos</dt>
+          <dd class="mt-2 flex flex-wrap gap-2">
+            <% instituicao_modulos_ativos(@instituicao).each do |chave| %>
+              <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800"><%= instituicao_modulo_label(chave) %></span>
+            <% end %>
+            <% if instituicao_modulos_ativos(@instituicao).empty? %>
+              <span class="text-stone-500">Nenhum módulo no plano vigente.</span>
+            <% end %>
+          </dd>
+        </div>
+      </dl>
+
+      <div>
+        <%= f.label :tipo, "Tipo de instituição", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.select :tipo,
+            Instituicao.tipos.keys.map { |k| [instituicao_tipo_label(k), k] },
+            {},
+            class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500" %>
+        <p class="text-xs text-stone-500 mt-1">Usado em textos e documentos; não altera o isolamento dos dados.</p>
+      </div>
+
+      <div>
+        <%= f.label :nome, "Nome oficial", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.text_field :nome, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", autofocus: true %>
+      </div>
+
+      <div>
+        <%= f.label :nome_curto, "Nome curto", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.text_field :nome_curto, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", placeholder: "Ex.: Face de Cristo" %>
+        <p class="text-xs text-stone-500 mt-1">Cabeçalhos e cartaz, quando aplicável.</p>
+      </div>
+
+      <div>
+        <%= f.label :slogan_rodape, "Frase do rodapé (cartaz MESC)", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.text_field :slogan_rodape, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", placeholder: "Ex.: Face de Cristo resplandecei em nós" %>
+      </div>
+
+      <div>
+        <%= f.label :nome_recibos, "Nome nos recibos de espórtula (PDF)", class: "block text-sm font-medium text-stone-700 mb-1" %>
+        <%= f.text_field :nome_recibos, class: "w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500", placeholder: "Ex.: Paróquia São Vicente" %>
+        <p class="text-xs text-stone-500 mt-1">Se vazio, usa o nome oficial.</p>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <%= f.submit "Salvar", class: "px-4 py-2.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

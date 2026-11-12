@@ -2,6 +2,7 @@
 
 module Admin
   class PlanoContasController < Admin::BaseController
+    require_instituicao_modulo! :financeiro_caixa
     before_action :set_plano_conta, only: [:show, :edit, :update, :destroy]
     before_action :set_index_params
 
@@ -51,14 +52,14 @@ module Admin
     private
 
     def carregar_arvore
-      scope = PlanoConta.ordenadas
+      scope = scoped(PlanoConta).ordenadas
       scope = scope.where(natureza: params[:natureza]) if PlanoConta::NATUREZAS.include?(params[:natureza])
 
       if params[:q].present?
         termo = "%#{params[:q].strip}%"
         matches = scope.where("nome ILIKE ? OR codigo ILIKE ?", termo, termo)
         ids = plano_contas_ids_com_ancestrais(matches)
-        scope = PlanoConta.where(id: ids).ordenadas
+        scope = scoped(PlanoConta).where(id: ids).ordenadas
       end
 
       contas = scope.to_a
@@ -68,7 +69,7 @@ module Admin
     end
 
     def build_nova_conta
-      pai = PlanoConta.find_by(id: params[:conta_pai_id])
+      pai = scoped(PlanoConta).find_by(id: params[:conta_pai_id])
       natureza = pai&.natureza || params[:natureza].presence
       natureza = "despesa" unless PlanoConta::NATUREZAS.include?(natureza)
 
@@ -101,7 +102,7 @@ module Admin
     end
 
     def plano_contas_ids_com_ancestrais(contas)
-      por_id = PlanoConta.pluck(:id, :conta_pai_id).to_h
+      por_id = scoped(PlanoConta).pluck(:id, :conta_pai_id).to_h
       ids = contas.map(&:id).to_set
 
       contas.each do |c|
@@ -115,7 +116,7 @@ module Admin
     end
 
     def set_plano_conta
-      @plano_conta = PlanoConta.find(params[:id])
+      @plano_conta = find_scoped!(PlanoConta, params[:id])
     end
 
     def plano_conta_params

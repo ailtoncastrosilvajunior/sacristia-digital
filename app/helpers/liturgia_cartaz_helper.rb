@@ -111,11 +111,12 @@ module LiturgiaCartazHelper
 
   # Evita o navegador mostrar PNG antigo após regerar (mesmo filename, blob novo).
   def liturgia_cartaz_whatsapp_path(liturgia_dia)
-    return unless liturgia_dia.cartaz_whatsapp.attached?
+    attachment = liturgia_dia.cartaz_whatsapp_instituicao
+    return unless attachment&.attached?
 
-    blob = liturgia_dia.cartaz_whatsapp.blob
+    blob = attachment.blob
     stamp = blob.created_at.to_i
-    "#{rails_blob_path(liturgia_dia.cartaz_whatsapp, only_path: true)}?v=#{stamp}"
+    "#{rails_blob_path(attachment, only_path: true)}?v=#{stamp}"
   end
 
   private

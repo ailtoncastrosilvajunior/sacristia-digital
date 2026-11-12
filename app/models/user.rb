@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  include InstituicaoScoped
+
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable,
-         :trackable
+         :recoverable, :rememberable, :trackable
 
   belongs_to :ministro, optional: true
   belongs_to :sacerdote, optional: true
@@ -18,8 +19,23 @@ class User < ApplicationRecord
   validates :nome, presence: true, if: -> { admin? || coordenador? || escala_extra? }
   validates :ministro, presence: true, if: -> { ministro? }
   validates :sacerdote, presence: true, if: -> { sacerdote? }
+  validates :email, presence: true, if: :email_required?
+  validates :email, format: { with: Devise.email_regexp, allow_blank: true, if: :devise_will_save_change_to_email? }
+  validates :email, uniqueness: { scope: :instituicao_id, case_sensitive: false, allow_blank: true,
+                                  if: :devise_will_save_change_to_email? }
+  validates :password, presence: true, if: :password_required?
+  validates :password, confirmation: true, if: :password_required?
+  validates :password, length: { within: Devise.password_length }, allow_blank: true
 
   scope :com_perfil, ->(p) { where("perfis @> ARRAY[?]::varchar[]", [p]) }
+
+  def self.find_for_database_authentication(warden_conditions)
+    inst = Current.instituicao
+    return nil unless inst
+
+    email = warden_conditions[:email].to_s.downcase.strip
+    da_instituicao_atual.where("LOWER(email) = ?", email).first
+  end
   scope :admins, -> { com_perfil("admin") }
   scope :coordenadores, -> { com_perfil("coordenador") }
   scope :ministros, -> { com_perfil("ministro") }
@@ -80,6 +96,18 @@ class User < ApplicationRecord
     return :escala_extra if escala_extra?
 
     :admin
+  end
+
+  def email_required?
+    true
+  end
+
+  def password_required?
+    !persisted? || !password.nil? || !password_confirmation.nil?
+  end
+
+  def devise_will_save_change_to_email?
+    will_save_change_to_email?
   end
 
   private

@@ -2,6 +2,8 @@
 
 # Bloco de dias de plantão (escala extra) de uma competência, com seus ministros.
 class PlantaoPeriodo < ApplicationRecord
+  include InstituicaoScoped
+
   belongs_to :competencia_mensal
   has_many :plantao_periodo_ministros, -> { order(:ordem, :id) }, dependent: :destroy, inverse_of: :plantao_periodo
   has_many :ministros, through: :plantao_periodo_ministros

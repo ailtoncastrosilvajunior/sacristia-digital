@@ -2,6 +2,8 @@
 
 module Admin
   class LancamentosCaixaController < Admin::BaseController
+    require_instituicao_modulo! :financeiro_caixa
+
     include Admin::ReturnToRedirect
 
     before_action :set_lancamento, only: [:show, :edit, :update, :estornar]
@@ -12,7 +14,7 @@ module Admin
       @mes = (params[:mes] || Date.current.month).to_i
       inicio = Date.new(@ano, @mes, 1)
 
-      scope = LancamentoCaixa.includes(:conta_corrente, :itens_lancamento)
+      scope = scoped(LancamentoCaixa).includes(:conta_corrente, :itens_lancamento)
       scope = scope.where(data: inicio..inicio.end_of_month)
       scope = scope.where(natureza: params[:natureza]) if LancamentoCaixa::NATUREZAS.include?(params[:natureza])
       scope = scope.where(status: params[:status]) if LancamentoCaixa::STATUS.include?(params[:status])
@@ -80,7 +82,7 @@ module Admin
       de, ate = ate, de if ate < de
       preferida = parse_data_param(params[:data])
 
-      eventos = EventoEscala.nao_cancelados.includes(:tipo_servico, :sacerdote)
+      eventos = EventoEscala.da_instituicao_atual.nao_cancelados.includes(:tipo_servico, :sacerdote)
                             .where(data: de..ate).order(:data, :horario).limit(200).to_a
       do_dia, outros = preferida ? eventos.partition { |e| e.data == preferida } : [[], eventos]
 
@@ -101,7 +103,7 @@ module Admin
     private
 
     def set_lancamento
-      @lancamento = LancamentoCaixa.includes(
+      @lancamento = scoped(LancamentoCaixa).includes(
         :conta_corrente,
         { evento_escala: :tipo_servico },
         { registro_esportula: { evento_escala: :tipo_servico } },
@@ -111,9 +113,9 @@ module Admin
     end
 
     def load_form_collections
-      @contas_correntes = ContaCorrente.ativas.order(:nome)
-      @contas_receita = PlanoConta.ativas.analiticas.por_natureza("receita").ordenadas
-      @contas_despesa = PlanoConta.ativas.analiticas.por_natureza("despesa").ordenadas
+      @contas_correntes = scoped(ContaCorrente).ativas.order(:nome)
+      @contas_receita = scoped(PlanoConta).ativas.analiticas.por_natureza("receita").ordenadas
+      @contas_despesa = scoped(PlanoConta).ativas.analiticas.por_natureza("despesa").ordenadas
     end
 
     # Eventos do dia do lançamento (hoje, por padrão) + o evento já vinculado.

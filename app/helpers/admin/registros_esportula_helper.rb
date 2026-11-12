@@ -29,6 +29,56 @@ module Admin
       competencia_admin_registros_esportula_index_path(competencia_mensal_id: competencia_mensal_id)
     end
 
+    def esportulas_paroquia_nome
+      Current.instituicao&.nome_exibicao_recibos.presence ||
+        ENV["PAROQUIA_NOME"].presence ||
+        "Paróquia"
+    end
+
+    def recibo_esportula_periodo_padrao(competencia)
+      inicio_comp = competencia.periodo
+      fim_comp = competencia.periodo_fim
+      hoje = Date.current
+      if hoje >= inicio_comp && hoje <= fim_comp
+        [hoje, fim_comp]
+      else
+        [inicio_comp, fim_comp]
+      end
+    end
+
+    def recibo_esportula_periodo_resolvido(competencia, data_inicio: nil, data_fim: nil)
+      padrao_inicio, padrao_fim = recibo_esportula_periodo_padrao(competencia)
+      inicio = parse_data_param(data_inicio) || padrao_inicio
+      fim = parse_data_param(data_fim) || padrao_fim
+      inicio = [inicio, competencia.periodo].max
+      fim = [fim, competencia.periodo_fim].min
+      fim = inicio if fim < inicio
+      [inicio, fim]
+    end
+
+    def recibo_esportula_form_admin_path(competencia_mensal_id:, sacerdote_id: nil, data_inicio: nil, data_fim: nil)
+      recibo_esportula_form_admin_registros_esportula_index_path(
+        competencia_mensal_id:,
+        sacerdote_id:,
+        data_inicio: format_data_param(data_inicio),
+        data_fim: format_data_param(data_fim)
+      )
+    end
+
+    def parse_data_param(value)
+      return if value.blank?
+
+      Date.parse(value.to_s)
+    rescue ArgumentError
+      nil
+    end
+
+    def format_data_param(value)
+      return if value.blank?
+
+      value.is_a?(Date) ? value.strftime("%Y-%m-%d") : value.to_s
+    end
+
     def edit_evento_from_esportulas_path(evento)
       edit_admin_evento_escala_path(
         evento,

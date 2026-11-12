@@ -7,7 +7,7 @@ module Coordenador
     end
 
     def show
-      @evento = EventoEscala.find(params[:id])
+      @evento = EventoEscala.da_instituicao_atual.find(params[:id])
     end
   end
 end

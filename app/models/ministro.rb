@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Ministro < ApplicationRecord
+  include InstituicaoScoped
   include NascimentoParcial
 
   has_one :user, dependent: :nullify
@@ -15,7 +16,7 @@ class Ministro < ApplicationRecord
   SEXOS = %w[Masculino Feminino].freeze
 
   validates :nome, presence: true
-  validates :email, uniqueness: { case_sensitive: false, allow_nil: true }
+  validates :email, uniqueness: { scope: :instituicao_id, case_sensitive: false, allow_nil: true }
   validates :sexo, inclusion: { in: SEXOS }, allow_blank: true
   # Dia e mês obrigatórios em novos cadastros (e se forem alterados), sem travar
   # a edição de ministros antigos que ainda não informaram.
@@ -47,7 +48,7 @@ class Ministro < ApplicationRecord
       errors.add(:email, "não pode ficar em branco: o ministro tem acesso ao sistema")
     elsif email !~ Devise.email_regexp
       errors.add(:email, "é inválido")
-    elsif User.where("LOWER(email) = ?", email).where.not(id: user.id).exists?
+    elsif User.where(instituicao_id: instituicao_id).where("LOWER(email) = ?", email).where.not(id: user.id).exists?
       errors.add(:email, "já está em uso por outro usuário")
     end
   end

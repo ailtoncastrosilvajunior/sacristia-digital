@@ -30,6 +30,9 @@
             <span class="text-stone-400 font-medium text-[10px] uppercase tracking-wider">Sacerdote</span>
             <%= ev.sacerdote&.nome || tag.span("—", class: "text-stone-400") %>
           </span>
+          <% if ev.descricao.present? %>
+            <span class="text-sm text-stone-600 min-w-0 truncate" title="<%= ev.descricao %>"><%= ev.descricao %></span>
+          <% end %>
         </div>
         <% if sem_escala %>
         <p class="inline-flex items-center gap-1.5 text-xs text-stone-500" title="Este tipo de evento não requer ministros (quantidade = 0)">

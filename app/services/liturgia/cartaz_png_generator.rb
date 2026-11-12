@@ -42,22 +42,22 @@ module Liturgia
       raise Erro, "PNG vazio" if png.blank?
 
       png
-    rescue Grover::JavaScript::Error, Grover::BrowserRunner::Error => e
+    rescue StandardError => e
       raise Erro, "Não foi possível gerar o PNG (Chrome/Grover): #{e.message}"
     end
 
     def attach!
+      registro = CartazRegistroInstituicao.for!(@liturgia)
       png = call
       filename = "escala-MESC-#{@liturgia.data.strftime('%d-%m-%Y')}-igmr-#{@cartaz.igmr_numero}.png"
-      # Substitui o arquivo anterior (sem isso alguns backends mantêm o blob antigo visível no cache).
-      @liturgia.cartaz_whatsapp.purge if @liturgia.cartaz_whatsapp.attached?
-      @liturgia.cartaz_whatsapp.attach(
+      registro.cartaz_whatsapp.purge if registro.cartaz_whatsapp.attached?
+      registro.cartaz_whatsapp.attach(
         io: StringIO.new(png),
         filename: filename,
         content_type: "image/png"
       )
-      @liturgia.touch
-      @liturgia
+      registro.touch
+      registro
     end
 
     private

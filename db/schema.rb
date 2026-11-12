@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_04_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.integer "dia_da_semana", null: false
     t.string "esportula_modo", default: "imediato", null: false
     t.time "horario", null: false
+    t.bigint "instituicao_id", null: false
     t.text "observacoes"
     t.integer "quantidade_ministros", default: 2, null: false
     t.bigint "sacerdote_id"
@@ -68,6 +69,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.datetime "updated_at", null: false
     t.decimal "valor_esportula_override", precision: 10, scale: 2
     t.index ["destinatario_esportula_id"], name: "index_calendario_base_on_destinatario_esportula_id"
+    t.index ["instituicao_id"], name: "index_calendario_base_on_instituicao_id"
   end
 
   create_table "competencia_mensal", force: :cascade do |t|
@@ -75,25 +77,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.datetime "created_at", null: false
     t.boolean "escala_gerada", default: false, null: false
     t.boolean "escala_liberada", default: false, null: false
+    t.bigint "instituicao_id", null: false
     t.integer "mes", null: false
     t.datetime "updated_at", null: false
+    t.index ["instituicao_id", "ano", "mes"], name: "index_competencia_mensal_on_instituicao_ano_mes", unique: true
+    t.index ["instituicao_id"], name: "index_competencia_mensal_on_instituicao_id"
   end
 
   create_table "contas_correntes", force: :cascade do |t|
     t.boolean "ativo", default: true, null: false
     t.datetime "created_at", null: false
     t.date "data_saldo_inicial", null: false
+    t.bigint "instituicao_id", null: false
     t.string "nome", null: false
     t.decimal "saldo_inicial", precision: 12, scale: 2, default: "0.0", null: false
     t.datetime "updated_at", null: false
+    t.index ["instituicao_id"], name: "index_contas_correntes_on_instituicao_id"
   end
 
   create_table "destinatarios_esportula", force: :cascade do |t|
     t.boolean "ativo", default: true, null: false
     t.datetime "created_at", null: false
+    t.bigint "instituicao_id", null: false
     t.string "nome", null: false
     t.text "observacoes"
     t.datetime "updated_at", null: false
+    t.index ["instituicao_id"], name: "index_destinatarios_esportula_on_instituicao_id"
   end
 
   create_table "escala_ministros", force: :cascade do |t|
@@ -142,8 +151,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
 
   create_table "financeiro_configuracoes", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.bigint "instituicao_id", null: false
     t.datetime "migrado_em"
     t.datetime "updated_at", null: false
+    t.index ["instituicao_id"], name: "index_financeiro_configuracoes_on_instituicao_id"
   end
 
   create_table "igmr_paragrafos", force: :cascade do |t|
@@ -163,10 +174,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.string "checksum", null: false
     t.datetime "concluida_em"
     t.datetime "created_at", null: false
+    t.bigint "instituicao_id", null: false
     t.text "relatorio", default: "{}", null: false
     t.string "status", default: "pendente", null: false
     t.datetime "updated_at", null: false
     t.index ["checksum"], name: "index_importacoes_financeiras_on_checksum", unique: true
+    t.index ["instituicao_id"], name: "index_importacoes_financeiras_on_instituicao_id"
+  end
+
+  create_table "instituicao_planos", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "faturamento_inicio_em"
+    t.bigint "instituicao_id", null: false
+    t.datetime "modulos_vigencia_inicio", null: false
+    t.string "motivo"
+    t.text "observacoes"
+    t.bigint "plano_id", null: false
+    t.integer "preco_mensal_centavos", default: 0, null: false
+    t.text "recursos_snapshot", default: "{}", null: false
+    t.string "status", default: "vigente", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "vigencia_fim"
+    t.datetime "vigencia_inicio", null: false
+    t.index ["instituicao_id", "vigencia_fim"], name: "index_instituicao_planos_uma_vigencia_aberta", unique: true, where: "(vigencia_fim IS NULL)"
+    t.index ["instituicao_id"], name: "index_instituicao_planos_on_instituicao_id"
+    t.index ["plano_id"], name: "index_instituicao_planos_on_plano_id"
+  end
+
+  create_table "instituicoes", force: :cascade do |t|
+    t.string "assinatura_status", default: "ativa", null: false
+    t.boolean "ativa", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "nome", null: false
+    t.string "nome_curto"
+    t.string "nome_recibos"
+    t.string "slogan_rodape"
+    t.string "slug", null: false
+    t.string "tipo", default: "comunidade", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_instituicoes_on_slug", unique: true
   end
 
   create_table "itens_lancamento", force: :cascade do |t|
@@ -192,6 +238,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.bigint "evento_escala_id"
     t.string "fornecedor"
     t.bigint "importacao_financeira_id"
+    t.bigint "instituicao_id", null: false
     t.bigint "lote_pagamento_esportula_id"
     t.string "natureza", null: false
     t.text "observacoes"
@@ -206,11 +253,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.index ["conta_corrente_id"], name: "index_lancamentos_caixa_on_conta_corrente_id"
     t.index ["data"], name: "index_lancamentos_caixa_on_data"
     t.index ["evento_escala_id"], name: "index_lancamentos_caixa_on_evento_escala_id"
+    t.index ["instituicao_id"], name: "index_lancamentos_caixa_on_instituicao_id"
     t.index ["lote_pagamento_esportula_id"], name: "index_lancamentos_caixa_on_lote_esportula_unique", unique: true, where: "(lote_pagamento_esportula_id IS NOT NULL)"
     t.index ["lote_pagamento_esportula_id"], name: "index_lancamentos_caixa_on_lote_pagamento_esportula_id"
     t.index ["natureza"], name: "index_lancamentos_caixa_on_natureza"
     t.index ["registro_esportula_id"], name: "index_lancamentos_caixa_on_registro_esportula_id", unique: true, where: "(registro_esportula_id IS NOT NULL)"
     t.index ["status"], name: "index_lancamentos_caixa_on_status"
+  end
+
+  create_table "liturgia_cartazes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "instituicao_id", null: false
+    t.bigint "liturgia_dia_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["instituicao_id", "liturgia_dia_id"], name: "index_liturgia_cartazes_instituicao_liturgia_dia", unique: true
+    t.index ["instituicao_id"], name: "index_liturgia_cartazes_on_instituicao_id"
+    t.index ["liturgia_dia_id"], name: "index_liturgia_cartazes_on_liturgia_dia_id"
   end
 
   create_table "liturgia_dias", force: :cascade do |t|
@@ -255,12 +313,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.bigint "destinatario_sacerdote_id"
     t.string "destinatario_tipo", null: false
     t.string "forma_pagamento"
+    t.bigint "instituicao_id", null: false
     t.string "status", default: "pendente", null: false
     t.datetime "updated_at", null: false
     t.decimal "valor", precision: 12, scale: 2, default: "0.0", null: false
     t.index ["competencia_mensal_id"], name: "index_lote_pagamento_esportulas_on_competencia_mensal_id"
     t.index ["destinatario_esportula_id"], name: "index_lote_pagamento_esportulas_on_destinatario_esportula_id"
     t.index ["destinatario_sacerdote_id"], name: "index_lote_pagamento_esportulas_on_destinatario_sacerdote_id"
+    t.index ["instituicao_id"], name: "index_lote_pagamento_esportulas_on_instituicao_id"
   end
 
   create_table "ministros", force: :cascade do |t|
@@ -268,6 +328,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.datetime "created_at", null: false
     t.string "email"
     t.boolean "exibir_ano_nascimento", default: false, null: false
+    t.bigint "instituicao_id", null: false
     t.integer "nascimento_ano"
     t.integer "nascimento_dia"
     t.integer "nascimento_mes"
@@ -277,7 +338,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.string "sexo"
     t.string "telefone"
     t.datetime "updated_at", null: false
-    t.index ["email"], name: "index_ministros_on_email_unique", unique: true, where: "(email IS NOT NULL)"
+    t.index ["instituicao_id", "email"], name: "index_ministros_on_instituicao_id_and_email", unique: true, where: "(email IS NOT NULL)"
+    t.index ["instituicao_id"], name: "index_ministros_on_instituicao_id"
     t.index ["nascimento_mes", "nascimento_dia"], name: "index_ministros_on_nascimento_mes_and_nascimento_dia"
   end
 
@@ -285,10 +347,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.bigint "competencia_mensal_id", null: false
     t.datetime "created_at", null: false
     t.date "data", null: false
+    t.bigint "instituicao_id", null: false
     t.bigint "ministro_id", null: false
     t.string "status", default: "ativa", null: false
     t.datetime "updated_at", null: false
     t.index ["competencia_mensal_id"], name: "index_oferta_apoios_on_competencia_mensal_id"
+    t.index ["instituicao_id"], name: "index_oferta_apoios_on_instituicao_id"
     t.index ["ministro_id", "data"], name: "index_oferta_apoios_on_ministro_id_and_data", unique: true
     t.index ["ministro_id"], name: "index_oferta_apoios_on_ministro_id"
     t.index ["status"], name: "index_oferta_apoios_on_status"
@@ -299,13 +363,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.string "codigo", null: false
     t.bigint "conta_pai_id"
     t.datetime "created_at", null: false
+    t.bigint "instituicao_id", null: false
     t.string "natureza", null: false
     t.string "nome", null: false
     t.integer "ordem", default: 0, null: false
     t.boolean "sintetica", default: false, null: false
     t.datetime "updated_at", null: false
-    t.index ["codigo"], name: "index_plano_contas_on_codigo", unique: true
     t.index ["conta_pai_id"], name: "index_plano_contas_on_conta_pai_id"
+    t.index ["instituicao_id", "codigo"], name: "index_plano_contas_on_instituicao_id_and_codigo", unique: true
+    t.index ["instituicao_id"], name: "index_plano_contas_on_instituicao_id"
+  end
+
+  create_table "planos", force: :cascade do |t|
+    t.string "codigo", null: false
+    t.datetime "created_at", null: false
+    t.text "descricao"
+    t.string "nome", null: false
+    t.integer "preco_mensal_centavos", default: 0, null: false
+    t.text "recursos", default: "{}", null: false
+    t.datetime "updated_at", null: false
+    t.index ["codigo"], name: "index_planos_on_codigo", unique: true
   end
 
   create_table "plantao_periodo_ministros", force: :cascade do |t|
@@ -324,7 +401,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.datetime "created_at", null: false
     t.integer "dia_fim", null: false
     t.integer "dia_inicio", null: false
+    t.bigint "instituicao_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["instituicao_id"], name: "index_plantao_periodos_on_instituicao_id"
   end
 
   create_table "registro_esportulas", force: :cascade do |t|
@@ -347,10 +426,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.datetime "created_at", null: false
     t.string "email"
     t.string "forma_esportula", default: "por_missa", null: false
+    t.bigint "instituicao_id", null: false
     t.string "nome", null: false
     t.string "telefone"
     t.datetime "updated_at", null: false
     t.decimal "valor_esportula_padrao", precision: 10, scale: 2, default: "0.0"
+    t.index ["instituicao_id"], name: "index_sacerdotes_on_instituicao_id"
   end
 
   create_table "solicitacao_cadastros", force: :cascade do |t|
@@ -360,6 +441,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.string "email", null: false
     t.string "encrypted_password"
     t.boolean "exibir_ano_nascimento", default: false, null: false
+    t.bigint "instituicao_id", null: false
     t.bigint "ministro_id"
     t.text "motivo_rejeicao"
     t.integer "nascimento_ano"
@@ -373,6 +455,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.datetime "updated_at", null: false
     t.index "lower((email)::text)", name: "idx_solicitacao_cadastros_email_lower"
     t.index ["avaliado_por_id"], name: "index_solicitacao_cadastros_on_avaliado_por_id"
+    t.index ["instituicao_id"], name: "index_solicitacao_cadastros_on_instituicao_id"
     t.index ["ministro_id"], name: "index_solicitacao_cadastros_on_ministro_id"
     t.index ["status"], name: "index_solicitacao_cadastros_on_status"
   end
@@ -394,9 +477,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.boolean "ativo", default: true, null: false
     t.string "cor_etiqueta", default: "#64748b"
     t.datetime "created_at", null: false
+    t.bigint "instituicao_id", null: false
     t.string "nome", null: false
     t.string "tipo_escala", default: "ordinaria", null: false
     t.datetime "updated_at", null: false
+    t.index ["instituicao_id"], name: "index_tipo_servicos_on_instituicao_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -405,6 +490,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.string "current_sign_in_ip"
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
+    t.bigint "instituicao_id", null: false
     t.datetime "last_sign_in_at"
     t.string "last_sign_in_ip"
     t.bigint "ministro_id"
@@ -416,6 +502,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
     t.bigint "sacerdote_id"
     t.integer "sign_in_count", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.index ["instituicao_id", "email"], name: "index_users_on_instituicao_id_and_email", unique: true
+    t.index ["instituicao_id"], name: "index_users_on_instituicao_id"
     t.index ["perfis"], name: "index_users_on_perfis", using: :gin
     t.index ["sacerdote_id"], name: "index_users_on_sacerdote_id"
   end
@@ -424,6 +512,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "auditorias_financeiras", "users"
   add_foreign_key "calendario_base", "destinatarios_esportula", column: "destinatario_esportula_id"
+  add_foreign_key "calendario_base", "instituicoes"
+  add_foreign_key "competencia_mensal", "instituicoes"
+  add_foreign_key "contas_correntes", "instituicoes"
+  add_foreign_key "destinatarios_esportula", "instituicoes"
   add_foreign_key "escala_ministros", "evento_escala"
   add_foreign_key "escala_ministros", "ministros"
   add_foreign_key "escala_ministros", "ministros", column: "ministro_original_id"
@@ -434,32 +526,48 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_190000) do
   add_foreign_key "evento_escala", "sacerdotes"
   add_foreign_key "evento_escala", "sacerdotes", column: "esportula_destinatario_sacerdote_id"
   add_foreign_key "evento_escala", "tipo_servicos"
+  add_foreign_key "financeiro_configuracoes", "instituicoes"
+  add_foreign_key "importacoes_financeiras", "instituicoes"
+  add_foreign_key "instituicao_planos", "instituicoes"
+  add_foreign_key "instituicao_planos", "planos"
   add_foreign_key "itens_lancamento", "lancamentos_caixa", column: "lancamento_caixa_id"
   add_foreign_key "itens_lancamento", "plano_contas"
   add_foreign_key "lancamentos_caixa", "contas_correntes", column: "conta_corrente_id"
   add_foreign_key "lancamentos_caixa", "evento_escala"
   add_foreign_key "lancamentos_caixa", "importacoes_financeiras", column: "importacao_financeira_id"
+  add_foreign_key "lancamentos_caixa", "instituicoes"
   add_foreign_key "lancamentos_caixa", "lote_pagamento_esportulas"
   add_foreign_key "lancamentos_caixa", "registro_esportulas"
+  add_foreign_key "liturgia_cartazes", "instituicoes"
+  add_foreign_key "liturgia_cartazes", "liturgia_dias"
   add_foreign_key "liturgia_dias", "users", column: "validado_por_id"
   add_foreign_key "lote_pagamento_esportula_eventos", "evento_escala"
   add_foreign_key "lote_pagamento_esportula_eventos", "lote_pagamento_esportulas"
   add_foreign_key "lote_pagamento_esportulas", "competencia_mensal"
   add_foreign_key "lote_pagamento_esportulas", "destinatarios_esportula", column: "destinatario_esportula_id"
+  add_foreign_key "lote_pagamento_esportulas", "instituicoes"
   add_foreign_key "lote_pagamento_esportulas", "sacerdotes", column: "destinatario_sacerdote_id"
+  add_foreign_key "ministros", "instituicoes"
   add_foreign_key "oferta_apoios", "competencia_mensal"
+  add_foreign_key "oferta_apoios", "instituicoes"
   add_foreign_key "oferta_apoios", "ministros"
+  add_foreign_key "plano_contas", "instituicoes"
   add_foreign_key "plano_contas", "plano_contas", column: "conta_pai_id"
   add_foreign_key "plantao_periodo_ministros", "ministros"
   add_foreign_key "plantao_periodo_ministros", "plantao_periodos"
   add_foreign_key "plantao_periodos", "competencia_mensal"
+  add_foreign_key "plantao_periodos", "instituicoes"
   add_foreign_key "registro_esportulas", "evento_escala"
   add_foreign_key "registro_esportulas", "lote_pagamento_esportulas"
   add_foreign_key "registro_esportulas", "sacerdotes"
+  add_foreign_key "sacerdotes", "instituicoes"
+  add_foreign_key "solicitacao_cadastros", "instituicoes"
   add_foreign_key "solicitacao_cadastros", "ministros"
   add_foreign_key "solicitacao_cadastros", "users", column: "avaliado_por_id"
   add_foreign_key "solicitacao_trocas", "escala_ministros"
   add_foreign_key "solicitacao_trocas", "ministros", column: "substituto_id"
+  add_foreign_key "tipo_servicos", "instituicoes"
+  add_foreign_key "users", "instituicoes"
   add_foreign_key "users", "ministros"
   add_foreign_key "users", "sacerdotes"
 end

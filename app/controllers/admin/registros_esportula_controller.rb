@@ -2,10 +2,11 @@
 
 module Admin
   class RegistrosEsportulaController < Admin::BaseController
+    require_instituicao_modulo! :esportulas
     before_action :set_registro, only: [:show, :edit, :update, :destroy]
 
     def index
-      scope = RegistroEsportula.joins(:sacerdote).includes(:sacerdote)
+      scope = scoped(RegistroEsportula).joins(:sacerdote).includes(:sacerdote)
       scope = busca_em(scope, %w[sacerdotes.nome])
       scope = scope.where(status: params[:status]) if RegistroEsportula::STATUS.include?(params[:status])
       scope = scope.where(sacerdote_id: params[:sacerdote_id]) if params[:sacerdote_id].present?
@@ -13,7 +14,7 @@ module Admin
     end
 
     def competencia
-      @competencias = CompetenciaMensal.ordenados.limit(48)
+      @competencias = scoped(CompetenciaMensal).ordenados.limit(48)
       @competencia = resolve_competencia_para_esportulas
       return if @competencia.blank?
 
@@ -21,18 +22,84 @@ module Admin
     end
 
     def conferencia_caixa
-      @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
+      @competencia = competencia_instituicao!(params[:competencia_mensal_id])
       @conferencia = Esportulas::ConferenciaMesService.call(@competencia)
       render layout: false
     end
 
+    def recibo_esportula_form
+      @competencia = competencia_instituicao!(params[:competencia_mensal_id])
+      @sacerdote = scoped(Sacerdote).find_by(id: params[:sacerdote_id])
+      @data_inicio, @data_fim = helpers.recibo_esportula_periodo_resolvido(
+        @competencia,
+        data_inicio: params[:data_inicio],
+        data_fim: params[:data_fim]
+      )
+      @eventos = eventos_esportula_da_competencia(@competencia)
+      @eventos = @eventos.select { |e| e.sacerdote_id.present? && e.sacerdote.present? }
+      @eventos = @eventos.select { |e| e.sacerdote_id == @sacerdote.id } if @sacerdote
+      @eventos = @eventos.select { |e| e.data >= @data_inicio && e.data <= @data_fim }
+      @eventos.sort_by! { |e| [e.data, e.horario] }
+      render partial: "recibo_esportula_drawer",
+        layout: false,
+        locals: {
+          competencia: @competencia,
+          eventos: @eventos,
+          sacerdote: @sacerdote,
+          data_inicio: @data_inicio,
+          data_fim: @data_fim
+        }
+    end
+
+    def recibo_esportula
+      @competencia = competencia_instituicao!(params[:competencia_mensal_id])
+      eventos = eventos_esportula_da_competencia(@competencia)
+      ids = Array(params[:evento_escala_ids]).presence
+      recibos = Esportulas::ReciboDados.call(
+        competencia: @competencia,
+        sacerdote_id: params[:sacerdote_id],
+        eventos:,
+        evento_escala_ids: ids
+      )
+
+      if recibos.empty?
+        redirect_to competencia_admin_registros_esportula_index_path(competencia_mensal_id: @competencia.id),
+          alert: "Selecione ao menos uma espórtula para gerar o recibo."
+        return
+      end
+
+      paroquia = helpers.esportulas_paroquia_nome
+      emitido_em = Time.current
+
+      respond_to do |format|
+        format.pdf do
+          pdf = Esportulas::ReciboPdfGenerator.call(
+            competencia: @competencia,
+            recibos:,
+            paroquia_nome: paroquia,
+            emitido_em:
+          )
+          filename = recibo_esportula_filename(@competencia, params[:sacerdote_id], recibos)
+          send_data pdf, filename:, type: "application/pdf", disposition: "inline"
+        end
+        format.html do
+          render :recibo_esportula,
+            layout: "impressao",
+            locals: { recibos:, competencia: @competencia, paroquia_nome: paroquia, emitido_em: }
+        end
+      end
+    rescue Esportulas::ReciboPdfGenerator::Erro => e
+      redirect_to competencia_admin_registros_esportula_index_path(competencia_mensal_id: @competencia.id),
+        alert: e.message
+    end
+
     def pagar_lote_acumulado
-      @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
+      @competencia = competencia_instituicao!(params[:competencia_mensal_id])
       tipo = params[:destinatario_tipo]
       data = params[:data_pagamento].presence&.then { |d| Date.parse(d) } || Date.current
 
       lote = if tipo == "instituicao"
-               inst = DestinatarioEsportula.find(params[:destinatario_esportula_id])
+               inst = find_scoped!(DestinatarioEsportula, params[:destinatario_esportula_id])
                LotePagamentoEsportulaService.registrar_pagamento!(
                  competencia: @competencia,
                  destinatario_tipo: "instituicao",
@@ -41,7 +108,7 @@ module Admin
                  forma_pagamento: params[:forma_pagamento]
                )
              else
-               sacerdote = Sacerdote.find(params[:destinatario_sacerdote_id])
+               sacerdote = find_scoped!(Sacerdote, params[:destinatario_sacerdote_id])
                LotePagamentoEsportulaService.registrar_pagamento!(
                  competencia: @competencia,
                  destinatario_tipo: "sacerdote",
@@ -60,7 +127,7 @@ module Admin
     end
 
     def estornar_lote_acumulado
-      @competencia = CompetenciaMensal.find(params[:competencia_mensal_id])
+      @competencia = competencia_instituicao!(params[:competencia_mensal_id])
       lote = @competencia.lote_pagamento_esportulas.pagos.find(params[:lote_pagamento_esportula_id])
       nome = lote.nome_destinatario
       LotePagamentoEsportulaService.estornar_lote!(lote)
@@ -74,7 +141,7 @@ module Admin
     end
 
     def toggle_evento_pago
-      evento = EventoEscala.find(params[:evento_escala_id])
+      evento = evento_instituicao!(params[:evento_escala_id])
       pago = params[:pago].to_s == "1"
 
       if evento.esportula_acumulado?
@@ -143,7 +210,7 @@ module Admin
     private
 
     def set_registro
-      @registro = RegistroEsportula.find(params[:id])
+      @registro = scoped(RegistroEsportula).find(params[:id])
     end
 
     def registro_params
@@ -194,12 +261,17 @@ module Admin
     end
 
     def resolve_competencia_para_esportulas
-      if params[:competencia_mensal_id].present?
-        return CompetenciaMensal.find_by(id: params[:competencia_mensal_id])
-      end
+      competencia_instituicao_resolvida
+    end
 
-      CompetenciaMensal.find_by(ano: Date.current.year, mes: Date.current.month) ||
-        CompetenciaMensal.ordenados.first
+    def recibo_esportula_filename(competencia, sacerdote_id, recibos)
+      slug_mes = "#{competencia.ano}-#{format('%02d', competencia.mes)}"
+      if sacerdote_id.present? && recibos.size == 1
+        nome = recibos.first.sacerdote.nome.parameterize(separator: "_", preserve_case: true)
+        "recibo_esportula_#{slug_mes}_#{nome}.pdf"
+      else
+        "recibos_esportula_#{slug_mes}.pdf"
+      end
     end
 
   end

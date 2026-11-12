@@ -57,7 +57,7 @@ module Esportulas
     end
 
     def conta_21_id
-      @conta_21_id ||= PlanoConta.where(codigo: "2.1").pick(:id)
+      @conta_21_id ||= PlanoConta.da_instituicao_atual.where(codigo: "2.1").pick(:id)
     end
 
     def preencher_hash_desde_somas(somas_por_data)
@@ -105,12 +105,12 @@ module Esportulas
     end
 
     def somas_pago_imediato_com_lancamento_por_dia
-      RegistroEsportula.pagos
+      RegistroEsportula.da_instituicao_atual.pagos
         .where(lote_pagamento_esportula_id: nil)
         .where.not(evento_escala_id: nil)
         .joins(:lancamento_caixa, :evento_escala)
         .merge(escala_imediato_scope)
-        .merge(LancamentoCaixa.confirmados.where(data: @inicio..@fim))
+        .merge(LancamentoCaixa.da_instituicao_atual.confirmados.where(data: @inicio..@fim))
         .group("lancamentos_caixa.data")
         .sum(:valor)
     end
@@ -118,7 +118,7 @@ module Esportulas
     def somas_pago_imediato_sem_lancamento_por_dia
       escala_imediato_scope
         .where(
-          id: RegistroEsportula.pagos
+          id: RegistroEsportula.da_instituicao_atual.pagos
             .where(lote_pagamento_esportula_id: nil)
             .left_joins(:lancamento_caixa)
             .where(lancamentos_caixa: { id: nil })
@@ -143,7 +143,7 @@ module Esportulas
       ItemLancamento
         .joins(:lancamento_caixa)
         .merge(
-          LancamentoCaixa.confirmados
+          LancamentoCaixa.da_instituicao_atual.confirmados
             .where(data: @inicio..@fim)
             .where(lote_pagamento_esportula_id: nil)
         )
@@ -156,7 +156,7 @@ module Esportulas
 
     def bloco_acumulado
       previsto = escala_acumulado_scope.sum(:valor_esportula).to_d
-      pago = LotePagamentoEsportula.pagos
+      pago = LotePagamentoEsportula.da_instituicao_atual.pagos
         .where(competencia_mensal_id: @competencia.id)
         .sum(:valor)
         .to_d
@@ -174,8 +174,8 @@ module Esportulas
 
       ItemLancamento
         .joins(lancamento_caixa: :lote_pagamento_esportula)
-        .merge(LancamentoCaixa.confirmados)
-        .merge(LotePagamentoEsportula.pagos.where(competencia_mensal_id: @competencia.id))
+        .merge(LancamentoCaixa.da_instituicao_atual.confirmados)
+        .merge(LotePagamentoEsportula.da_instituicao_atual.pagos.where(competencia_mensal_id: @competencia.id))
         .where(plano_conta_id: conta_21_id)
         .sum(:valor)
         .to_d

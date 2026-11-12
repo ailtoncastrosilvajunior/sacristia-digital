@@ -3,7 +3,7 @@
 module Admin
   class DashboardController < Admin::BaseController
     def index
-      @competencias = CompetenciaMensal.ordenados.limit(48)
+      @competencias = scoped(CompetenciaMensal).ordenados.limit(48)
       @competencia = resolve_competencia
       return if @competencia.blank?
 
@@ -20,7 +20,7 @@ module Admin
       @recentes_passados = @eventos.select { |e| e.data < hoje }.last(5).reverse
       @heatmap = build_heatmap(@competencia, @eventos)
       @eventos_dia_filtro = @lista_desde ? @eventos.select { |e| e.data == @lista_desde }.sort_by(&:horario) : []
-      load_esportulas_resumo(@competencia)
+      load_esportulas_resumo(@competencia) if instituicao_recurso?(:esportulas)
     end
 
     private
@@ -38,12 +38,7 @@ module Admin
     end
 
     def resolve_competencia
-      if params[:competencia_mensal_id].present?
-        return CompetenciaMensal.find_by(id: params[:competencia_mensal_id])
-      end
-
-      CompetenciaMensal.find_by(ano: Date.current.year, mes: Date.current.month) ||
-        CompetenciaMensal.ordenados.first
+      competencia_instituicao_resolvida
     end
 
     def build_stats(eventos)
@@ -74,7 +69,7 @@ module Admin
     end
 
     def load_esportulas_resumo(competencia)
-      registros = RegistroEsportula
+      registros = scoped(RegistroEsportula)
         .includes(:sacerdote, :evento_escala)
         .por_competencia(competencia.ano, competencia.mes)
         .order(data: :desc, created_at: :desc)
