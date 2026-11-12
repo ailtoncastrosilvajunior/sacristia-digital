@@ -9,7 +9,7 @@ module Admin
     def safe_return_to_path(raw = params[:return_to])
       path = raw.to_s.strip
       return nil if path.blank?
-      return nil unless path.start_with?("/admin/")
+      return nil unless path.start_with?("/admin/", "/ministro/")
       return nil if path.start_with?("//")
 
       path

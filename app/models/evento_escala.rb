@@ -36,6 +36,7 @@ class EventoEscala < ApplicationRecord
   validates :esportula_modo, inclusion: { in: ESPORTULA_MODOS }
   validates :esportula_destinatario_tipo, inclusion: { in: ESPORTULA_DESTINATARIO_TIPOS }
   validate :plantao_apenas_para_extra
+  before_validation { self.proclamacao_palavra = proclamacao_palavra.presence&.strip }
 
   # Preenche a escala do evento com os ministros do bloco de plantão (cópia).
   def popular_escala_do_plantao!

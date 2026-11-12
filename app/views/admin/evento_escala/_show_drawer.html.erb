@@ -117,6 +117,13 @@
       <% end %>
     </section>
 
+    <% if ev.proclamacao_palavra.present? %>
+      <section class="<%= campo %>">
+        <h3 class="<%= rotulo %> mb-1.5">Proclamação da Palavra</h3>
+        <p class="text-sm text-stone-700 leading-relaxed whitespace-pre-line"><%= ev.proclamacao_palavra %></p>
+      </section>
+    <% end %>
+
     <% if ev.descricao.present? || ev.observacoes.present? %>
       <div class="grid gap-2.5 sm:grid-cols-2">
         <% if ev.descricao.present? %>

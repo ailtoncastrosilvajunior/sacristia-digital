@@ -37,13 +37,39 @@
   td.sem { text-align: center; font-weight: 700; font-size: .85em; }
   td.hora { text-align: center; font-weight: 700; white-space: nowrap; }
   td.cel { font-weight: 600; }
-  td.extra { text-align: center; font-style: italic; color: #1d4ed8; font-weight: 600; }
-  td.extra .dias-plantao { display: block; margin-bottom: 2px; font-size: .8em; font-style: normal; font-weight: 700; color: #475569; }
+  td.extra { text-align: center; }
   tr.fds td.c { background: #eff6ff; }
   tr.fds td.dia, tr.fds td.sem { color: #1e3a8a; }
   tr.sep-dia td.c { border-top: 2px solid #0b2545; }
   .adoracao { font-weight: 700; }
   .meu { background: #bbf7d0; font-weight: 800; padding: 0 2px; border-radius: 2px; }
+  .pagina-cal { page-break-before: always; break-before: page; font-size: 11pt; }
+  .pagina-cal .titulo .t1 { font-size: 1.3em; }
+  .pagina-cal .titulo .mes { font-size: 1.1em; width: 24%; }
+  .cal-titulo { margin-bottom: 10px; }
+  .hib { display: flex; gap: 14px; align-items: flex-start; }
+  .hib-lista { flex: 1 1 60%; }
+  .hib-mini { flex: 0 0 36%; }
+  .bloco { display: flex; align-items: center; gap: 10px; padding: 3px 8px; margin-bottom: 4px; border-radius: 4px; border: 1px solid; border-left-width: 5px; }
+  .bloco.cor0 { background: #e8f0fb; border-color: #a9c1e6; border-left-color: #6f97d6; color: #1e3a5f; }
+  .bloco.cor1 { background: #e6f4ec; border-color: #a5d3b9; border-left-color: #5fae85; color: #1f4d3a; }
+  .bc-dias { flex: 0 0 20mm; font-weight: 800; font-size: 1.2em; }
+  .bc-sem { flex: 0 0 22mm; font-size: .85em; text-transform: uppercase; letter-spacing: .03em; opacity: .8; border-right: 1px solid rgba(0,0,0,.15); margin-right: 2px; }
+  .bc-nome .sep { font-weight: 400; opacity: .35; margin: 0 .6em; }
+  .bc-nome { flex: 1 1 0; min-width: 0; font-weight: 700; font-size: 1.1em; }
+  .anivs { margin-top: 8px; padding: 5px 8px; background: #fdf5dc; border: 1px solid #e6c886; border-left: 5px solid #e0b050; border-radius: 4px; color: #7a4a14; }
+  .anivs-t { font-weight: 800; margin-bottom: 3px; }
+  .anivs-i { font-size: .95em; }
+  table.mini { width: 100%; table-layout: fixed; }
+  table.mini th { background: none; color: #64748b; border: 0; font-size: .85em; padding: 2px; }
+  table.mini td { text-align: center; padding: 5px 0; font-weight: 700; font-size: 1.05em; border: 2px solid #fff; border-radius: 4px; color: #94a3b8; }
+  table.mini td.sem { color: #94a3b8; font-weight: 500; }
+  table.mini td.cor0 { background: #e8f0fb; color: #1e3a5f; box-shadow: inset 0 0 0 1px #a9c1e6; }
+  table.mini td.cor1 { background: #e6f4ec; color: #1f4d3a; box-shadow: inset 0 0 0 1px #a5d3b9; }
+  table.mini td.aniv { box-shadow: inset 0 0 0 3px #e0b050; }
+  .legenda { display: flex; flex-direction: column; gap: 4px; font-size: .85em; margin-top: 10px; color: #334155; }
+  .lg { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+  .lg0 { background: #e8f0fb; border: 1px solid #a9c1e6; } .lg1 { background: #e6f4ec; border: 1px solid #a5d3b9; } .lga { background: #fff; border: 3px solid #e0b050; }
   .rodape { margin-top: 6px; font-size: .8em; color: #475569; text-align: center; }
   @media print {
     body { background: #fff; }
@@ -80,7 +106,7 @@
         <td colspan="5" class="t2">MINISTÉRIO EXTRAORDINÁRIO DA SAGRADA COMUNHÃO</td>
         <td class="ano"><%= @competencia.ano %></td>
       </tr>
-      <tr><th>Dia</th><th>Dia da semana</th><th>Hora</th><th>Celebrante</th><th>MESC</th><th>Escala Extra</th></tr>
+      <tr><th>Dia</th><th>Dia da semana</th><th>Hora</th><th>Celebrante</th><th>MESC</th><th>Proclamação da Palavra</th></tr>
     </thead>
     <tbody>
       <% @dias.each do |dia| %>
@@ -97,13 +123,67 @@
               <% ministros = escala_ministros_do_evento(ev, @meu_id) %>
               <% ministros.each_with_index do |m, k| %><%= " | " if k.positive? %><span class="<%= 'meu' if m[:meu] %>"><%= m[:nome] %></span><% if m[:adoracao] %><span class="adoracao">(Adoração)</span><% end %><% end %>
             </td>
-            <% if i.zero? && !dia.plantao_continuacao %>
-              <td class="c extra" rowspan="<%= dia.plantao_rowspan %>"><% if dia.plantao %><span class="dias-plantao"><%= escala_plantao_dias_texto(dia.plantao) %></span><%= escala_plantao_texto(dia.plantao) %><% end %></td>
-            <% end %>
+            <td class="c extra"><%= ev.proclamacao_palavra %></td>
           </tr>
         <% end %>
       <% end %>
     </tbody>
   </table>
   <p class="rodape">Sacristia Digital - gerado em <%= l(Time.current, format: "%d/%m/%Y %H:%M") %></p>
+</div>
+
+<% blocos = @cal_plantao.values.uniq %>
+<% abrev = %w[dom seg ter qua qui sex sáb] %>
+<div class="folha pagina-cal">
+  <table class="cal-titulo"><tr class="titulo">
+    <td class="t1">ESCALA EXTRA • PLANTÕES E ANIVERSARIANTES</td><td class="mes"><%= mes_nome %> <%= @competencia.ano %></td>
+  </tr></table>
+  <div class="hib">
+    <div class="hib-lista">
+      <% blocos.each_with_index do |pl, i| %>
+        <% d1 = Date.new(@competencia.ano, @competencia.mes, pl.dia_inicio) %>
+        <% d2 = Date.new(@competencia.ano, @competencia.mes, pl.dia_fim) %>
+        <div class="bloco cor<%= i % 2 %>">
+          <div class="bc-dias"><%= pl.dia_inicio == pl.dia_fim ? pl.dia_inicio : "#{pl.dia_inicio} e #{pl.dia_fim}" %></div>
+          <div class="bc-sem"><%= pl.dia_inicio == pl.dia_fim ? abrev[d1.wday] : "#{abrev[d1.wday]} – #{abrev[d2.wday]}" %></div>
+          <div class="bc-nome"><%= safe_join(pl.ministros.map(&:nome), content_tag(:span, "|", class: "sep")) %></div>
+        </div>
+      <% end %>
+    </div>
+    <div class="hib-mini">
+      <% inicio = @cal_primeiro.beginning_of_week(:sunday) %>
+      <% fim = @cal_primeiro.end_of_month.end_of_week(:sunday) %>
+      <table class="mini">
+        <thead><tr><% %w[D S T Q Q S S].each do |n| %><th><%= n %></th><% end %></tr></thead>
+        <tbody>
+          <% (inicio..fim).each_slice(7) do |semana| %>
+            <tr>
+              <% semana.each do |d| %>
+                <% if d.month != @competencia.mes %>
+                  <td></td>
+                <% else %>
+                  <% pl = @cal_plantao[d.day] %>
+                  <% cls = [pl ? "cor#{blocos.index(pl) % 2}" : "sem", (@cal_aniversarios[d.day] ? "aniv" : nil)].compact.join(" ") %>
+                  <td class="<%= cls %>"><%= d.day %></td>
+                <% end %>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <% if @cal_aniversarios.any? %>
+        <div class="anivs">
+          <div class="anivs-t">🎂 Aniversariantes do mês</div>
+          <% @cal_aniversarios.sort.each do |dia, ms| %>
+            <% ms.each do |m| %><div class="anivs-i"><strong>Dia <%= dia %></strong> — <%= m.nome %></div><% end %>
+          <% end %>
+        </div>
+      <% end %>
+      <div class="legenda">
+        <span><i class="lg lg0"></i> Plantão</span>
+        <span><i class="lg lg1"></i> Plantão (próximo bloco)</span>
+        <span><i class="lg lga"></i> 🎂 Aniversário</span>
+      </div>
+    </div>
+  </div>
 </div>
