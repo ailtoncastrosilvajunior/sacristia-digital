@@ -10,7 +10,7 @@
     <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg border shadow-sm" style="background-color: <%= ts.cor_etiqueta %>22; border-color: <%= ts.cor_etiqueta %>55; color: #1e293b;"><%= ts.nome %></span>
   </td>
   <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm text-stone-700 max-w-[10rem] sm:max-w-none truncate" title="<%= ev.sacerdote&.nome %>"><%= ev.sacerdote&.nome || "—" %></td>
-  <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm text-stone-600 min-w-[11rem] sm:min-w-[14rem] max-w-[min(100vw-8rem,28rem)] align-top" title="<%= ev.ministros_nomes_com_coordenador %>"><%= render "admin/evento_escala/ministros_com_coordenador", evento: ev %></td>
+  <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm text-stone-600 min-w-[11rem] sm:min-w-[14rem] max-w-[min(100vw-8rem,28rem)] align-top" title="<%= ev.ministros_nomes_com_coordenador %>"><%= render "admin/evento_escala/ministros_com_coordenador", evento: ev %><div class="mt-1"><%= render "admin/evento_escala/proclamacao_palavra", evento: ev %></div></td>
   <td class="px-3 sm:px-4 py-3 align-middle">
     <% case ev.status
          when "confirmado" %>
