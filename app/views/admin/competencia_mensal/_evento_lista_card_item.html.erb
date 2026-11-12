@@ -23,14 +23,13 @@
     </div>
 
     <div class="flex-1 min-w-0 px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-      <div class="min-w-0 flex-1 space-y-1.5">
+      <div class="min-w-0 space-y-1.5">
         <div class="flex flex-wrap items-center gap-2">
           <span class="inline-flex px-2.5 py-0.5 text-xs font-bold rounded-lg border-2" style="background-color: <%= cor %>33; border-color: <%= cor %>; color: #0f172a;"><%= ts.nome %></span>
           <span class="text-sm text-stone-600 min-w-0 truncate">
             <span class="text-stone-400 font-medium text-[10px] uppercase tracking-wider">Sacerdote</span>
             <%= ev.sacerdote&.nome || tag.span("—", class: "text-stone-400") %>
           </span>
-          <%= render "admin/evento_escala/proclamacao_palavra", evento: ev, inline: true %>
         </div>
         <% if sem_escala %>
         <p class="inline-flex items-center gap-1.5 text-xs text-stone-500" title="Este tipo de evento não requer ministros (quantidade = 0)">
@@ -48,6 +47,7 @@
           <%= render "admin/evento_escala/ministros_com_coordenador", evento: ev, variant: :chips, compacto: true %>
         </div>
         <% end %>
+        <%= render "admin/evento_escala/proclamacao_palavra", evento: ev %>
       </div>
 
       <div class="flex items-center gap-1 shrink-0 sm:mt-4">
