@@ -38,6 +38,13 @@
     <%# Cabeçalho %>
     <div class="relative px-5 py-5 sm:px-6 sm:py-6">
       <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(120% 150% at 0% 0%, <%= cor %>30 0%, <%= cor %>0d 45%, transparent 75%)"></div>
+      <% if current_user.admin? %>
+        <%= link_to edit_admin_evento_escala_path(ev, return_to: ministro_servico_path(ev)), data: { turbo_frame: "_top" }, title: "Editar evento", aria: { label: "Editar evento" },
+            class: "absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white/90 px-2.5 py-1.5 text-xs font-semibold text-stone-600 shadow-sm hover:bg-stone-50 hover:border-stone-400" do %>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          Editar
+        <% end %>
+      <% end %>
       <div class="relative flex items-center gap-4">
         <div class="shrink-0 w-16 rounded-2xl bg-white shadow-md ring-1 ring-stone-200/80 overflow-hidden text-center">
           <p class="py-0.5 text-[10px] font-bold uppercase tracking-wider text-white" style="background-color: <%= cor %>"><%= I18n.t("date.abbr_day_names")[ev.data.wday] %></p>
