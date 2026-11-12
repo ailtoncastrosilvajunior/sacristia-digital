@@ -15,9 +15,9 @@ module EscalaMensalImpressao
   def imprimir
     # A tabela impressa só tem dias com celebrações ordinárias.
     @dias = @dias.select { |d| d.eventos.any? }
-    agrupar_plantao!(@dias)
     @total_linhas = @dias.sum { |d| d.eventos.size }
     @fonte_pt = fonte_para_impressao
+    montar_calendario_plantao
     render template: "painel_ministro/escala_mensal/imprimir", layout: "impressao"
   end
 
@@ -42,6 +42,14 @@ module EscalaMensalImpressao
               plantao: plantoes.find { |p| p.cobre_dia?(data) })
     end
     agrupar_plantao!(@dias)
+  end
+
+  # Dados da página de calendário: plantonistas por dia e aniversariantes do mês.
+  def montar_calendario_plantao
+    @cal_primeiro = Date.new(@competencia.ano, @competencia.mes, 1)
+    @cal_plantao = {}
+    @competencia.plantao_periodos.includes(:ministros).ordenados.each { |p| p.range_dias.each { |d| @cal_plantao[d] = p } }
+    @cal_aniversarios = Ministro.ativos.aniversariantes_do_mes(@competencia.mes).group_by(&:nascimento_dia)
   end
 
   # Mescla células de "Escala Extra" entre dias consecutivos do mesmo bloco.
