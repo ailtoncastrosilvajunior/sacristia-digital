@@ -28,7 +28,6 @@
         <% when "pendente" %>
           <span class="h-2 w-2 rounded-full bg-amber-400 shrink-0" title="Pendente"></span>
         <% end %>
-        <%= render "admin/evento_escala/proclamacao_palavra", evento: ev, inline: true %>
       </div>
 
       <% if ministros.any? %>
@@ -45,6 +44,7 @@
           Sem ministros escalados
         </p>
       <% end %>
+      <div class="mt-1.5"><%= render "admin/evento_escala/proclamacao_palavra", evento: ev %></div>
     </div>
 
   </div>
