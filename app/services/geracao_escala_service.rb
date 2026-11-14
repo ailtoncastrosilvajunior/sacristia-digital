@@ -58,6 +58,7 @@ class GeracaoEscalaService
           tipo_escala: "ordinaria",
           status: "confirmado",
           calendario_base_id: cb.id,
+          proclamacao_palavra: cb.proclamacao_palavra,
           **esportula_attrs
         )
         EsportulaDestinatarioResolver.apply!(evento, calendario_base: cb)
@@ -79,10 +80,13 @@ class GeracaoEscalaService
 
   def sincronizar_esportula_eventos_ordinarios!
     @competencia.evento_escalas.ordinarios.includes(:tipo_servico, :calendario_base).find_each do |evento|
-      next if evento.esportula_destinatario_manual?
-
       cb = evento.calendario_base || EsportulaDestinatarioResolver.infer_calendario_para(evento)
       next unless cb
+
+      if evento.proclamacao_palavra.blank? && cb.proclamacao_palavra.present?
+        evento.update_column(:proclamacao_palavra, cb.proclamacao_palavra)
+      end
+      next if evento.esportula_destinatario_manual?
 
       if evento.calendario_base_id.blank?
         evento.update_column(:calendario_base_id, cb.id)

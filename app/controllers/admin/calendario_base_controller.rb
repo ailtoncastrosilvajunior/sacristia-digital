@@ -60,7 +60,7 @@ module Admin
 
     def calendario_base_params
       params.require(:calendario_base).permit(:dia_da_semana, :horario, :tipo, :quantidade_ministros, :sacerdote_id,
-        :valor_esportula_override, :ativo, :observacoes, :esportula_modo, :destinatario_esportula_id)
+        :valor_esportula_override, :ativo, :observacoes, :proclamacao_palavra, :esportula_modo, :destinatario_esportula_id)
     end
   end
 end

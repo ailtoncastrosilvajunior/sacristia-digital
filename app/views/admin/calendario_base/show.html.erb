@@ -95,6 +95,13 @@
       </dl>
     </section>
 
+    <% if @calendario_base.proclamacao_palavra.present? %>
+      <section class="p-6 sm:p-8">
+        <h2 class="text-sm font-semibold text-stone-900 mb-4">Proclamação da Palavra</h2>
+        <div class="text-stone-800 text-sm leading-relaxed"><%= simple_format(@calendario_base.proclamacao_palavra) %></div>
+      </section>
+    <% end %>
+
     <% if @calendario_base.observacoes.present? %>
       <section class="p-6 sm:p-8">
         <h2 class="text-sm font-semibold text-stone-900 mb-4">Observações</h2>
