@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["escalados", "form", "ministroCoordenadorId", "ministroAdoracaoId", "sacerdoteId", "sacerdoteEscalado", "busca", "listaDisponiveis", "buscaVazia", "listaSacerdotes", "botaoRecarregar"]
+  static targets = ["escalados", "form", "ministroCoordenadorId", "ministroAdoracaoId", "sacerdoteId", "sacerdoteEscalado", "busca", "listaDisponiveis", "buscaVazia", "listaSacerdotes", "buscaSacerdote", "buscaSacerdoteVazia", "botaoRecarregar"]
   static values = {
     ministrosData: String,
     sacerdotesData: String,
@@ -103,6 +103,7 @@ export default class extends Controller {
       chaveId: "sacerdoteId", chaveJson: "sacerdoteJson", ignorar: ["none"], manter: selecionado,
       registrar: (s) => { this.sacerdoteDataById[s.id] = s }
     })
+    if (this.hasBuscaSacerdoteTarget) this.buscarSacerdote()
   }
 
   normalizar(texto) {
@@ -124,6 +125,38 @@ export default class extends Controller {
       if (mostrar) visiveis += 1
     })
     if (this.hasBuscaVaziaTarget) this.buscaVaziaTarget.classList.toggle("hidden", visiveis > 0 || this.itensDisponiveis().length === 0)
+  }
+
+  itensSacerdotes() {
+    return Array.from(this.listaSacerdotesTarget.querySelectorAll(":scope > div[data-sacerdote-id]"))
+  }
+
+  buscarSacerdote() {
+    const q = this.normalizar(this.buscaSacerdoteTarget.value)
+    let visiveis = 0
+    this.itensSacerdotes().forEach((el) => {
+      const mostrar = !q || (el.dataset.sacerdoteId !== "none" && this.normalizar(el.textContent).includes(q))
+      el.classList.toggle("hidden", !mostrar)
+      if (mostrar) visiveis += 1
+    })
+    if (this.hasBuscaSacerdoteVaziaTarget) this.buscaSacerdoteVaziaTarget.classList.toggle("hidden", visiveis > 0)
+  }
+
+  // Enter escolhe o primeiro resultado visível; Esc limpa a busca.
+  buscaSacerdoteTecla(e) {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      const primeiro = this.itensSacerdotes().find((el) => !el.classList.contains("hidden") && el.dataset.sacerdoteId !== "none")
+      if (primeiro) {
+        this.setSacerdote(primeiro.dataset.sacerdoteId)
+        this.buscaSacerdoteTarget.select()
+      }
+    } else if (e.key === "Escape" && this.buscaSacerdoteTarget.value) {
+      e.preventDefault()
+      e.stopPropagation()
+      this.buscaSacerdoteTarget.value = ""
+      this.buscarSacerdote()
+    }
   }
 
   // Enter adiciona o primeiro resultado visível; Esc limpa a busca.
@@ -187,14 +220,14 @@ export default class extends Controller {
       const nome = (s.nome || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
       this.sacerdoteEscaladoTarget.innerHTML = `
         <div data-sacerdote-id="${this.sacerdoteId}"
-             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-sky-200 bg-white shadow-md cursor-grab active:cursor-grabbing hover:border-sky-400 transition-all text-sm font-semibold text-stone-900"
+             class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-sky-200 bg-white shadow-md cursor-grab active:cursor-grabbing hover:border-sky-400 transition-all text-sm font-semibold text-stone-900"
              draggable="true" data-action="dragstart->escalar-ministros#sacerdoteDragStart dragend->escalar-ministros#sacerdoteDragEnd">
           <span class="text-sky-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></span>
           <span>${nome}</span>
         </div>
       `
     } else {
-      this.sacerdoteEscaladoTarget.innerHTML = `<div class="flex flex-col items-center justify-center py-6 rounded-xl border border-dashed border-sky-300/60 bg-white/50 text-center">
+      this.sacerdoteEscaladoTarget.innerHTML = `<div class="flex flex-col items-center justify-center py-3 rounded-lg border border-dashed border-sky-300/60 bg-white/50 text-center">
           <p class="text-sm font-medium text-sky-900/80">Solte o sacerdote aqui</p>
           <p class="text-xs text-sky-700/70 mt-1">Área do evento</p>
         </div>`

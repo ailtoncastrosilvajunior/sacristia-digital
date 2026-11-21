@@ -165,6 +165,14 @@ module Admin
       if coord_id && evento.ministro_ids.include?(coord_id)
         evento.escala_ministros.find_by(ministro_id: coord_id)&.update_column(:coordenador, true)
       end
+
+      return unless params[:evento_escala]&.key?(:ministro_adoracao_id)
+
+      adoracao_id = params.dig(:evento_escala, :ministro_adoracao_id).to_s.presence&.to_i
+      evento.escala_ministros.update_all(adoracao: false)
+      if adoracao_id && evento.ministro_ids.include?(adoracao_id)
+        evento.escala_ministros.find_by(ministro_id: adoracao_id)&.update_column(:adoracao, true)
+      end
     end
 
     def filter_params
