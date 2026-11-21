@@ -110,8 +110,12 @@ Rails.application.routes.draw do
 
   # path e helpers permanecem /ministro e ministro_*; módulo PainelMinistro evita colisão Zeitwerk com o model Ministro
   scope path: "ministro", module: "painel_ministro", as: "ministro" do
-    root "dashboard#index"
-    get "meus-servicos", to: "servicos#index"
+    root "central#index"
+    # Minha escala e Meus serviços foram incorporados à Central (/ministro); os caminhos antigos redirecionam.
+    get "minha-escala", as: :minha_escala, to: redirect { |_, req| req.query_string.present? ? "/ministro?#{req.query_string}" : "/ministro" }
+    get "meu-cadastro", to: "cadastro#edit", as: :cadastro
+    patch "meu-cadastro", to: "cadastro#update"
+    get "meus-servicos", as: :meus_servicos, to: redirect { |_, req| req.query_string.present? ? "/ministro?#{req.query_string}" : "/ministro" }
     get "escala-do-mes", to: "escala_mensal#show", as: :escala_mensal
     get "escala-do-mes/imprimir", to: "escala_mensal#imprimir", as: :escala_mensal_imprimir
     get "liturgia", to: "liturgia#index", as: :liturgia_index

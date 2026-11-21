@@ -1,0 +1,34 @@
+<%# locals: ev, ministros, meu, troca, ativo, retorno, detalhes — ação de troca de um serviço (compartilhado: escala do mês e Central). Só aparece se o ministro serve no evento e a data não passou. %>
+<% if ativo %>
+  <% if troca %>
+    <div class="flex flex-col gap-2 rounded-lg bg-white px-2.5 py-2 ring-1 ring-sky-200 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-xs text-slate-700 sm:text-sm">Pedido enviado a <strong><%= troca.substituto.nome %></strong>. Aguardando resposta.</p>
+      <%= button_to "Cancelar pedido", ministro_solicitacao_troca_path(troca), method: :delete, params: { voltar: retorno },
+            class: "shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-sky-700 ring-1 ring-sky-200 hover:bg-sky-50" %>
+    </div>
+  <% else %>
+    <div class="flex flex-wrap items-center justify-end gap-1.5">
+      <details class="group w-full min-[420px]:w-auto open:min-[420px]:w-full">
+        <summary class="flex cursor-pointer list-none items-center justify-center gap-1 rounded-lg bg-white px-2.5 py-2 text-xs font-semibold text-slate-800 ring-1 ring-slate-300 active:bg-slate-50 sm:text-sm">
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          Solicitar troca
+        </summary>
+        <%= form_with url: ministro_solicitacao_trocas_path, method: :post, class: "mt-2 space-y-2" do %>
+          <%= hidden_field_tag :escala_ministro_id, meu[:em_id] %>
+          <%= hidden_field_tag :voltar, retorno %>
+          <% na_equipe = ministros.map { |m| m[:ministro_id] } %>
+          <%= select_tag :substituto_id,
+                options_for_select(@ministros_para_troca.reject { |m| na_equipe.include?(m.id) }.map { |m| [m.nome, m.id] }),
+                prompt: "Quem vai te substituir?", required: true,
+                class: "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" %>
+          <%= text_area_tag :motivo, nil, rows: 2, maxlength: 500, placeholder: "Recado ou motivo (opcional)", class: "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" %>
+          <%= submit_tag "Pedir a este ministro", class: "w-full cursor-pointer rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-white active:bg-sky-700" %>
+        <% end %>
+      </details>
+      <% if detalhes %>
+      <%= link_to "Ver detalhes", ministro_servico_path(ev), data: { turbo_frame: "servico_modal" },
+            class: "inline-flex items-center justify-center gap-1 rounded-lg bg-slate-800 px-2.5 py-2 text-xs font-semibold text-white active:bg-slate-900 sm:text-sm" %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

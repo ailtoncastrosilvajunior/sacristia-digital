@@ -1,6 +1,19 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  # Destino do botão "Escala do mês" na área do ministro.
+  # Admin vai para a lista da competência atual no painel admin; os demais ficam na visão do ministro.
+  def escala_do_mes_destino(user = current_user)
+    return ministro_escala_mensal_path unless user&.admin?
+
+    # Memoizado: o helper é chamado mais de uma vez por página (menu, atalhos).
+    @escala_do_mes_destino ||= begin
+      hoje = Date.current
+      competencia = CompetenciaMensal.find_by(ano: hoje.year, mes: hoje.month) || CompetenciaMensal.ordenados.first
+      competencia ? admin_competencia_mensal_path(competencia, aba: "lista") : admin_competencia_mensal_index_path
+    end
+  end
+
   # Aparência da célula do calendário do ministro (ordinária vs extra).
   def ministro_calendario_celula(cell)
     ord = cell[:ordinaria].to_i

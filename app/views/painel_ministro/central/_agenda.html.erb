@@ -1,0 +1,51 @@
+<%# locals: comp, mid — agenda do ministro: só os dias em que ele serve, data à esquerda e serviços à direita %>
+<% futuros = @dias_agenda.select { |d| d[:data] >= @hoje } %>
+<% passados = @dias_agenda.select { |d| d[:data] < @hoje }.reverse %>
+<section class="space-y-3">
+  <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200">
+    <%= render "painel_ministro/competencia_picker", comp: comp, competencias: @competencias %>
+    <% mes_atual = comp.ano == @hoje.year && comp.mes == @hoje.month %>
+    <% prox_cal = comp.periodo.next_month %>
+    <% prox_liberada = @competencias.find { |c| c.ano == prox_cal.year && c.mes == prox_cal.month } %>
+    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 bg-stone-50 px-4 py-2 text-xs">
+      <% unless mes_atual %>
+        <%= link_to "↩ Voltar ao mês atual", ministro_root_path, class: "font-semibold", style: "color: var(--lit-forte);" %>
+      <% end %>
+      <% if prox_liberada.nil? && prox_cal >= @hoje.beginning_of_month %>
+        <span class="inline-flex items-center gap-1.5 text-stone-500">
+          <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <%= I18n.l(prox_cal, format: :month_year).capitalize %> ainda não foi liberada pela coordenação.
+        </span>
+      <% elsif prox_liberada && mes_atual %>
+        <%= link_to "Ver #{prox_liberada.label} →", ministro_root_path(competencia_mensal_id: prox_liberada.id), class: "ml-auto font-semibold", style: "color: var(--lit-forte);" %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @dias_agenda.empty? %>
+    <div class="rounded-2xl bg-white p-8 text-center text-sm text-stone-500 ring-1 ring-stone-200">Nenhum serviço seu em <%= comp.label %>.</div>
+  <% else %>
+    <% if futuros.empty? %>
+      <div class="rounded-2xl bg-white p-6 text-center text-sm text-stone-500 ring-1 ring-stone-200">Nenhum serviço pela frente neste mês.</div>
+    <% end %>
+    <div class="space-y-4">
+      <% futuros.each do |dia| %>
+        <%= render "painel_ministro/central/agenda_dia", dia: dia, mid: mid, passado: false %>
+      <% end %>
+    </div>
+
+    <% if passados.any? %>
+      <details class="group overflow-hidden rounded-2xl bg-white ring-1 ring-stone-200">
+        <summary class="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-slate-700">
+          <span>Dias anteriores (<%= passados.size %>)</span>
+          <svg class="h-4 w-4 text-stone-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <div class="space-y-4 border-t border-stone-100 bg-stone-50/60 p-3">
+          <% passados.each do |dia| %>
+            <%= render "painel_ministro/central/agenda_dia", dia: dia, mid: mid, passado: true %>
+          <% end %>
+        </div>
+      </details>
+    <% end %>
+  <% end %>
+</section>

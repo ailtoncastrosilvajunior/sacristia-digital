@@ -1,0 +1,23 @@
+<%# locals: dia ({ data:, eventos:, plantao: }), mid, passado %>
+<% data = dia[:data] %>
+<% hoje = data == @hoje %>
+<div class="flex items-start gap-3" id="dia-<%= data.iso8601 %>">
+  <div class="w-14 shrink-0 rounded-2xl py-2 text-center shadow-sm ring-1 sm:w-16 <%= hoje ? 'text-white ring-transparent' : 'bg-white text-slate-800 ring-stone-200' %>" style="<%= 'background: var(--lit-ate);' if hoje %>">
+    <span class="block text-[10px] font-bold uppercase tracking-wider <%= hoje ? 'opacity-90' : 'text-stone-400' %>"><%= I18n.t("date.abbr_day_names")[data.wday].first(3) %></span>
+    <span class="block text-2xl font-extrabold leading-tight tabular-nums"><%= data.day %></span>
+    <span class="block text-[10px] uppercase <%= hoje ? 'opacity-90' : 'text-stone-400' %>"><%= hoje ? "Hoje" : I18n.t("date.abbr_month_names")[data.month] %></span>
+  </div>
+
+  <div class="min-w-0 flex-1 space-y-2">
+    <% dia[:eventos].each do |ev| %>
+      <%= render "painel_ministro/servicos/card", ev: ev, mid: mid, passado: passado, agrupado: true %>
+    <% end %>
+    <% if (bloco = dia[:plantao]) %>
+      <% colegas = bloco.plantao_periodo_ministros.reject { |x| x.ministro_id == mid }.map { |x| x.ministro&.nome }.compact %>
+      <div class="rounded-xl bg-white px-3 py-2.5 ring-1 ring-amber-300">
+        <p class="text-sm font-semibold text-amber-900">De plantão · <%= bloco.rotulo %></p>
+        <% if colegas.any? %><p class="mt-0.5 text-xs text-stone-600">Com <%= colegas.to_sentence(two_words_connector: " e ", last_word_connector: " e ") %></p><% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

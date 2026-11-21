@@ -54,7 +54,14 @@ module PainelMinistro
     end
 
     def voltar(evento, **flash)
-      redirect_to ministro_escala_mensal_path(competencia_mensal_id: evento.competencia_mensal_id, anchor: "dia-#{evento.data.day}"), **flash
+      padrao = ministro_escala_mensal_path(competencia_mensal_id: evento.competencia_mensal_id, anchor: "dia-#{evento.data.day}")
+      redirect_to destino_interno || padrao, **flash
+    end
+
+    # Aceita apenas caminhos internos da área do ministro (evita redirecionamento aberto).
+    def destino_interno
+      destino = params[:voltar].to_s
+      destino if destino.start_with?("/ministro") && !destino.start_with?("//")
     end
   end
 end
