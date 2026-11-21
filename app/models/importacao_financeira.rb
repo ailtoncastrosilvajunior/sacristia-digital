@@ -5,7 +5,7 @@ class ImportacaoFinanceira < ApplicationRecord
 
   STATUS = %w[pendente concluida falha].freeze
 
-  has_many :lancamentos_caixa, dependent: :nullify
+  has_many :lancamentos_caixa, class_name: "LancamentoCaixa", dependent: :nullify
 
   validates :checksum, presence: true, uniqueness: true
   validates :status, inclusion: { in: STATUS }

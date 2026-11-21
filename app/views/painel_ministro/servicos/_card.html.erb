@@ -1,7 +1,19 @@
 <% em = ev.escala_ministros.find { |x| x.ministro_id == mid } %>
 <% cor = ev.tipo_servico.cor_etiqueta.presence || "#64748b" %>
 <% passado = local_assigns.fetch(:passado, false) %>
-      <%= link_to ministro_servico_path(ev), class: "group relative flex items-stretch rounded-xl border border-stone-200/80 #{passado ? "bg-stone-50/70 opacity-80 hover:opacity-100" : "bg-white"} shadow-sm overflow-hidden hover:border-sky-300 hover:shadow-md active:scale-[0.99] transition-all" do %>
+<% agrupado = local_assigns.fetch(:agrupado, false) %>
+<% ministros_card = escala_ministros_do_evento(ev, mid) %>
+<% meu_card = ministros_card.find { |m| m[:meu] } %>
+<% troca_card = meu_card && @trocas_pedidas&.dig(meu_card[:em_id]) %>
+<% pode_trocar = meu_card && !passado && @ministros_para_troca && ev.data >= Date.current && !ev.cancelado? %>
+<div class="group relative rounded-xl border border-stone-200/80 <%= passado ? 'bg-stone-50/70 opacity-80 hover:opacity-100' : 'bg-white' %> shadow-sm overflow-hidden hover:border-sky-300 hover:shadow-md transition-all">
+      <%= link_to ministro_servico_path(ev), class: "flex items-stretch active:scale-[0.99] transition-transform" do %>
+        <% if agrupado %>
+          <div class="w-14 shrink-0 flex flex-col items-center justify-center py-2 bg-gradient-to-b from-sky-50 to-white border-r border-stone-100">
+            <svg class="w-3 h-3 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="mt-0.5 text-sm font-bold tabular-nums text-sky-900"><%= l(ev.horario, format: :time) %></span>
+          </div>
+        <% else %>
         <div class="w-16 shrink-0 flex flex-col items-center justify-center py-2 bg-gradient-to-b from-sky-50 to-white border-r border-stone-100">
           <span class="text-[10px] font-bold uppercase tracking-wider text-sky-600"><%= I18n.t("date.abbr_day_names")[ev.data.wday] %></span>
           <span class="text-xl font-extrabold tabular-nums text-stone-900 leading-tight"><%= ev.data.day %></span>
@@ -10,6 +22,7 @@
             <%= l(ev.horario, format: :time) %>
           </span>
         </div>
+        <% end %>
         <div class="flex-1 min-w-0 px-3 py-2.5">
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-md border" style="background-color: <%= cor %>22; border-color: <%= cor %>55; color: #1e293b;"><%= ev.tipo_servico.nome %></span>
@@ -31,3 +44,10 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </span>
       <% end %>
+  <% if pode_trocar %>
+    <div class="border-t border-stone-100 bg-stone-50/70 px-2.5 py-2">
+      <%= render "painel_ministro/troca_acoes", ev: ev, ministros: ministros_card, meu: meu_card, troca: troca_card, ativo: true,
+            retorno: ministro_root_path(competencia_mensal_id: ev.competencia_mensal_id, anchor: "dia-#{ev.data.iso8601}"), detalhes: false %>
+    </div>
+  <% end %>
+</div>

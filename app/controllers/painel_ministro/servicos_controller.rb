@@ -2,14 +2,6 @@
 
 module PainelMinistro
   class ServicosController < PainelMinistro::BaseController
-    def index
-      @competencias = CompetenciaMensal.liberadas_para_ministros.ordenados.limit(48).to_a
-      @competencia = resolve_competencia(@competencias)
-      scope = eventos_do_ministro
-      scope = scope.where(competencia_mensal_id: @competencia.id) if @competencia
-      @servicos = scope.por_data
-    end
-
     def show
       @servico = eventos_do_ministro.find(params[:id])
       return unless turbo_frame_request_id == "servico_modal"

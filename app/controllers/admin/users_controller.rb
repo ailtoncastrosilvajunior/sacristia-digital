@@ -2,7 +2,7 @@
 
 module Admin
   class UsersController < Admin::BaseController
-    before_action :set_user, only: [:show, :edit, :update, :destroy]
+    before_action :set_user, only: [:show, :edit, :update, :destroy, :resetar_senha]
 
     def index
       scope = busca_em(User.all, %w[email nome])
@@ -44,6 +44,14 @@ module Admin
       end
       @user.destroy
       redirect_to admin_users_path, notice: "Usuário removido."
+    end
+
+    def resetar_senha
+      if @user.update(password: "123456", password_confirmation: "123456")
+        redirect_to admin_user_path(@user), notice: "Senha de #{@user.email} redefinida para 123456."
+      else
+        redirect_to admin_user_path(@user), alert: "Não foi possível redefinir a senha: #{@user.errors.full_messages.to_sentence}"
+      end
     end
 
     private

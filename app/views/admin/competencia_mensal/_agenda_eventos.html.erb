@@ -1,6 +1,6 @@
 <%# locals: grupos (Hash Date => eventos), filtros, extra: false, data_inicial: nil %>
 <% data_inicial = local_assigns[:data_inicial]&.iso8601 %>
-<div data-controller="agenda-nav"<% if data_inicial.present? %> data-agenda-nav-initial-date-value="<%= data_inicial %>"<% end %> class="flex gap-3 w-full h-[60vh] sm:h-[min(70vh,520px)] lg:h-[560px] rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-50/90 to-white shadow-xl shadow-slate-900/10 ring-1 ring-slate-200/50 overflow-hidden">
+<div data-controller="agenda-nav"<% if data_inicial.present? %> data-agenda-nav-initial-date-value="<%= data_inicial %>"<% end %> class="flex gap-3 w-full h-[70vh] sm:h-[calc(100vh-17rem)] sm:min-h-[520px] rounded-2xl border border-slate-200/80 bg-gradient-to-b from-slate-50/90 to-white shadow-xl shadow-slate-900/10 ring-1 ring-slate-200/50 overflow-hidden">
   <nav class="w-20 sm:w-24 shrink-0 overflow-y-auto border-r border-slate-200/80 bg-slate-50/80 p-2 space-y-1.5" aria-label="Datas">
     <% grupos.each do |data, eventos_do_dia| %>
       <button type="button" data-agenda-nav-target="data" data-data="<%= data.iso8601 %>" data-action="agenda-nav#ir"

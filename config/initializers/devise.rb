@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Devise.setup do |config|
-  config.mailer_sender = "noreply@sacristiadigital.local"
+  config.mailer_sender = ENV.fetch("MAILER_SENDER", "noreply@swind.com.br")
   config.stretches = Rails.env.test? ? 1 : 12
   config.pepper = Rails.application.credentials.dig(:devise, :pepper) || "devise_pepper_placeholder_change_in_production"
   config.secret_key = Rails.application.credentials.dig(:devise, :secret_key) || "devise_secret_key_placeholder_change_in_production"

@@ -1,0 +1,126 @@
+<%#
+  Componente reutilizável: Sacerdote + Ministros (arrastar e soltar, busca, coord./ador.).
+  Qualquer alteração visual ou de comportamento deve ser feita AQUI (e em
+  escalar_ministros_controller.js) para refletir em todas as telas que o usam.
+
+  Renderize DENTRO de um <form>. O próprio componente cuida do data-controller.
+
+  Locais:
+    evento               - EventoEscala (novo ou persistido) (obrigatório)
+    ministros_disponiveis- ministros que podem ser escolhidos (obrigatório)
+    ministros_escalados  - EscalaMinistro/Ministro já escalados (padrão: [])
+    sacerdotes           - sacerdotes disponíveis (padrão: [])
+    prefixo              - nome do escopo dos campos, ex.: "evento_escala" -> evento_escala[sacerdote_id].
+                           Sem prefixo envia sacerdote_id, ministro_ids[], ministro_coordenador_id... (padrão: nil)
+    sem_ministros        - tipo de serviço não requer ministros: oculta o seletor e mostra aviso (padrão: false)
+%>
+<% prefixo = local_assigns[:prefixo].presence %>
+<% ministros_escalados = local_assigns[:ministros_escalados] || [] %>
+<% sacerdotes = local_assigns[:sacerdotes] || [] %>
+<% sem_ministros = local_assigns.fetch(:sem_ministros, false) %>
+<% recarregar = evento.persisted? %>
+<% campo = ->(nome) { prefixo ? "#{prefixo}[#{nome}]" : nome.to_s } %>
+<% ministros_json = (ministros_disponiveis + ministros_escalados.map { |e| e.respond_to?(:ministro) ? e.ministro : e }).compact.uniq.map { |m| { id: m.id, nome: m.nome } }.to_json %>
+<% sacerdotes_json = sacerdotes.map { |s| { id: s.id, nome: s.nome } }.to_json %>
+<div data-controller="escalar-ministros"
+     <% if recarregar %>data-escalar-ministros-url-value="<%= escalar_ministros_admin_evento_escala_path(evento) %>"<% end %>
+     data-escalar-ministros-field-name-value="<%= campo.call(:ministro_ids) %>[]"
+     data-escalar-ministros-ministros-data-value="<%= h ministros_json %>" data-escalar-ministros-sacerdotes-data-value="<%= h sacerdotes_json %>">
+  <div class="space-y-8" data-escalar-ministros-target="form">
+    <div data-ministro-ids-container></div>
+    <input type="hidden" name="<%= campo.call(:ministro_coordenador_id) %>" data-escalar-ministros-target="ministroCoordenadorId" value="<%= evento.ministro_coordenador&.id %>">
+    <input type="hidden" name="<%= campo.call(:ministro_adoracao_id) %>" data-escalar-ministros-target="ministroAdoracaoId" value="<%= evento.ministro_adoracao&.id %>">
+    <input type="hidden" name="<%= campo.call(:sacerdote_id) %>" data-escalar-ministros-target="sacerdoteId" value="<%= evento.sacerdote_id %>">
+
+    <%# Sacerdote %>
+    <section class="rounded-2xl border border-stone-200/90 bg-white shadow-md shadow-stone-900/5 ring-1 ring-stone-100 overflow-hidden">
+      <div class="px-4 py-3 sm:px-5 border-b border-stone-100 bg-gradient-to-r from-sky-50/90 via-white to-blue-50/50 flex items-start gap-4">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-sky-200/70 text-sky-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </span>
+        <div class="min-w-0 pt-0.5">
+          <h3 class="text-base font-bold text-stone-900 tracking-tight">Sacerdote</h3>
+          <p class="text-xs text-stone-500 mt-1 leading-relaxed">Arraste da lista à esquerda para o cartão do evento. Use <span class="font-medium text-stone-700">Nenhum</span> se ainda não houver definição.</p>
+        </div>
+      </div>
+      <div class="p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-2xl border-2 border-dashed border-stone-200/90 bg-gradient-to-b from-stone-50/80 to-stone-50/30 p-3 min-h-[5rem] ring-1 ring-stone-100/80" data-zone="sacerdotes_disponiveis"
+               data-action="dragover->escalar-ministros#dragOver drop->escalar-ministros#drop">
+            <div class="flex items-center justify-between gap-2 mb-2">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-stone-400 flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
+              Sacerdotes
+            </p>
+            <% if recarregar %><button type="button" data-action="click->escalar-ministros#recarregar" data-tipo="sacerdotes" data-escalar-ministros-target="botaoRecarregar" title="Recarregar lista de sacerdotes" aria-label="Recarregar lista de sacerdotes"
+                      class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-stone-300 bg-white text-[11px] font-semibold normal-case tracking-normal text-stone-600 hover:bg-stone-50 hover:border-stone-400 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait">
+                <svg class="w-3.5 h-3.5" data-icone fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Recarregar
+              </button><% end %>
+            </div>
+            <div class="relative mb-2">
+              <svg class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+              <input type="search" autocomplete="off" placeholder="Buscar sacerdote… (Enter seleciona)" aria-label="Buscar sacerdote"
+                     data-escalar-ministros-target="buscaSacerdote"
+                     data-action="input->escalar-ministros#buscarSacerdote keydown->escalar-ministros#buscaSacerdoteTecla"
+                     class="block w-full rounded-lg border border-stone-300 bg-white pl-8 pr-3 py-1.5 text-sm text-stone-800 placeholder:text-stone-400 shadow-sm focus:border-sky-500 focus:ring-sky-500">
+            </div>
+            <div class="flex flex-wrap gap-1.5 max-h-[5.75rem] overflow-y-auto pr-1" data-escalar-ministros-target="listaSacerdotes">
+              <div data-sacerdote-id="none" class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border border-stone-200/90 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:border-sky-300 hover:shadow-md hover:ring-1 hover:ring-sky-200/50 transition-all text-xs font-medium text-stone-600"
+                   draggable="true" data-action="dragstart->escalar-ministros#sacerdoteDragStart dragend->escalar-ministros#sacerdoteDragEnd">
+                <span class="text-stone-400"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></span>
+                Nenhum
+              </div>
+              <% (sacerdotes || []).each do |s| %>
+                <div data-sacerdote-id="<%= s.id %>" data-sacerdote-json='<%= { id: s.id, nome: s.nome }.to_json %>'
+                     class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg border border-stone-200/90 bg-white shadow-sm cursor-grab active:cursor-grabbing hover:border-sky-400 hover:shadow-md hover:ring-1 hover:ring-sky-200/60 transition-all text-xs font-semibold text-stone-800"
+                     draggable="true" data-action="dragstart->escalar-ministros#sacerdoteDragStart dragend->escalar-ministros#sacerdoteDragEnd">
+                  <span class="text-stone-400"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></span>
+                  <%= s.nome %>
+                </div>
+              <% end %>
+              <p data-escalar-ministros-target="buscaSacerdoteVazia" class="hidden text-stone-500 text-sm py-2 w-full text-center">Nenhum sacerdote encontrado.</p>
+              <% if (sacerdotes || []).empty? %>
+                <p class="text-stone-500 text-sm py-2 w-full text-center rounded-xl border border-dashed border-stone-200 bg-white/60">Nenhum sacerdote ativo cadastrado.</p>
+              <% end %>
+            </div>
+          </div>
+          <div class="rounded-2xl border-2 border-sky-300/70 bg-gradient-to-br from-sky-50/95 to-blue-50/60 p-3 min-h-[5rem] shadow-inner shadow-sky-900/5 ring-1 ring-sky-200/40" data-zone="sacerdote_evento"
+               data-action="dragover->escalar-ministros#dragOver drop->escalar-ministros#drop">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-sky-800/90 mb-2 flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Celebração
+            </p>
+            <div class="min-h-[2rem]" data-escalar-ministros-target="sacerdoteEscalado">
+              <% if evento.sacerdote %>
+                <div data-sacerdote-id="<%= evento.sacerdote_id %>" data-sacerdote-json='<%= { id: evento.sacerdote.id, nome: evento.sacerdote.nome }.to_json %>'
+                     class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-sky-200 bg-white shadow-md cursor-grab active:cursor-grabbing hover:border-sky-400 transition-all text-sm font-semibold text-stone-900"
+                     draggable="true" data-action="dragstart->escalar-ministros#sacerdoteDragStart dragend->escalar-ministros#sacerdoteDragEnd">
+                  <span class="text-sky-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg></span>
+                  <%= evento.sacerdote.nome %>
+                </div>
+              <% else %>
+                <div class="flex flex-col items-center justify-center py-3 rounded-lg border border-dashed border-sky-300/60 bg-white/50 text-center">
+                  <p class="text-sm font-medium text-sky-900/80">Solte o sacerdote aqui</p>
+                  <p class="text-xs text-sky-700/70 mt-1">Área do evento</p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <% if sem_ministros %>
+    <div class="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-600">
+      <svg class="w-5 h-5 shrink-0 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+      <span><span class="font-semibold text-stone-700"><%= evento.tipo_servico&.nome %></span> não requer ministros. Defina apenas o sacerdote.</span>
+    </div>
+    <% end %>
+    <%= render "admin/shared/ministros_picker",
+          disponiveis: ministros_disponiveis,
+          escalados: ministros_escalados,
+          recarregar: recarregar,
+          oculto: sem_ministros %>
+  </div>
+</div>
