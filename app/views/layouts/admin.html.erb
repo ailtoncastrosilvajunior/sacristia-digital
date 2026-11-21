@@ -153,35 +153,7 @@
 
         <%# Barra inferior (somente celular): atalhos no estilo de app + abre o menu completo %>
         <% if current_user.admin? || current_user.coordenador? %>
-          <% bn_item = "flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 min-h-[3.25rem] " %>
-          <% bn_painel = request.path.match?(%r{^/admin/?$}) %>
-          <% bn_central = request.path == ministro_root_path %>
-          <% bn_escala = request.path.start_with?("/admin/competencia-mensal", "/ministro/escala-do-mes") %>
-          <% bn_lit = request.path.start_with?("/ministro/liturgia", "/admin/liturgia") %>
-          <nav class="lg:hidden shrink-0 border-t border-stone-200 bg-white pb-[env(safe-area-inset-bottom)]" aria-label="Navegação principal">
-            <div class="grid grid-cols-5 max-w-6xl mx-auto">
-              <%= link_to admin_root_path, class: bn_item + (bn_painel ? "text-sky-800" : "text-stone-500") do %>
-                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10-3a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z"/></svg>
-                <span class="text-[11px] font-semibold">Painel</span>
-              <% end %>
-              <%= link_to ministro_root_path, class: bn_item + (bn_central ? "text-sky-800" : "text-stone-500") do %>
-                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                <span class="text-[11px] font-semibold">Central</span>
-              <% end %>
-              <%= link_to escala_do_mes_destino, class: bn_item + (bn_escala ? "text-sky-800" : "text-stone-500") do %>
-                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                <span class="text-[11px] font-semibold">Escala do mês</span>
-              <% end %>
-              <%= link_to ministro_liturgia_index_path, class: bn_item + (bn_lit ? "text-sky-800" : "text-stone-500") do %>
-                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                <span class="text-[11px] font-semibold">Liturgia</span>
-              <% end %>
-              <button type="button" data-action="click->sidebar#toggle" class="<%= bn_item %>text-stone-500" aria-label="Abrir menu completo">
-                <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                <span class="text-[11px] font-semibold">Menu</span>
-              </button>
-            </div>
-          </nav>
+          <%= render "shared/barra_inferior_admin", classes: "lg:hidden shrink-0", menu_attrs: { data: { action: "click->sidebar#toggle" } } %>
         <% end %>
       </div>
     </div>
