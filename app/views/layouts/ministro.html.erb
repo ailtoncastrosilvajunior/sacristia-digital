@@ -98,6 +98,10 @@
       <%= yield %>
     </div>
 
+    <% if current_user.admin? %>
+      <%= render "shared/barra_inferior_admin", classes: "sm:hidden fixed bottom-0 inset-x-0 z-40 backdrop-blur-md",
+            menu_attrs: { data: { controller: "abrir-menu", action: "click->abrir-menu#abrir" } } %>
+    <% else %>
     <nav class="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-stone-200 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]" aria-label="Navegação principal">
       <div class="grid grid-cols-4 max-w-6xl mx-auto">
         <%= link_to ministro_root_path, class: "flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 min-h-[3.25rem] #{central_secao ? "text-sky-800" : "text-stone-500"}" do %>
@@ -114,5 +118,6 @@
         <% end %>
       </div>
     </nav>
+    <% end %>
   </body>
 </html>

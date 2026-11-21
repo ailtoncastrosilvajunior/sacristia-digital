@@ -1,6 +1,6 @@
 <%# locals: competencia, por_data, dias_meus_celebracao, dias_meus_plantao, hoje — faixa horizontal só no celular %>
 <%# Scroll no wrapper externo + trilho interno evita a barra horizontal sobrepor os cards. %>
-<div data-escala-filtro-target="faixa" class="relative overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch] [scrollbar-width:thin] lg:hidden">
+<div data-escala-filtro-target="faixa" class="relative overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch] [scrollbar-width:thin] lg:hidden -mx-1 px-1 py-2">
   <div class="flex w-max min-w-full touch-pan-x gap-1.5 pb-0.5">
   <% (competencia.periodo..competencia.periodo_fim).each do |d| %>
     <% dia = por_data[d] %>
