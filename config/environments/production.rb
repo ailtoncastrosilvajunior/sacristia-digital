@@ -26,6 +26,20 @@ Rails.application.configure do
   config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "digitalocean_spaces").to_sym
   config.action_mailer.perform_caching = false
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "localhost") }
+
+  # E-mail (SendGrid) — senha/API key via ENV, nunca no código.
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.smtp_settings = {
+    user_name: "apikey",
+    password: ENV["SENDGRID_API_KEY"],
+    domain: "swind.com.br",
+    address: "smtp.sendgrid.net",
+    port: 587,
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
   config.i18n.fallbacks = true
   config.active_support.report_deprecations = false
   config.active_record.dump_schema_after_migration = false

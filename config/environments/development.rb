@@ -15,9 +15,22 @@ Rails.application.configure do
   config.action_controller.perform_caching = false
   config.action_view.cache_template_loading = false
 
-  config.action_mailer.raise_delivery_errors = false
   config.action_mailer.perform_caching = false
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+
+  # E-mail (SendGrid) — senha/API key via ENV, nunca no código.
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.smtp_settings = {
+    user_name: "apikey",
+    password: ENV["SENDGRID_API_KEY"],
+    domain: "swind.com.br",
+    address: "smtp.sendgrid.net",
+    port: 587,
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
 
   # Local por padrão; com ACTIVE_STORAGE_SERVICE=digitalocean_spaces no .env usa o bucket (docker-compose).
   config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "local").to_sym

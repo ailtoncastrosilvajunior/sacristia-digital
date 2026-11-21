@@ -16,7 +16,9 @@ Rails.application.routes.draw do
 
   namespace :admin do
     root "dashboard#index"
-    resources :users
+    resources :users do
+      member { patch :resetar_senha }
+    end
     resources :ministros
     resources :solicitacao_cadastros, path: "solicitacoes-cadastro", only: [:index, :show] do
       member do
