@@ -104,7 +104,7 @@
           <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
           <span class="text-[11px] font-semibold">Central</span>
         <% end %>
-        <%= link_to escala_do_mes_destino, class: "flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 min-h-[3.25rem] #{escala_mes_ativa ? "text-sky-800" : "text-stone-500"}" do %>
+        <%= link_to ministro_escala_mensal_path, class: "flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 min-h-[3.25rem] #{escala_mes_ativa ? "text-sky-800" : "text-stone-500"}" do %>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
           <span class="relative text-[11px] font-semibold">Escala do mês<% if trocas_recebidas_ct.positive? %><span class="absolute -right-2.5 -top-5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"><%= trocas_recebidas_ct %></span><% end %></span>
         <% end %>
