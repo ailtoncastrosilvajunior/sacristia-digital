@@ -26,7 +26,9 @@
         </thead>
         <tbody class="divide-y divide-slate-100/90">
           <% linhas.each do |linha| %>
-            <tr class="hover:bg-sky-50/60">
+            <tr class="hover:bg-sky-50/60"
+                data-esportula-resumo-filter-target="destinatarioRow"
+                data-nome="<%= linha.nome %>">
               <td class="px-2 py-1.5 font-semibold text-slate-800 truncate max-w-[8rem]" title="<%= linha.nome %>"><%= linha.nome %></td>
               <td class="px-1 py-1.5 text-center tabular-nums text-stone-600"><%= linha.missas %></td>
               <td class="px-1.5 py-1.5 text-right tabular-nums font-medium text-emerald-900 whitespace-nowrap"><%= number_to_currency(linha.previsto, precision: 0) %></td>
@@ -86,6 +88,9 @@
         </tbody>
       </table>
     </div>
+    <p class="hidden px-3 py-6 text-center text-xs text-stone-500" data-esportula-resumo-filter-target="destinatarioEmpty">
+      Nenhum destinatário corresponde ao filtro.
+    </p>
   <% else %>
     <p class="px-3 py-6 text-center text-xs text-stone-500">Nenhuma acumulada nesta competência.</p>
   <% end %>

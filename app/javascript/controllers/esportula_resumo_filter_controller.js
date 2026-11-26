@@ -61,7 +61,9 @@ export default class extends Controller {
     "footPrevisto",
     "footRealizado",
     "footSaldo",
-    "clear"
+    "clear",
+    "destinatarioRow",
+    "destinatarioEmpty"
   ]
 
   static values = { total: Number, horarios: Array }
@@ -108,6 +110,8 @@ export default class extends Controller {
     const nomeQ = this.hasNomeTarget ? this.nomeTarget.value : ""
     const horaQ = this.hasHorarioTarget ? this.horarioTarget.value : ""
     const filtering = Boolean(nomeQ.trim() || horaQ.trim())
+
+    this.filterDestinatarios(nomeQ)
 
     if (!filtering) {
       this.rowTargets.forEach((row) => {
@@ -180,6 +184,19 @@ export default class extends Controller {
     }
 
     this.syncClearButton(true)
+  }
+
+  // Só pelo nome: os valores não são recalculados, pois "Pagar" quita o acumulado inteiro.
+  filterDestinatarios(nomeQ) {
+    let visible = 0
+    this.destinatarioRowTargets.forEach((row) => {
+      const match = matchNome(row.dataset.nome || "", nomeQ)
+      row.classList.toggle("hidden", !match)
+      if (match) visible += 1
+    })
+    if (this.hasDestinatarioEmptyTarget) {
+      this.destinatarioEmptyTarget.classList.toggle("hidden", visible > 0)
+    }
   }
 
   syncClearButton(active) {
