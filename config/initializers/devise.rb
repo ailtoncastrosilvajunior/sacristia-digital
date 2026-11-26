@@ -15,4 +15,9 @@ Devise.setup do |config|
   # Lista vazia faz o Devise não redirecionar após entrar/sair (resposta “não navegável”),
   # o que quebra logout com Turbo/HTML. Inclua :turbo_stream para formulários enviados pelo Turbo.
   config.navigational_formats = %i[html turbo_stream]
+  # O Turbo só exibe a resposta de um formulário com erro se o status não for 200.
+  config.responder.error_status = :unprocessable_content
+  config.responder.redirect_status = :see_other
+  # Não revela se um e-mail tem conta (login e recuperação de senha).
+  config.paranoid = true
 end
