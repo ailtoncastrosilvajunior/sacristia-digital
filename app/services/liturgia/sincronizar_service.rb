@@ -88,7 +88,7 @@ module Liturgia
 
     def anexar_imagem_santo(registro, url)
       corpo, tipo = Http.get_binary(url)
-      ext = File.extname(URI.parse(url).path).delete_prefix(".").downcase
+      ext = File.extname(URI.parse(Http.normalizar_url(url)).path).delete_prefix(".").downcase
       ext = "jpg" if ext.blank?
       tipo = tipo.presence || (ext == "jpg" ? "image/jpeg" : "image/#{ext}")
 
@@ -97,7 +97,8 @@ module Liturgia
         filename: "santo-#{@data.iso8601}.#{ext}",
         content_type: tipo
       )
-    rescue Erro => e
+    rescue Erro, URI::Error => e
+      # A imagem é opcional: nunca deve impedir a gravação do dia.
       Rails.logger.warn("[Liturgia] Imagem do santo #{@data}: #{e.message}")
     end
 
