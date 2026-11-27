@@ -8,8 +8,14 @@ module Liturgia
 
     module_function
 
+    # As fontes publicam endereços com acentos (ex.: "São-João.jpg"), que URI.parse rejeita.
+    # Codifica apenas espaços e caracteres fora do ASCII; o que já está codificado não muda.
+    def normalizar_url(url)
+      url.to_s.b.strip.gsub(/[^!-~]/n) { |byte| format("%%%02X", byte.ord) }.force_encoding("UTF-8")
+    end
+
     def get(url, limite_redirects: 3)
-      uri = URI.parse(url)
+      uri = URI.parse(normalizar_url(url))
       req = Net::HTTP::Get.new(uri)
       req["User-Agent"] = USER_AGENT
       resposta = request(uri, req)
@@ -17,14 +23,14 @@ module Liturgia
     end
 
     def get_binary(url, limite_redirects: 3)
-      uri = URI.parse(url)
+      uri = URI.parse(normalizar_url(url))
       req = Net::HTTP::Get.new(uri)
       req["User-Agent"] = USER_AGENT
       resposta = request(uri, req)
       if resposta.is_a?(Net::HTTPRedirection)
         raise Erro, "Redirecionamentos demais" if limite_redirects <= 0
 
-        return get_binary(URI.join(uri, resposta["location"]).to_s, limite_redirects: limite_redirects - 1)
+        return get_binary(URI.join(uri, normalizar_url(resposta["location"])).to_s, limite_redirects: limite_redirects - 1)
       end
       raise Erro, "HTTP #{resposta.code} em #{url}" unless resposta.is_a?(Net::HTTPSuccess)
 
@@ -52,7 +58,7 @@ module Liturgia
       return nil unless resposta.is_a?(Net::HTTPRedirection)
       raise Erro, "Redirecionamentos demais" if restantes <= 0
 
-      get(URI.join(uri, resposta["location"]).to_s, limite_redirects: restantes - 1)
+      get(URI.join(uri, normalizar_url(resposta["location"])).to_s, limite_redirects: restantes - 1)
     end
 
     def resposta_ok!(resposta, url)
